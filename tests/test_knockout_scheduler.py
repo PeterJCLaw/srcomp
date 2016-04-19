@@ -326,6 +326,177 @@ def test_first_round_late_dropout_from_second_match():
     check_first_round_single_dropout_from_second_match(teams)
 
 
+def test_dropout_after_separate_semi_1():
+    positions = OrderedDict()
+    positions['ABC'] = 1
+    positions['CDE'] = 2
+    positions['EFG'] = 3
+    positions['GHI'] = 4
+    positions['IJK'] = 5
+    positions['KLM'] = 6
+    positions['MNO'] = 7
+    positions['OPQ'] = 8
+
+    teams = defaultdict(lambda: Team(None, None, False, None))
+    # dropped out after the first match of the knockouts,
+    # but before their knockout match
+    teams['IJK'] = Team(None, None, False, 2)
+
+    # Fake a couple of league matches
+    matches = [{},{}]
+    scheduler = get_scheduler(matches, positions = positions, teams=teams)
+
+    def seeder(*args):
+        assert args[0] == 8, "Wrong number of teams"
+        return [[0,1,2,3],[4,5,6,7]]
+
+    # Mock the random (even thought it's not really random)
+    scheduler.R = mock.Mock()
+    # Mock the seeder to make it less interesting
+    with mock.patch('sr.comp.knockout.first_round_seeding') as first_round_seeding:
+        first_round_seeding.side_effect = seeder
+        scheduler.add_knockouts()
+
+    knockout_rounds = scheduler.knockout_rounds
+    period = scheduler.period
+
+    assert len(knockout_rounds) == 2, "Should be semis and finals"
+    semis = knockout_rounds[0]
+
+    assert len(semis) == 2, "Should be two semis"
+    semi_0 = semis[0]
+    semi_0_teams = semi_0.teams
+    # Thanks to our mocking of the seeder...
+    expected_0_teams = list(positions.keys())[:4]
+
+    assert semi_0.num == 2, "Match number should carry on above league matches"
+    assert semi_0.type == MatchType.knockout
+    assert semi_0_teams == expected_0_teams
+    semi_0_name = semi_0.display_name
+    assert semi_0_name == "Semi 1 (#2)" # labelling starts at 1
+
+    semi_1 = semis[1]
+    semi_1_teams = semi_1.teams
+    # Thanks to our mocking of the seeder...
+    expected_1_teams = [None] + list(positions.keys())[5:] # first team in second match dropped out
+
+    assert semi_1.num == 3, "Match number should carry on above league matches"
+    assert semi_1.type == MatchType.knockout
+    assert semi_1_teams == expected_1_teams
+    semi_1_name = semi_1.display_name
+    assert semi_1_name == "Semi 2 (#3)" # labelling starts at 1
+
+    period_matches = period.matches
+    expected_matches = [{'A':m} for r in knockout_rounds for m in r]
+
+    assert period_matches == expected_matches
+    final = period_matches[2]['A']
+    final_teams = final.teams
+
+    expected_final_teams = [None, 'DEF', 'IJK', 'KLM']
+
+    assert final_teams == expected_final_teams, "Wrong finals teams"
+
+
+def check_dropout_after_semis(teams):
+    positions = OrderedDict()
+    positions['ABC'] = 1
+    positions['CDE'] = 2
+    positions['EFG'] = 3
+    positions['GHI'] = 4
+    positions['IJK'] = 5
+    positions['KLM'] = 6
+    positions['MNO'] = 7
+    positions['OPQ'] = 8
+
+    knockout_positions = {
+        ('A', 2):  OrderedDict([
+            ('ABC', 1),
+            ('DEF', 2),
+            ('GHI', 3),
+            ('JKL', 4),
+        ]),
+        ('A', 3):  OrderedDict([
+            ('IJK', 1),
+            ('KLM', 2),
+            ('MNO', 3),
+            ('OPQ', 4),
+        ])
+    }
+
+    # Fake a couple of league matches
+    matches = [{},{}]
+    scheduler = get_scheduler(matches, positions = positions, teams=teams,
+                              knockout_positions = knockout_positions)
+
+    def seeder(*args):
+        assert args[0] == 8, "Wrong number of teams"
+        return [[0,1,2,3],[4,5,6,7]]
+
+    # Mock the random (even thought it's not really random)
+    scheduler.R = mock.Mock()
+    # Mock the seeder to make it less interesting
+    with mock.patch('sr.comp.knockout.first_round_seeding') as first_round_seeding:
+        first_round_seeding.side_effect = seeder
+        scheduler.add_knockouts()
+
+    knockout_rounds = scheduler.knockout_rounds
+    period = scheduler.period
+
+    assert len(knockout_rounds) == 2, "Should be semis and finals"
+    semis = knockout_rounds[0]
+
+    assert len(semis) == 2, "Should be two semis"
+    semi_0 = semis[0]
+    semi_0_teams = semi_0.teams
+    # Thanks to our mocking of the seeder...
+    expected_0_teams = list(positions.keys())[:4]
+
+    assert semi_0.num == 2, "Match number should carry on above league matches"
+    assert semi_0.type == MatchType.knockout
+    assert semi_0_teams == expected_0_teams
+    semi_0_name = semi_0.display_name
+    assert semi_0_name == "Semi 1 (#2)" # labelling starts at 1
+
+    semi_1 = semis[1]
+    semi_1_teams = semi_1.teams
+    # Thanks to our mocking of the seeder...
+    expected_1_teams = list(positions.keys())[4:]
+
+    assert semi_1.num == 3, "Match number should carry on above league matches"
+    assert semi_1.type == MatchType.knockout
+    assert semi_1_teams == expected_1_teams
+    semi_1_name = semi_1.display_name
+    assert semi_1_name == "Semi 2 (#3)" # labelling starts at 1
+
+    period_matches = period.matches
+    expected_matches = [{'A':m} for r in knockout_rounds for m in r]
+
+    assert period_matches == expected_matches
+    final = period_matches[2]['A']
+    final_teams = final.teams
+
+    expected_final_teams = [None, 'DEF', 'IJK', 'KLM']
+
+    assert final_teams == expected_final_teams, "Wrong finals teams"
+
+def test_dropout_after_semi_1():
+    teams = defaultdict(lambda: Team(None, None, False, None))
+    # dropped out after their first knockout match
+    # ABC competes in the first knockout match (#2)
+    teams['ABC'] = Team(None, None, False, 2)
+
+    check_dropout_after_semis(teams)
+
+def test_dropout_after_semi_2():
+    teams = defaultdict(lambda: Team(None, None, False, None))
+    # dropped out after the first knockouts round
+    # ABC competes in the first knockout match (#2)
+    teams['ABC'] = Team(None, None, False, 3)
+
+    check_dropout_after_semis(teams)
+
+
 def test_timings_no_delays():
     positions = OrderedDict()
     for i in range(16):
