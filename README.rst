@@ -6,6 +6,9 @@ SRComp
 Yet Another attempt at some Competition Software for `Student
 Robotics <http://srobo.org>`__.
 
+The `SRComp wiki <https://github.com/PeterJCLaw/srcomp/wiki>`__ provides
+an overview of the suite as a whole.
+
 This repository provides a python API to accessing information about the
 state of the competition. That *compstate* is stored as a collection of
 YAML files in a git repository. This allows the state of the competition
