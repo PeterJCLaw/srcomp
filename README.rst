@@ -43,7 +43,6 @@ repo*.
 Requirements
 ------------
 
--  Python 2.7
 -  python-dateutil
 -  PyYAML
 -  nose (for testing)
