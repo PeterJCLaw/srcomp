@@ -27,8 +27,10 @@ setup(
     author_email='srobo-devel@googlegroups.com',
     install_requires=install_requires,
     setup_requires=[
-        'nose >=1.3, <2',
         'Sphinx >=1.3, <2'
+    ],
+    tests_require=[
+        'nose >=1.3, <2',
     ],
     test_suite='nose.collector'
 )
