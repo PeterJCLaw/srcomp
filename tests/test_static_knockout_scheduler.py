@@ -13,6 +13,7 @@ def get_four_team_config():
             0: {
                 0: {
                     'arena': 'A',
+                    'display_name': "Qualifier 1",
                     'start_time': datetime(2014, 4, 27, 14, 30),
                     'teams': ['S3', 'S5', 'S8', 'S10']
                 },
@@ -51,6 +52,7 @@ def get_two_team_config():
             0: {
                 0: {
                     'arena': 'A',
+                    'display_name': "Qualifier 1",
                     'start_time': datetime(2014, 4, 27, 14, 30),
                     'teams': ['S3', 'S5']
                 },
@@ -135,7 +137,7 @@ def get_scheduler(matches_config, matches = None, positions = None, \
 
 def build_5_matches(places):
     return [
-        {'A': Match(0, 'Quarter 1 (#0)', 'A', places[0], datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True) },
+        {'A': Match(0, 'Qualifier 1 (#0)', 'A', places[0], datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True) },
         {'A': Match(1, 'Quarter 2 (#1)', 'A', places[1], datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True) },
         {'A': Match(2, 'Semi 1 (#2)', 'A', places[2], datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True) },
         {'A': Match(3, 'Semi 2 (#3)', 'A', places[3], datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True) },
@@ -158,7 +160,7 @@ def test_four_teams_before():
     league_matches = [{'A': Match(0, 'Match 0', 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False) }]
 
     expected = [
-        {'A': Match(1, 'Quarter 1 (#1)', 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True) },
+        {'A': Match(1, 'Qualifier 1 (#1)', 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True) },
         {'A': Match(2, 'Quarter 2 (#2)', 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True) },
         {'A': Match(3, 'Semi 1 (#3)', 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True) },
         {'A': Match(4, 'Semi 2 (#4)', 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True) },
@@ -242,7 +244,7 @@ def test_two_teams_before():
     league_matches = [{'A': Match(0, 'Match 0', 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False) }]
 
     expected = [
-        {'A': Match(1, 'Quarter 1 (#1)', 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True) },
+        {'A': Match(1, 'Qualifier 1 (#1)', 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True) },
         {'A': Match(2, 'Quarter 2 (#2)', 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True) },
         {'A': Match(3, 'Semi 1 (#3)', 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True) },
         {'A': Match(4, 'Semi 2 (#4)', 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True) },

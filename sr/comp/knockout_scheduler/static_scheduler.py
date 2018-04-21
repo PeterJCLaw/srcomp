@@ -68,6 +68,12 @@ class StaticScheduler(BaseKnockoutScheduler):
 
         display_name = self.get_match_display_name(rounds_remaining, round_num,
                                                    num)
+
+        # allow overriding the name
+        override_name = match_info.get('display_name')
+        if override_name is not None:
+            display_name = "{} (#{})".format(override_name, num)
+
         is_final = rounds_remaining == 0
         match = Match(num, display_name, arena, teams, start_time, end_time,
                       MatchType.knockout, use_resolved_ranking=not is_final)
