@@ -5,6 +5,9 @@ import mock
 
 from sr.comp.match_period import Match, MatchType
 from sr.comp.knockout_scheduler import StaticScheduler, UNKNOWABLE_TEAM
+from sr.comp.teams import Team
+
+TLAs = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF', 'GGG', 'HHH', 'III', 'JJJ']
 
 def get_four_team_config():
     return {
@@ -86,12 +89,13 @@ def get_two_team_config():
 
 def get_scheduler(matches_config, matches = None, positions = None, \
                     knockout_positions = None, league_game_points = None, \
-                    delays = None):
+                    delays = None, teams = None):
     matches = matches or []
     delays = delays or []
     match_duration = timedelta(minutes = 5)
     league_game_points = league_game_points or {}
     knockout_positions = knockout_positions or {}
+
     if not positions:
         positions = OrderedDict()
         positions['AAA'] = 1
@@ -105,8 +109,15 @@ def get_scheduler(matches_config, matches = None, positions = None, \
         positions['III'] = 9
         positions['JJJ'] = 10
 
+    assert sorted(positions.keys()) == TLAs, "Must use common TLAs"
+
+    if teams is None:
+        teams = {x: Team(x, x, False, None) for x in positions.keys()}
+
+    mock_n_matches = mock.Mock(side_effect=lambda: len(matches))
     league_schedule = mock.Mock(matches = matches, delays = delays, \
-                                match_duration = match_duration)
+                                match_duration = match_duration,
+                                n_matches = mock_n_matches)
     league_scores = mock.Mock(positions = positions, game_points = league_game_points)
     knockout_scores = mock.Mock(resolved_positions = knockout_positions)
     scores = mock.Mock(league = league_scores, knockout = knockout_scores)
@@ -124,7 +135,6 @@ def get_scheduler(matches_config, matches = None, positions = None, \
     }
     arenas = ['A']
 
-    teams = None  # static schedule shouldn't use teams
     scheduler = StaticScheduler(
         league_schedule,
         scores,
@@ -205,6 +215,51 @@ def test_four_teams_start():
     assertMatches(
         expected_matches,
         matches_config=config,
+    )
+
+def test_four_teams_with_dropout_part_way_through():
+    LAST_QUARTER_FINAL_MATCH_NUM = 1
+
+    teams = {x: Team(x, x, False, None) for x in TLAs}
+    teams['BBB'] = Team('BBB', 'BBB', False,
+                        dropped_out_after=LAST_QUARTER_FINAL_MATCH_NUM)
+
+    expected_matches = build_5_matches([
+        ['CCC', 'EEE', 'HHH', 'JJJ'],
+        ['DDD', 'FFF', 'GGG', 'III'],
+        ['BBB'] + [UNKNOWABLE_TEAM] * 3,
+        ['AAA'] + [UNKNOWABLE_TEAM] * 3,
+        [UNKNOWABLE_TEAM] * 4,
+    ])
+
+    assertMatches(
+        expected_matches,
+        matches_config=get_four_team_config(),
+        teams=teams,
+    )
+
+def test_four_teams_with_dropout_before_start():
+    teams = {x: Team(x, x, False, None) for x in TLAs}
+    teams['BBB'] = Team('BBB', 'BBB', False, dropped_out_after=-1)
+
+    config = get_four_team_config()
+    qualifier_teams = config['matches'][0][0]['teams']
+
+    assert qualifier_teams[-1] == 'S10', "Setup self-check failed!"
+    qualifier_teams[-1] = None
+
+    expected_matches = build_5_matches([
+        ['DDD', 'FFF', 'III', None],
+        ['EEE', 'GGG', 'HHH', 'JJJ'],
+        ['CCC'] + [UNKNOWABLE_TEAM] * 3,
+        ['AAA'] + [UNKNOWABLE_TEAM] * 3,
+        [UNKNOWABLE_TEAM] * 4,
+    ])
+
+    assertMatches(
+        expected_matches,
+        matches_config=config,
+        teams=teams,
     )
 
 def test_four_teams_partial_1():

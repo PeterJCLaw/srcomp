@@ -10,7 +10,24 @@ class StaticScheduler(BaseKnockoutScheduler):
     """
     A knockout scheduler which loads almost fixed data from the config. Assumes
     only a single arena.
+
+    Due to the nature of its interaction with the seedings, this scheduler has a
+    very limited handling of dropped-out teams: it only adjusts its scheduling
+    for dropouts before the knockouts.
+
+    The practical results of this dropout behaviour are:
+      * the schedule is stable when teams drop out, as this either affects the
+        entire knockout or none of it
+      * dropping out a team such that there are no longer enough seeds requires
+        manual changes to the schedule to remove the seeds which cannot be filled
     """
+
+    def __init__(self, *args, **kwargs):
+        super(StaticScheduler, self).__init__(*args, **kwargs)
+
+        # Collect a list of the teams eligible for the knockouts, in seeded order.
+        last_league_match_num = self.schedule.n_matches()
+        self._knockout_seeds = self._get_non_dropped_out_teams(last_league_match_num)
 
     def get_team(self, team_ref):
         if not self._played_all_league_matches():
@@ -21,16 +38,15 @@ class StaticScheduler(BaseKnockoutScheduler):
 
         if team_ref.startswith('S'):
             # get a seeded position
-            positions = list(self.scores.league.positions.keys())
             pos = int(team_ref[1:])
             pos -= 1  # seed numbers are 1 based
             try:
-                return positions[pos]
+                return self._knockout_seeds[pos]
             except IndexError:
                 raise ValueError(
-                    "Cannot reference seed {}, there are only {} teams!".format(
+                    "Cannot reference seed {}, there are only {} eligible teams!".format(
                         team_ref,
-                        len(positions),
+                        len(self._knockout_seeds),
                     ),
                 )
 
