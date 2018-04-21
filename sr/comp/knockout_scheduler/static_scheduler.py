@@ -16,6 +16,9 @@ class StaticScheduler(BaseKnockoutScheduler):
         if not self._played_all_league_matches():
             return UNKNOWABLE_TEAM
 
+        if team_ref is None:
+            return None
+
         if team_ref.startswith('S'):
             # get a seeded position
             positions = list(self.scores.league.positions.keys())

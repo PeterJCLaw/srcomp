@@ -187,6 +187,26 @@ def test_four_teams_start():
         matches_config=get_four_team_config(),
     )
 
+def test_four_teams_start():
+    config = get_four_team_config()
+
+    semis = config['matches'][1]
+    semis[0]['teams'][-1] = None
+    semis[1]['teams'][-1] = None
+
+    expected_matches = build_5_matches([
+        ['CCC', 'EEE', 'HHH', 'JJJ'],
+        ['DDD', 'FFF', 'GGG', 'III'],
+        ['BBB', UNKNOWABLE_TEAM, UNKNOWABLE_TEAM, None],
+        ['AAA', UNKNOWABLE_TEAM, UNKNOWABLE_TEAM, None],
+        [UNKNOWABLE_TEAM] * 4,
+    ])
+
+    assertMatches(
+        expected_matches,
+        matches_config=config,
+    )
+
 def test_four_teams_partial_1():
     expected_matches = build_5_matches([
         ['CCC', 'EEE', 'HHH', 'JJJ'],
