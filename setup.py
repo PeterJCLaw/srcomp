@@ -14,7 +14,7 @@ setup(
     author_email='srobo-devel@googlegroups.com',
     install_requires=[
         'PyYAML >=3.11, <5',
-        'sr.comp.ranker >=1.3, <2',
+        'league-ranker <0.1',
         'python-dateutil >=2.2, <3',
     ],
     python_requires='>=3.5',

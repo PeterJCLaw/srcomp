@@ -5,8 +5,7 @@ import os
 from collections import OrderedDict
 from functools import total_ordering
 
-# For reasons which are not clear, Pylint on Travis doesn't find the ranker.
-from sr.comp import ranker  # pylint: disable=no-name-in-module
+import league_ranker as ranker
 
 from . import yaml_loader
 

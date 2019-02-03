@@ -3,10 +3,10 @@ from datetime import datetime
 from unittest import mock
 
 from dateutil.tz import tzutc
+from league_ranker import calc_positions, calc_ranked_points
 from nose.tools import eq_
 
 from sr.comp.match_period import Match, MatchType
-from sr.comp.ranker import calc_positions, calc_ranked_points
 from sr.comp.scores import TeamScore
 from sr.comp.teams import Team
 from sr.comp.winners import Award, compute_awards

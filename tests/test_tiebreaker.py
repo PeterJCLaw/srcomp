@@ -2,11 +2,11 @@ import datetime
 from collections import defaultdict
 from unittest import mock
 
+from league_ranker import calc_positions, calc_ranked_points
 from nose.tools import assert_raises, eq_
 
 from sr.comp.match_period import Match, MatchPeriod, MatchType
 from sr.comp.matches import MatchSchedule
-from sr.comp.ranker import calc_positions, calc_ranked_points
 from sr.comp.teams import Team
 
 

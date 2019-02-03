@@ -8,8 +8,6 @@ python:
 matrix:
   allow_failures:
     - python: "3.9-dev"
-before_install:
-  - pip install git+https://github.com/PeterJCLaw/ranker.git
 install: pip install .
 script:
   - ./run-tests
