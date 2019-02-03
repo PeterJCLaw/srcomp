@@ -9,7 +9,6 @@ with open('README.rst') as f:
 install_requires = [
     'PyYAML >=3.11, <4',
     'sr.comp.ranker >=1.3, <2',
-    'mock >=1.0.1, <2',
     'python-dateutil >=2.2, <3'
 ]
 
@@ -30,6 +29,7 @@ setup(
         'Sphinx >=1.3, <2'
     ],
     tests_require=[
+        'mock >=1.0.1, <2',
         'nose >=1.3, <2',
     ],
     test_suite='nose.collector'
