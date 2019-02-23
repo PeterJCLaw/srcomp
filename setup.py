@@ -19,7 +19,7 @@ setup(
     name='sr.comp',
     version='1.1.1',
     packages=['sr.comp'],
-    namespace_packages=['sr', 'sr.comp'],
+    namespace_packages=['sr'],
     description='Student Robotics Competition Software',
     long_description=long_description,
     author='Student Robotics Competition Software SIG',
