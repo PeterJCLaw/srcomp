@@ -18,7 +18,7 @@ if sys.version_info < (3, 4):
 setup(
     name='sr.comp',
     version='1.1.1',
-    packages=find_packages(),
+    packages=find_packages(exclude=('tests',)),
     namespace_packages=['sr', 'sr.comp'],
     description='Student Robotics Competition Software',
     long_description=long_description,
