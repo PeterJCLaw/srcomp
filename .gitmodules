@@ -1,3 +1,3 @@
 [submodule "tests/dummy"]
 	path = tests/dummy
-	url = git://git.srobo.org/comp/dummy-comp
+	url = https://github.com/PeterJCLaw/dummy-comp.git
