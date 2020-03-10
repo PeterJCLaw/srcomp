@@ -7,8 +7,6 @@ class OutOfTimeException(Exception):
     matches.
     """
 
-    pass
-
 
 class MatchPeriodClock(object):
     """
