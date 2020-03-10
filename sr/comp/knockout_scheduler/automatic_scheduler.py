@@ -137,7 +137,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
         # Seed the random generator with the seeded team list
         # This makes it unpredictable which teams will be in which zones
         # until the league scores have been established
-        self.R.seed("".join(teams).encode("utf-8"))
+        self.R.seed(''.join(teams).encode('utf-8'))
 
         matches = []
 
@@ -153,8 +153,8 @@ class KnockoutScheduler(BaseKnockoutScheduler):
         return int(math.log(len(prev_matches), 2))
 
     def add_knockouts(self):
-        knockout_conf = self.config["knockout"]
-        round_spacing = timedelta(seconds=knockout_conf["round_spacing"])
+        knockout_conf = self.config['knockout']
+        round_spacing = timedelta(seconds=knockout_conf['round_spacing'])
 
         self._add_first_round(conf_arity=knockout_conf.get('arity'))
 
@@ -166,14 +166,14 @@ class KnockoutScheduler(BaseKnockoutScheduler):
             # Number of rounds remaining to be added
             rounds_remaining = self.get_rounds_remaining(self.knockout_rounds[-1])
 
-            if rounds_remaining <= knockout_conf["single_arena"]["rounds"]:
-                arenas = knockout_conf["single_arena"]["arenas"]
+            if rounds_remaining <= knockout_conf['single_arena']['rounds']:
+                arenas = knockout_conf['single_arena']['arenas']
             else:
                 arenas = self.arenas
 
             if len(self.knockout_rounds[-1]) == 2:
                 # Extra delay before the final match
-                final_delay = timedelta(seconds=knockout_conf["final_delay"])
+                final_delay = timedelta(seconds=knockout_conf['final_delay'])
                 self.clock.advance_time(final_delay)
 
             self._add_round(arenas, rounds_remaining - 1)

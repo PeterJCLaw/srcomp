@@ -22,47 +22,47 @@ def assert_times(expected, matches, message):
 
 def get_basic_data():
     the_data = {
-        "match_slot_lengths": {
-            "pre": 90,
-            "match": 180,
-            "post": 30,
-            "total": 300
+        'match_slot_lengths': {
+            'pre': 90,
+            'match': 180,
+            'post': 30,
+            'total': 300
         },
-        "staging": {
-            "opens": 300,
-            "closes": 120,
-            "duration": 180,
-            "signal_shepherds": {
-                "Blue": 241,
-                "Green": 181,
+        'staging': {
+            'opens': 300,
+            'closes': 120,
+            'duration': 180,
+            'signal_shepherds': {
+                'Blue': 241,
+                'Green': 181,
             },
-            "signal_teams": 240,
+            'signal_teams': 240,
         },
-        "delays": [ {
-            "delay": 15,
-            "time":         datetime(2014, 3, 26,  13, 2)
+        'delays': [ {
+            'delay': 15,
+            'time':         datetime(2014, 3, 26,  13, 2)
         } ],
-        "match_periods": {
-            "league": [ {
-                "description": "A description of the period",
-                "start_time":   datetime(2014, 3, 26,  13),
-                "end_time":     datetime(2014, 3, 26,  17, 30),
-                "max_end_time": datetime(2014, 3, 26,  17, 40, 0)
+        'match_periods': {
+            'league': [ {
+                'description': "A description of the period",
+                'start_time':   datetime(2014, 3, 26,  13),
+                'end_time':     datetime(2014, 3, 26,  17, 30),
+                'max_end_time': datetime(2014, 3, 26,  17, 40, 0)
             } ],
-            "knockout": []
+            'knockout': []
         },
-        "league": { "extra_spacing": [], },
-        "matches": {
+        'league': { 'extra_spacing': [], },
+        'matches': {
             0: {
-                "A": ["CLY", "TTN", "SCC", "DSF"],
-                "B": ["GRS", "QMC", "GRD", "BRK"]
+                'A': ['CLY', 'TTN', 'SCC', 'DSF'],
+                'B': ['GRS', 'QMC', 'GRD', 'BRK']
             },
             1: {
-                "A": ["WYC", "QMS", "LSS", "EMM"],
-                "B": ["BPV", "BDF", "NHS", "MEA"]
+                'A': ['WYC', 'QMS', 'LSS', 'EMM'],
+                'B': ['BPV', 'BDF', 'NHS', 'MEA']
             },
             2: {
-                "A": ["WYC", "QMS", "LSS", "EMM"]
+                'A': ['WYC', 'QMS', 'LSS', 'EMM']
             }
         }
     }
@@ -148,8 +148,8 @@ def test_extra_spacing_no_delays():
     the_data = get_basic_data()
 
     the_data['league']['extra_spacing'] = [{
-        "match_numbers": "1",
-        "duration": 30,
+        'match_numbers': '1',
+        'duration': 30,
     }]
     the_data['delays'] = []
 
@@ -177,8 +177,8 @@ def test_extra_spacing_first_match():
     the_data = get_basic_data()
 
     the_data['league']['extra_spacing'] = [{
-        "match_numbers": "0",
-        "duration": 30,
+        'match_numbers': '0',
+        'duration': 30,
     }]
     the_data['delays'] = []
 
@@ -206,8 +206,8 @@ def test_extra_spacing_with_delays():
     the_data = get_basic_data()
 
     the_data['league']['extra_spacing'] = [{
-        "match_numbers": "1",
-        "duration": 30,
+        'match_numbers': '1',
+        'duration': 30,
     }]
 
     matches = load_data(the_data)
@@ -234,12 +234,12 @@ def test_extra_spacing_overlapping_with_delays():
     the_data = get_basic_data()
 
     the_data['league']['extra_spacing'] = [{
-        "match_numbers": "1",
-        "duration": 30,
+        'match_numbers': '1',
+        'duration': 30,
     }]
     # Inject a delay which occurs during our extra spcing time
     the_data['delays'] = [{
-        "delay": 15,
+        'delay': 15,
         "time": datetime(2014, 3, 26,  13,  5, 10)
     }]
 
@@ -460,11 +460,11 @@ def test_no_delays():
 def test_two_overlapping_delays():
     the_data = get_basic_data()
     the_data['delays'] = [
-        { "delay": 5*60, "time": datetime(2014, 3, 26,  13, 2) },
+        { 'delay': 5*60, 'time': datetime(2014, 3, 26,  13, 2) },
         # Second delay 'starts' part-way through the first
-        { "delay": 5*60, "time": datetime(2014, 3, 26,  13, 6) },
+        { 'delay': 5*60, 'time': datetime(2014, 3, 26,  13, 6) },
     ]
-    the_data["matches"][3] = { "A": ["SRZ", "SRZ1", "SRZ2", "SRZ3"] }
+    the_data['matches'][3] = { 'A': ['SRZ', 'SRZ1', 'SRZ2', 'SRZ3'] }
     matches = load_data(the_data)
 
     expected = [
@@ -479,10 +479,10 @@ def test_two_overlapping_delays():
 def test_two_sepearate_delays():
     the_data = get_basic_data()
     the_data['delays'] = [
-        { "delay": 5*60, "time": datetime(2014, 3, 26,  13, 2) },
-        { "delay": 5*60, "time": datetime(2014, 3, 26,  13, 12) },
+        { 'delay': 5*60, 'time': datetime(2014, 3, 26,  13, 2) },
+        { 'delay': 5*60, 'time': datetime(2014, 3, 26,  13, 12) },
     ]
-    the_data["matches"][3] = { "A": ["SRZ", "SRZ1", "SRZ2", "SRZ3"] }
+    the_data['matches'][3] = { 'A': ['SRZ', 'SRZ1', 'SRZ2', 'SRZ3'] }
     matches = load_data(the_data)
 
     expected = [
@@ -497,9 +497,9 @@ def test_two_sepearate_delays():
 def test_period_end_simple():
     the_data = get_basic_data()
     # Don't care about delays for now
-    the_data["delays"] = None
+    the_data['delays'] = None
     # for a total of 4 matches
-    the_data["matches"][3] = { "A": ["SRZ", "SRZ1", "SRZ2", "SRZ3"] }
+    the_data['matches'][3] = { 'A': ['SRZ', 'SRZ1', 'SRZ2', 'SRZ3'] }
 
     # Period is 12 minutes long. Since we measure by the start of matches
     # this is enough time to start 3 matches (at 5 minutes each)
@@ -521,11 +521,11 @@ def test_period_end_simple():
 def test_period_end_with_delay():
     the_data = get_basic_data()
     # Simple delay
-    the_data["delays"] = [
-        { "delay": 60, "time": datetime(2014, 3, 26,  13, 2) },
+    the_data['delays'] = [
+        { 'delay': 60, 'time': datetime(2014, 3, 26,  13, 2) },
     ]
     # for a total of 4 matches
-    the_data["matches"][3] = { "A": ["SRZ", "SRZ1", "SRZ2", "SRZ3"] }
+    the_data['matches'][3] = { 'A': ['SRZ', 'SRZ1', 'SRZ2', 'SRZ3'] }
 
     # Period is 12 minutes long. Since we measure by the start of matches
     # this is enough time to start 3 matches (at 5 minutes each)
@@ -548,11 +548,11 @@ def test_period_end_with_delay():
 def test_period_end_with_large_delay():
     the_data = get_basic_data()
     # Simple delay
-    the_data["delays"] = [
-        { "delay": 300, "time": datetime(2014, 3, 26,  13, 1) },
+    the_data['delays'] = [
+        { 'delay': 300, 'time': datetime(2014, 3, 26,  13, 1) },
     ]
     # for a total of 4 matches
-    the_data["matches"][3] = { "A": ["SRZ", "SRZ1", "SRZ2", "SRZ3"] }
+    the_data['matches'][3] = { 'A': ['SRZ', 'SRZ1', 'SRZ2', 'SRZ3'] }
 
     # Period is 12 minutes long. Since we measure by the start of matches
     # this is enough time to start 3 matches (at 5 minutes each)
@@ -574,9 +574,9 @@ def test_period_end_with_large_delay():
 def test_period_max_end_simple():
     the_data = get_basic_data()
     # Don't care about delays for now
-    the_data["delays"] = None
+    the_data['delays'] = None
     # for a total of 4 matches
-    the_data["matches"][3] = { "A": ["SRZ", "SRZ1", "SRZ2", "SRZ3"] }
+    the_data['matches'][3] = { 'A': ['SRZ', 'SRZ1', 'SRZ2', 'SRZ3'] }
 
     # Period is 12 minutes long. Since we measure by the start of matches
     # this is enough time to start 3 matches (at 5 minutes each)
@@ -599,11 +599,11 @@ def test_period_max_end_simple():
 def test_period_max_end_with_delay():
     the_data = get_basic_data()
     # Simple delay
-    the_data["delays"] = [
-        { "delay": 60, "time": datetime(2014, 3, 26,  13, 2) },
+    the_data['delays'] = [
+        { 'delay': 60, 'time': datetime(2014, 3, 26,  13, 2) },
     ]
     # for a total of 4 matches
-    the_data["matches"][3] = { "A": ["SRZ", "SRZ1", "SRZ2", "SRZ3"] }
+    the_data['matches'][3] = { 'A': ['SRZ', 'SRZ1', 'SRZ2', 'SRZ3'] }
 
     # Period is 12 minutes long. Since we measure by the start of matches
     # this is enough time to start 3 matches (at 5 minutes each)
@@ -627,11 +627,11 @@ def test_period_max_end_with_delay():
 def test_period_max_end_with_large_delay():
     the_data = get_basic_data()
     # Simple delay
-    the_data["delays"] = [
-        { "delay": 300, "time": datetime(2014, 3, 26,  13, 1) },
+    the_data['delays'] = [
+        { 'delay': 300, 'time': datetime(2014, 3, 26,  13, 1) },
     ]
     # for a total of 4 matches
-    the_data["matches"][3] = { "A": ["SRZ", "SRZ1", "SRZ2", "SRZ3"] }
+    the_data['matches'][3] = { 'A': ['SRZ', 'SRZ1', 'SRZ2', 'SRZ3'] }
 
     # Period is 12 minutes long. Since we measure by the start of matches
     # this is enough time to start 3 matches (at 5 minutes each)
@@ -658,8 +658,8 @@ def test_planned_matches():
     the_data = get_basic_data()
 
     extra_match = {
-                "A": ["WYC2", "QMS2", "LSS2", "EMM2"],
-                "B": ["BPV2", "BDF2", "NHS2", "MEA2"]
+                'A': ['WYC2', 'QMS2', 'LSS2', 'EMM2'],
+                'B': ['BPV2', 'BDF2', 'NHS2', 'MEA2']
             }
     the_data['matches'][2] = extra_match
 
@@ -685,12 +685,12 @@ def test_parse_ranges():
         actual = parse_ranges(range_str)
         assert expected == actual, "Wrong ranges parsed"
 
-    yield check, "1", set([1])
-    yield check, "1,4", set([1, 4])
-    yield check, "1, 4", set([1, 4])
-    yield check, "1-4", set([1, 2, 3, 4])
-    yield check, "1-4,2-5", set([1, 2, 3, 4, 5])
-    yield check, "1-4,6,0", set([0, 1, 2, 3, 4, 6])
+    yield check, '1', set([1])
+    yield check, '1,4', set([1, 4])
+    yield check, '1, 4', set([1, 4])
+    yield check, '1-4', set([1, 2, 3, 4])
+    yield check, '1-4,2-5', set([1, 2, 3, 4, 5])
+    yield check, '1-4,6,0', set([0, 1, 2, 3, 4, 6])
 
 def test_parse_bad_ranges():
     def check(range_str):
@@ -702,7 +702,7 @@ def test_parse_bad_ranges():
             msg = "Should have errored, got: {0}".format(repr(actual))
             raise AssertionError(msg)
 
-    yield check, ""
-    yield check, "1,a"
-    yield check, "1--4"
-    yield check, "1-,4"
+    yield check, ''
+    yield check, '1,a'
+    yield check, '1--4'
+    yield check, '1-,4'

@@ -68,7 +68,7 @@ class TeamScore(object):
         return self._ordering_key < other._ordering_key
 
     def __repr__(self):
-        return "TeamScore({0}, {1})".format(self.league_points,
+        return 'TeamScore({0}, {1})'.format(self.league_points,
                                             self.game_points)
 
 
@@ -188,7 +188,7 @@ class BaseScores(object):
     def _load_resfile(self, fname):
         y = yaml_loader.load(fname)
 
-        match_id = (y["arena_id"], y["match_number"])
+        match_id = (y['arena_id'], y['match_number'])
         if match_id in self.game_points:
             raise DuplicateScoresheet(match_id)
 
@@ -197,11 +197,11 @@ class BaseScores(object):
 
         # Build the disqualification dict
         dsq = []
-        for tla, scoreinfo in y["teams"].items():
+        for tla, scoreinfo in y['teams'].items():
             # disqualifications and non-presence are effectively the same
             # in terms of league points awarding.
-            if (scoreinfo.get("disqualified", False) or
-               not scoreinfo.get("present", True)):
+            if (scoreinfo.get('disqualified', False) or
+               not scoreinfo.get('present', True)):
                 dsq.append(tla)
 
         positions = ranker.calc_positions(game_points, dsq)
@@ -326,21 +326,21 @@ class Scores(object):
     def __init__(self, root, teams, scorer, num_teams_per_arena):
         self.root = root
 
-        self.league = LeagueScores(os.path.join(root, "league"),
+        self.league = LeagueScores(os.path.join(root, 'league'),
                                    teams, scorer, num_teams_per_arena)
         """
         The :class:`LeagueScores` for the competition.
         """
 
 
-        self.knockout = KnockoutScores(os.path.join(root, "knockout"),
+        self.knockout = KnockoutScores(os.path.join(root, 'knockout'),
                                        teams, scorer, num_teams_per_arena,
                                        self.league.positions)
         """
         The :class:`KnockoutScores` for the competition.
         """
 
-        self.tiebreaker = TiebreakerScores(os.path.join(root, "tiebreaker"),
+        self.tiebreaker = TiebreakerScores(os.path.join(root, 'tiebreaker'),
                                            teams, scorer, num_teams_per_arena,
                                            self.league.positions)
         """

@@ -8,7 +8,7 @@ from sr.comp.knockout_scheduler.stable_random import Random
 
 def test_getrandbits():
     rnd = Random()
-    rnd.seed(b"this is a seed")
+    rnd.seed(b'this is a seed')
     bits = rnd.getrandbits(32)
 
     eq_(bits, 4025750249)
@@ -16,21 +16,21 @@ def test_getrandbits():
 def test_seeds_differ():
     # A different seed than test_getrandbits above
     rnd = Random()
-    rnd.seed(b"this is another seed")
+    rnd.seed(b'this is another seed')
     bits = rnd.getrandbits(32)
 
     eq_(bits, 682087810)
 
 def test_random():
     rnd = Random()
-    rnd.seed(b"this is a seed")
+    rnd.seed(b'this is a seed')
     num = rnd.random()
 
     eq_(num, 0.9373180216643959)
 
 def test_shuffle():
     rnd = Random()
-    rnd.seed(b"this is a seed")
+    rnd.seed(b'this is a seed')
 
     numbers = list(range(16))
     rnd.shuffle(numbers)

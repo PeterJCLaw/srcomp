@@ -132,7 +132,7 @@ class RawCompstate(object):
         Whether or not there are any changes to files in the state,
         including untracked files.
         """
-        output = self.git(["status", "--porcelain"], return_output=True)
+        output = self.git(['status', '--porcelain'], return_output=True)
         return len(output) != 0
 
     def show_changes(self):
@@ -142,13 +142,13 @@ class RawCompstate(object):
         self.git(['remote', '-v'])
 
     def push(self, where, revspec, err_msg=None, force=False):
-        args = ["push", where, revspec]
+        args = ['push', where, revspec]
         if force:
             args.insert(1, '--force')
         self.git(args, err_msg)
 
     def rev_parse(self, revision):
-        output = self.git(["rev-parse", '--verify', revision], return_output=True,
+        output = self.git(['rev-parse', '--verify', revision], return_output=True,
                           err_msg="Unknown revision '{0}'.".format(revision))
         return output.strip()
 
@@ -162,7 +162,7 @@ class RawCompstate(object):
 
     def _is_parent(self, parent, child):
         try:
-            revspec = "{0}..{1}".format(parent, child)
+            revspec = '{0}..{1}'.format(parent, child)
             revs = self.git(['rev-list', '-n1', revspec, '--'],
                             return_output=True)
             # rev-list prints the revisions which are parents of 'child',
@@ -180,7 +180,7 @@ class RawCompstate(object):
         return self._is_parent('HEAD', commit)
 
     def reset_hard(self):
-        self.git(["reset", "--hard", "HEAD"], err_msg="Git reset failed.")
+        self.git(['reset', '--hard', 'HEAD'], err_msg="Git reset failed.")
 
     def reset_and_fast_forward(self):
         self.reset_hard()
@@ -191,7 +191,7 @@ class RawCompstate(object):
         if self._local_only:
             return
 
-        self.git(["pull", "--ff-only", "origin", "master"],
+        self.git(['pull', '--ff-only', 'origin', 'master'],
                  err_msg="Git pull failed, deal with the merge manually.")
 
     def stage(self, file_path):
@@ -202,7 +202,7 @@ class RawCompstate(object):
                               either be an absolute path, or one relative
                               to the compstate.
         """
-        self.git(["add", file_path])
+        self.git(['add', file_path])
 
     def fetch(self, where='origin', quiet=False):
         self.git(['fetch', where], return_output=quiet)
@@ -211,7 +211,7 @@ class RawCompstate(object):
         self.git(['checkout', what])
 
     def commit(self, commit_msg, allow_empty=False):
-        args = ["commit", "-m", commit_msg]
+        args = ['commit', '-m', commit_msg]
         if allow_empty:
             args += ['--allow-empty']
         self.git(args, return_output=True, err_msg="Git commit failed.")
@@ -222,5 +222,5 @@ class RawCompstate(object):
         if self._local_only:
             return
 
-        self.push("origin", "master",
+        self.push('origin', 'master',
                   err_msg="Git push failed, deal with the merge manually.")

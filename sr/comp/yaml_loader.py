@@ -24,7 +24,7 @@ def time_constructor(_, node):
 
 
 def add_time_constructor(loader):
-    loader.add_constructor("tag:yaml.org,2002:timestamp", time_constructor)
+    loader.add_constructor('tag:yaml.org,2002:timestamp', time_constructor)
 
 
 add_time_constructor(YAML_Loader)

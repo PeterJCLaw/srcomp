@@ -6,7 +6,7 @@ from . import yaml_loader
 
 
 Arena = namedtuple('Arena', ['name', 'display_name', 'colour'])
-Corner = namedtuple("Corner", ["number", "colour"])
+Corner = namedtuple('Corner', ['number', 'colour'])
 
 
 def load_arenas(filename):

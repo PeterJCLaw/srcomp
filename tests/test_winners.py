@@ -12,22 +12,22 @@ from nose.tools import eq_
 import mock
 
 
-FINAL_INFO = Match(num=1, display_name='Match 1', arena='A',
+FINAL_INFO = Match(num=1, display_name="Match 1", arena='A',
                    teams=['AAA', 'BBB', 'CCC', 'DDD'],
                    start_time=datetime(2014, 4, 26, 16, 30, tzinfo=tzutc()),
                    end_time=datetime(2014, 4, 26, 16, 35, tzinfo=tzutc()),
                    type=MatchType.knockout, use_resolved_ranking=False)
 
-TIEBREAKER_INFO = Match(num=2, display_name='Tiebreaker (#2)', arena='A',
+TIEBREAKER_INFO = Match(num=2, display_name="Tiebreaker (#2)", arena='A',
                         teams=['AAA', 'BBB'],
                         start_time=datetime(2014, 4, 26, 16, 30, tzinfo=tzutc()),
                         end_time=datetime(2014, 4, 26, 16, 35, tzinfo=tzutc()),
                         type=MatchType.tiebreaker, use_resolved_ranking=False)
 
-TEAMS = {'AAA': Team(tla='AAA', name='AAA Squad', rookie=True, dropped_out_after=None),
-         'BBB': Team(tla='BBB', name='BBBees', rookie=False, dropped_out_after=None),
-         'CCC': Team(tla='CCC', name='Team CCC', rookie=True, dropped_out_after=None),
-         'DDD': Team(tla='DDD', name='DDD Robotics', rookie=False, dropped_out_after=None)}
+TEAMS = {'AAA': Team(tla='AAA', name="AAA Squad", rookie=True, dropped_out_after=None),
+         'BBB': Team(tla='BBB', name="BBBees", rookie=False, dropped_out_after=None),
+         'CCC': Team(tla='CCC', name="Team CCC", rookie=True, dropped_out_after=None),
+         'DDD': Team(tla='DDD', name="DDD Robotics", rookie=False, dropped_out_after=None)}
 
 class MockScoreSet(object):
     def __init__(self, arena, game, scores, dsq=()):

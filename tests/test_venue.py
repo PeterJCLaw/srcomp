@@ -13,12 +13,12 @@ TIMES = {'signal_shepherds': {'Yellow': None, 'Pink': None } }
 def mock_layout_loader():
     return {'teams':[{
             'name': 'a-group',
-            'display_name': 'A group',
+            'display_name': "A group",
             'teams': ['ABC', 'DEF', 'GHI']
         },
         {
             'name': 'b-group',
-            'display_name': 'B group',
+            'display_name': "B group",
             'teams': ['JKL', 'MNO', 'PQR']
         }
     ]}
@@ -192,20 +192,20 @@ def test_locations():
         expected = {
             'a-group': {
                 'name': 'a-group',
-                'display_name': 'A group',
+                'display_name': "A group",
                 'teams': ['ABC', 'DEF', 'GHI'],
                 'shepherds': {
-                        "name": 'Yellow',
-                        "colour": 'colour-yellow',
+                        'name': 'Yellow',
+                        'colour': 'colour-yellow',
                     },
                 },
             'b-group': {
                 'name': 'b-group',
-                'display_name': 'B group',
+                'display_name': "B group",
                 'teams': ['JKL', 'MNO', 'PQR'],
                 'shepherds': {
-                        "name": 'Pink',
-                        "colour": 'colour-pink',
+                        'name': 'Pink',
+                        'colour': 'colour-pink',
                     },
                 },
         }

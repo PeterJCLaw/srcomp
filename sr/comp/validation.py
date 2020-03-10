@@ -188,14 +188,14 @@ def validate_scores_inner(match_type, scores, schedule):
         """Check that the requested match was scheduled, return it if so."""
         num = match_id[1]
         if num < 0 or num >= len(schedule):
-            msg = '{0} Match not scheduled'.format(match_type_title)
+            msg = "{0} Match not scheduled".format(match_type_title)
             report_errors(type_, match_id, [msg])
             return None
 
         arena = match_id[0]
         match = schedule[num]
         if arena not in match:
-            msg = 'Arena not in this {0} match'.format(match_type_title)
+            msg = "Arena not in this {0} match".format(match_type_title)
             report_errors(type_, match_id, [msg])
             return None
 
@@ -235,12 +235,12 @@ def validate_match_score(match_type, match_score, scheduled_match):
 
     errors = []
     if len(missing):
-        missing = ', '.join(missing)
+        missing = ", ".join(missing)
         errors.append("Teams {0} missing from this {1} match."
                       .format(missing, match_type.name))
 
     if len(extra):
-        extra = ', '.join(extra)
+        extra = ", ".join(extra)
         errors.append("Teams {0} not scheduled in this {1} match."
                       .format(extra, match_type.name))
 

@@ -35,16 +35,16 @@ def get_scheduler(matches = None, positions = None, \
     scores = mock.Mock(league = league_scores, knockout = knockout_scores)
 
     period_config = {
-        "description": "A description of the period",
-        "start_time":   datetime(2014, 3, 27,  13),
-        "end_time":     datetime(2014, 3, 27,  17, 30),
+        'description': "A description of the period",
+        'start_time':   datetime(2014, 3, 27,  13),
+        'end_time':     datetime(2014, 3, 27,  17, 30),
     }
     knockout_config = {
         'round_spacing': 30,
         'final_delay': 12,
         'single_arena': {
             'rounds': 3,
-            'arenas': ["A"],
+            'arenas': ['A'],
         },
     }
     config = {
@@ -65,7 +65,7 @@ def test_invalid_num_teams_per_arena():
 
 def test_knockout_match_winners_empty():
     scheduler = get_scheduler()
-    game = Match(2, 'Match 2', 'A', [], None, None, None, False)
+    game = Match(2, "Match 2", 'A', [], None, None, None, False)
     winners = scheduler.get_winners(game)
     assert winners == [UNKNOWABLE_TEAM] * 2
 
@@ -80,7 +80,7 @@ def test_knockout_match_winners_simple():
     }
     scheduler = get_scheduler(knockout_positions = knockout_positions)
 
-    game = Match(2, 'Match 2', 'A', [], None, None, None, False)
+    game = Match(2, "Match 2", 'A', [], None, None, None, False)
     winners = scheduler.get_winners(game)
 
     assert set(winners) == set(['GHI', 'JKL'])
@@ -97,7 +97,7 @@ def test_knockout_match_winners_irrelevant_tie_1():
     }
     scheduler = get_scheduler(knockout_positions = knockout_positions)
 
-    game = Match(2, 'Match 2', 'A', [], None, None, None, False)
+    game = Match(2, "Match 2", 'A', [], None, None, None, False)
     winners = scheduler.get_winners(game)
 
     assert set(winners) == set(['GHI', 'JKL'])
@@ -120,7 +120,7 @@ def test_knockout_match_winners_irrelevant_tie_2():
     scheduler = get_scheduler(knockout_positions = knockout_positions, \
                                 positions = positions)
 
-    game = Match(2, 'Match 2', 'A', [], None, None, None, False)
+    game = Match(2, "Match 2", 'A', [], None, None, None, False)
     winners = scheduler.get_winners(game)
 
     assert set(winners) == set(['GHI', 'JKL'])
@@ -145,7 +145,7 @@ def test_knockout_match_winners_tie():
     scheduler = get_scheduler(knockout_positions = knockout_positions, \
                                 positions = positions)
 
-    game = Match(2, 'Match 2', 'A', [], None, None, None, False)
+    game = Match(2, "Match 2", 'A', [], None, None, None, False)
     winners = scheduler.get_winners(game)
 
     assert set(winners) == set(['GHI', 'JKL']), \
@@ -161,8 +161,8 @@ def test_first_round_before_league_end():
 
     # Fake a couple of league matches that won't have been scored
     matches = [
-        {'A':Match(0, 'Match 0', 'A', [], None, None, MatchType.league, False)},
-        {'A':Match(1, 'Match 1', 'A', [], None, None, MatchType.league, False)},
+        {'A':Match(0, "Match 0", 'A', [], None, None, MatchType.league, False)},
+        {'A':Match(1, "Match 1", 'A', [], None, None, MatchType.league, False)},
     ]
     scheduler = get_scheduler(matches, positions = positions)
 

@@ -23,8 +23,8 @@ class WrongNumberOfTeams(Exception):
         super(WrongNumberOfTeams, self).__init__(message)
 
 
-Delay = namedtuple("Delay",
-                   ["delay", "time"])
+Delay = namedtuple('Delay',
+                   ['delay', 'time'])
 
 def parse_ranges(ranges):
     """
@@ -103,21 +103,21 @@ class MatchSchedule(object):
         contains a list with only one match -- the final.
         """
 
-        for e in y["match_periods"]["league"]:
-            if "max_end_time" in e:
-                max_end_time = e["max_end_time"]
+        for e in y['match_periods']['league']:
+            if 'max_end_time' in e:
+                max_end_time = e['max_end_time']
             else:
-                max_end_time = e["end_time"]
+                max_end_time = e['end_time']
 
-            period = MatchPeriod(e["start_time"], e["end_time"], max_end_time,
-                                 e["description"], [], MatchType.league)
+            period = MatchPeriod(e['start_time'], e['end_time'], max_end_time,
+                                 e['description'], [], MatchType.league)
             self.match_periods.append(period)
 
-        self._load_match_slot_lengths(y["match_slot_lengths"])
-        self._load_staging_times(y["staging"])
+        self._load_match_slot_lengths(y['match_slot_lengths'])
+        self._load_staging_times(y['staging'])
 
-        self._build_extra_spacing(y["league"]['extra_spacing'])
-        self._build_delaylist(y["delays"])
+        self._build_extra_spacing(y['league']['extra_spacing'])
+        self._build_delaylist(y['delays'])
 
         self.matches = []
         """
@@ -142,7 +142,7 @@ class MatchSchedule(object):
         match = durations['match']
         total = durations['total']
         if total != pre + post + match:
-            raise ValueError('Match slot lengths are inconsistent.')
+            raise ValueError("Match slot lengths are inconsistent.")
         self.match_slot_lengths = durations
         self.match_duration = total
 
@@ -160,7 +160,7 @@ class MatchSchedule(object):
         closes = durations['closes']
         duration = durations['duration']
         if duration != opens - closes:
-            raise ValueError('Staging timings are inconsistent.')
+            raise ValueError("Staging timings are inconsistent.")
 
         for other in ('signal_teams', 'signal_shepherds'):
             if other not in durations:
@@ -208,7 +208,7 @@ class MatchSchedule(object):
             return
 
         for info in yamldata:
-            d = Delay(timedelta(seconds=info["delay"]), info["time"])
+            d = Delay(timedelta(seconds=info['delay']), info['time'])
             delays.append(d)
 
         delays.sort(key=lambda x: x.time)
@@ -291,7 +291,7 @@ class MatchSchedule(object):
         end_time = start_time + self.match_duration
         for arena_name, teams in arenas.items():
             teams = self.remove_drop_outs(teams, match_n)
-            display_name = 'Match {n}'.format(n=match_n)
+            display_name = "Match {n}".format(n=match_n)
 
             if len(teams) != self._num_corners:
                 raise WrongNumberOfTeams(match_n, arena_name, teams, self._num_corners)
@@ -395,7 +395,7 @@ class MatchSchedule(object):
             return
         winners = finals_positions.get(1)
         if not winners:
-            raise AssertionError('The only winning move is not to play.')
+            raise AssertionError("The only winning move is not to play.")
         if len(winners) > 1:  # Act surprised!
             # Start with the winning teams in the same order as in the finals
             tiebreaker_teams = [team if team in winners else None

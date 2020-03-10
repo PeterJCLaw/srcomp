@@ -65,7 +65,7 @@ class Random(object):
 
 def _demo():
     R = Random()
-    R.seed("hello".encode("utf-8"))
+    R.seed('hello'.encode('utf-8'))
     for _ in range(10):
         print(R.random())
 

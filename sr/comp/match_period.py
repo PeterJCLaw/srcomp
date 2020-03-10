@@ -13,7 +13,7 @@ class MatchPeriod(namedtuple('MatchPeriod', ['start_time', 'end_time',
     __slots__ = ()
 
     def __str__(self):
-        return '{} ({}–{})'.format(self.description,
+        return "{} ({}–{})".format(self.description,
                                    self.start_time.strftime('%H:%M'),
                                    self.end_time.strftime('%H:%M'))
 

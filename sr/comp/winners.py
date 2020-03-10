@@ -25,14 +25,14 @@ class Award(Enum):
     These correspond with awards as specified in the rulebook.
     """
 
-    first = "first"          # First place
-    second = "second"        # Second place
-    third = "third"          # Third place
-    rookie = "rookie"        # Rookie award
-    committee = "committee"  # Committee award
-    image = "image"          # Robot and Team Image award
-    movement = "movement"    # First Movement award
-    web = "web"              # Online Presence award
+    first = 'first'          # First place
+    second = 'second'        # Second place
+    third = 'third'          # Third place
+    rookie = 'rookie'        # Rookie award
+    committee = 'committee'  # Committee award
+    image = 'image'          # Robot and Team Image award
+    movement = 'movement'    # First Movement award
+    web = 'web'              # Online Presence award
 
 
 def _compute_main_awards(scores, final_match_info):

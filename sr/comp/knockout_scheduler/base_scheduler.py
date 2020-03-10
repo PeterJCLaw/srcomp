@@ -44,14 +44,14 @@ class BaseKnockoutScheduler(object):
         # involve the second seed).
         self.knockout_rounds = []
 
-        period_config = self.config["match_periods"]["knockout"][0]
+        period_config = self.config['match_periods']['knockout'][0]
         self.period = MatchPeriod(
-            period_config["start_time"],
-            period_config["end_time"],
+            period_config['start_time'],
+            period_config['end_time'],
             # The knockouts *must* end on time, so we don't specify a
             # different max_end_time.
-            period_config["end_time"],
-            period_config["description"],
+            period_config['end_time'],
+            period_config['description'],
             [],
             MatchType.knockout,
         )
@@ -85,13 +85,13 @@ class BaseKnockoutScheduler(object):
         """
 
         if rounds_remaining == 0:
-            display_name = 'Final (#{global_num})'
+            display_name = "Final (#{global_num})"
         elif rounds_remaining == 1:
-            display_name = 'Semi {round_num} (#{global_num})'
+            display_name = "Semi {round_num} (#{global_num})"
         elif rounds_remaining == 2:
-            display_name = 'Quarter {round_num} (#{global_num})'
+            display_name = "Quarter {round_num} (#{global_num})"
         else:
-            display_name = 'Match {global_num}'
+            display_name = "Match {global_num}"
         return display_name.format(round_num=round_num + 1,
                                    global_num=global_num)
 

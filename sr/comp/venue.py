@@ -26,15 +26,15 @@ class MismatchException(Exception):
     def __init__(self, tpl, duplicates, extras, missing):
         details = []
 
-        for label, teams in (('duplicates', duplicates),
-                             ('extras', extras),
-                             ('missing', missing)):
+        for label, teams in (("duplicates", duplicates),
+                             ("extras", extras),
+                             ("missing", missing)):
             if teams:
-                details.append('{0}: '.format(label) + ', '.join(sorted(teams)))
+                details.append("{0}: ".format(label) + ", ".join(sorted(teams)))
 
         assert details, "No bad items given to {0}!".format(self.__class__)
 
-        detail = '; '.join(details)
+        detail = "; ".join(details)
         super(MismatchException, self).__init__(tpl.format(detail))
 
         self.duplicates = duplicates
@@ -89,7 +89,7 @@ class Venue(object):
         missing_areas = shepherding_areas_set - staging_areas_set
 
         if extra_areas or missing_areas:
-            raise ShepherdingAreasException('in the staging times', [], \
+            raise ShepherdingAreasException("in the staging times", [], \
                                             extra_areas, missing_areas)
 
 
@@ -164,8 +164,8 @@ class Venue(object):
                     raise InvalidRegionException(region, area['name'])
 
                 location['shepherds'] = {
-                    "name": area['name'],
-                    "colour": area['colour'],
+                    'name': area['name'],
+                    'colour': area['colour'],
                 }
 
 

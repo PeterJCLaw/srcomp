@@ -20,9 +20,9 @@ setup(
     version='1.1.1',
     packages=find_packages(exclude=('tests',)),
     namespace_packages=['sr', 'sr.comp'],
-    description='Student Robotics Competition Software',
+    description="Student Robotics Competition Software",
     long_description=long_description,
-    author='Student Robotics Competition Software SIG',
+    author="Student Robotics Competition Software SIG",
     author_email='srobo-devel@googlegroups.com',
     install_requires=install_requires,
     setup_requires=[

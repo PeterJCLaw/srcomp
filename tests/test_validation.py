@@ -18,8 +18,8 @@ from sr.comp.knockout_scheduler import UNKNOWABLE_TEAM
 from sr.comp.match_period import MatchType
 
 
-Match = namedtuple("Match", ["teams"])
-Match2 = namedtuple("Match2", ["num", "start_time"])
+Match = namedtuple('Match', ['teams'])
+Match2 = namedtuple('Match2', ['num', 'start_time'])
 Match3 = namedtuple('Match3', ['num', 'type'])
 Match4 = namedtuple('Match4', ['teams', 'type'])
 
@@ -28,7 +28,7 @@ def test_dummy_is_valid():
     test_dir = os.path.dirname(os.path.abspath(__file__))
     dummy_compstate = os.path.join(test_dir, 'dummy')
     fake_stderr = StringIO()
-    with mock.patch("sys.stderr", fake_stderr):
+    with mock.patch('sys.stderr', fake_stderr):
         comp = SRComp(dummy_compstate)
         error_count = validate(comp)
         assert 0 == error_count, fake_stderr.getvalue()
