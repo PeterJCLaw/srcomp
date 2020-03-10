@@ -14,8 +14,8 @@ before_install:
   - pip install git+https://github.com/PeterJCLaw/ranker.git
 install: pip install .
 script:
-- ./run-tests
-# Deliberately after running the real tests so that we can't accidentally
-# depend on it
-- pip install pylint
-- ./lint
+  - ./run-tests
+  # Deliberately after running the real tests so that we can't accidentally
+  # depend on it
+  - pip install pylint
+  - ./lint
