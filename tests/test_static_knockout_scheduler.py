@@ -1,9 +1,10 @@
 from collections import OrderedDict
 from datetime import datetime, timedelta
+
 import mock
 
-from sr.comp.match_period import Match, MatchType
 from sr.comp.knockout_scheduler import StaticScheduler, UNKNOWABLE_TEAM
+from sr.comp.match_period import Match, MatchType
 from sr.comp.teams import Team
 
 TLAs = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF', 'GGG', 'HHH', 'III', 'JJJ']

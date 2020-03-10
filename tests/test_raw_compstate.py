@@ -5,7 +5,6 @@ from sr.comp.comp import SRComp
 from sr.comp.match_period import Match, MatchType
 from sr.comp.raw_compstate import RawCompstate
 
-
 DUMMY_PATH = os.path.dirname(os.path.abspath(__file__)) + '/dummy'
 
 

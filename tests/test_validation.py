@@ -1,20 +1,26 @@
+import os
 from collections import namedtuple
 from datetime import datetime, timedelta
+
 import mock
-import os
+
+from sr.comp.comp import SRComp
+from sr.comp.knockout_scheduler import UNKNOWABLE_TEAM
+from sr.comp.match_period import MatchType
+from sr.comp.validation import (
+    find_missing_scores,
+    find_teams_without_league_matches,
+    validate,
+    validate_match,
+    validate_match_score,
+    validate_schedule_arenas,
+    validate_schedule_timings,
+)
 
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-
-from sr.comp.comp import SRComp
-from sr.comp.validation import validate, validate_match, validate_schedule_arenas, \
-    validate_schedule_timings, validate_match_score, find_missing_scores, \
-    find_teams_without_league_matches
-
-from sr.comp.knockout_scheduler import UNKNOWABLE_TEAM
-from sr.comp.match_period import MatchType
 
 
 Match = namedtuple('Match', ['teams'])

@@ -4,7 +4,6 @@ from collections import namedtuple
 
 from . import yaml_loader
 
-
 _Team = namedtuple('Team', [
     'tla',
     'name',

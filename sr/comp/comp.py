@@ -1,10 +1,10 @@
 """Core competition functions."""
 
-from copy import copy
 import imp
 import os
-from subprocess import check_output
 import sys
+from copy import copy
+from subprocess import check_output
 
 from . import arenas, matches, scores, teams, venue
 from .winners import compute_awards

@@ -1,10 +1,11 @@
-from nose.tools import eq_, assert_raises
-from collections import defaultdict
 import datetime
-import mock
+from collections import defaultdict
 
+import mock
+from nose.tools import assert_raises, eq_
+
+from sr.comp.match_period import Match, MatchPeriod, MatchType
 from sr.comp.matches import MatchSchedule
-from sr.comp.match_period import MatchType, Match, MatchPeriod
 from sr.comp.ranker import calc_positions, calc_ranked_points
 from sr.comp.teams import Team
 

@@ -1,8 +1,8 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-from sr.comp.matches import MatchSchedule, parse_ranges
 from sr.comp.match_period import Match
+from sr.comp.matches import MatchSchedule, parse_ranges
 from sr.comp.teams import Team
 
 

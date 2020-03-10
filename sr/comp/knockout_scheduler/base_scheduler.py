@@ -2,7 +2,6 @@
 
 from ..match_period import MatchPeriod, MatchType
 
-
 # Use '???' as the "we don't know yet" marker
 UNKNOWABLE_TEAM = '???'
 

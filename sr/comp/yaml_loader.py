@@ -5,8 +5,8 @@ This includes parsing of dates and times properly, and also ensures the C YAML
 loader is used which is necessary for optimum performance.
 """
 
-import dateutil.tz
 import dateutil.parser
+import dateutil.tz
 import yaml
 
 try:

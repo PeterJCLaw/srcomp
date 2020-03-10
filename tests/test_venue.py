@@ -1,10 +1,13 @@
 from copy import deepcopy
+
 import mock
 
-from sr.comp.venue import InvalidRegionException, \
-                          LayoutTeamsException, \
-                          ShepherdingAreasException, \
-                          Venue
+from sr.comp.venue import (
+    InvalidRegionException,
+    LayoutTeamsException,
+    ShepherdingAreasException,
+    Venue,
+)
 
 TEAMS = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQR']
 TIMES = {'signal_shepherds': {'Yellow': None, 'Pink': None}}

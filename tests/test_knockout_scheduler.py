@@ -1,13 +1,13 @@
-from nose.tools import assert_raises
-
 from collections import defaultdict, OrderedDict
 from datetime import datetime, timedelta
-import mock
 
-from sr.comp.teams import Team
-from sr.comp.matches import Delay
-from sr.comp.match_period import Match, MatchType
+import mock
+from nose.tools import assert_raises
+
 from sr.comp.knockout_scheduler import KnockoutScheduler, UNKNOWABLE_TEAM
+from sr.comp.match_period import Match, MatchType
+from sr.comp.matches import Delay
+from sr.comp.teams import Team
 
 
 def mock_first_round_seeding(side_effect):

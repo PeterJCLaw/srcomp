@@ -1,6 +1,6 @@
-from sr.comp.matches import Delay
 from sr.comp.match_period import MatchPeriod
 from sr.comp.match_period_clock import MatchPeriodClock, OutOfTimeException
+from sr.comp.matches import Delay
 
 
 def build_match_period(start, end, max_end=None, desc=None, matches=None, type_=None):

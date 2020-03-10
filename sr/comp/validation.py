@@ -2,12 +2,11 @@
 
 from __future__ import print_function
 
-from collections import defaultdict
 import sys
+from collections import defaultdict
 
 from .knockout_scheduler import UNKNOWABLE_TEAM
 from .match_period import MatchType
-
 
 NO_TEAM = None
 META_TEAMS = set([NO_TEAM, UNKNOWABLE_TEAM])

@@ -1,14 +1,14 @@
 """Utilities for working with scores."""
 
-from collections import OrderedDict
-from functools import total_ordering
 import glob
 import os
-
-from . import yaml_loader
+from collections import OrderedDict
+from functools import total_ordering
 
 # For reasons which are not clear, Pylint on Travis doesn't find the ranker.
 from sr.comp import ranker  # pylint: disable=no-name-in-module,relative-import
+
+from . import yaml_loader
 
 
 class InvalidTeam(Exception):

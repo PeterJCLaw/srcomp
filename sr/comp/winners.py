@@ -9,8 +9,8 @@ The awards calculated are:
  * Rookie award (rookie team with highest league position).
 """
 
-from enum import Enum, unique
 import os.path
+from enum import Enum, unique
 
 from . import yaml_loader
 from .match_period import MatchType

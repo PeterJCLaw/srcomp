@@ -1,16 +1,15 @@
-from datetime import datetime
-from dateutil.tz import tzutc
 from collections import OrderedDict
+from datetime import datetime
 
-from sr.comp.winners import Award, compute_awards
-from sr.comp.match_period import Match, MatchType
-from sr.comp.teams import Team
-from sr.comp.scores import TeamScore
-from sr.comp.ranker import calc_positions, calc_ranked_points
-
-from nose.tools import eq_
 import mock
+from dateutil.tz import tzutc
+from nose.tools import eq_
 
+from sr.comp.match_period import Match, MatchType
+from sr.comp.ranker import calc_positions, calc_ranked_points
+from sr.comp.scores import TeamScore
+from sr.comp.teams import Team
+from sr.comp.winners import Award, compute_awards
 
 FINAL_INFO = Match(
     num=1,

@@ -1,15 +1,15 @@
 """Match schedule library."""
 
-from collections import namedtuple
 import datetime
+from collections import namedtuple
 from datetime import timedelta
 
 from dateutil.tz import gettz
 
 from . import yaml_loader
-from .match_period import MatchPeriod, Match, MatchType
-from .match_period_clock import MatchPeriodClock
 from .knockout_scheduler import KnockoutScheduler, StaticScheduler
+from .match_period import Match, MatchPeriod, MatchType
+from .match_period_clock import MatchPeriodClock
 
 
 class WrongNumberOfTeams(Exception):
