@@ -26,9 +26,11 @@ class MismatchException(Exception):
     def __init__(self, tpl, duplicates, extras, missing):
         details = []
 
-        for label, teams in (("duplicates", duplicates),
-                             ("extras", extras),
-                             ("missing", missing)):
+        for label, teams in (
+            ("duplicates", duplicates),
+            ("extras", extras),
+            ("missing", missing),
+        ):
             if teams:
                 details.append("{0}: ".format(label) + ", ".join(sorted(teams)))
 
@@ -49,8 +51,7 @@ class LayoutTeamsException(MismatchException):
     """
     def __init__(self, duplicate_teams, extra_teams, missing_teams):
         tpl = "Duplicate, extra or missing teams in the layout! ({0})"
-        super(LayoutTeamsException, self).__init__(tpl, duplicate_teams, \
-                                                   extra_teams, missing_teams)
+        super(LayoutTeamsException, self).__init__(tpl, duplicate_teams, extra_teams, missing_teams)
 
 
 class ShepherdingAreasException(MismatchException):
@@ -89,8 +90,12 @@ class Venue(object):
         missing_areas = shepherding_areas_set - staging_areas_set
 
         if extra_areas or missing_areas:
-            raise ShepherdingAreasException("in the staging times", [], \
-                                            extra_areas, missing_areas)
+            raise ShepherdingAreasException(
+                "in the staging times",
+                [],
+                extra_areas,
+                missing_areas,
+            )
 
 
     @staticmethod
@@ -141,8 +146,12 @@ class Venue(object):
 
         duplicate_areas = self._get_duplicates(self._shepherding_areas)
         if duplicate_areas:
-            raise ShepherdingAreasException('in the shepherding data', \
-                                            duplicate_areas, [], [])
+            raise ShepherdingAreasException(
+                'in the shepherding data',
+                duplicate_areas,
+                [],
+                [],
+            )
 
         self.locations = {r['name']: r for r in teams_layout}
         """

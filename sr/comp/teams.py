@@ -5,8 +5,12 @@ from collections import namedtuple
 from . import yaml_loader
 
 
-_Team = namedtuple('Team', ['tla', 'name', 'rookie',
-                            'dropped_out_after'])
+_Team = namedtuple('Team', [
+    'tla',
+    'name',
+    'rookie',
+    'dropped_out_after',
+])
 class Team(_Team):
     def is_still_around(self, match_number):
         """
@@ -35,8 +39,11 @@ def load_teams(filename):
     teams = {}
     for tla, info in data['teams'].items():
         tla = tla.upper()
-        teams[tla] = Team(tla=tla, name=info['name'],
-                          rookie=info.get('rookie', False),
-                          dropped_out_after=info.get('dropped_out_after'))
+        teams[tla] = Team(
+            tla=tla,
+            name=info['name'],
+            rookie=info.get('rookie', False),
+            dropped_out_after=info.get('dropped_out_after'),
+        )
 
     return teams

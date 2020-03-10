@@ -10,28 +10,40 @@ from sr.comp.teams import Team
 
 
 def make_schedule():
-    settings = {'match_periods': {'league': [], 'knockout': []},
-                'match_slot_lengths': {'pre': 90,
-                                       'match': 180,
-                                       'post': 30,
-                                       'total': 300},
-                'staging': {'opens': 300,
-                            'closes': 120,
-                            'duration': 180,
-                            'signal_shepherds': {'Blue': 241,
-                                                 'Green': 181},
-                            'signal_teams': 240},
-                'league': { 'extra_spacing': [], },
-                'delays': []}
+    settings = {
+        'match_periods': {'league': [], 'knockout': []},
+        'match_slot_lengths': {
+            'pre': 90,
+            'match': 180,
+            'post': 30,
+            'total': 300,
+        },
+        'staging': {
+            'opens': 300,
+            'closes': 120,
+            'duration': 180,
+            'signal_shepherds': {
+                'Blue': 241,
+                'Green': 181,
+            },
+            'signal_teams': 240,
+        },
+        'league': {'extra_spacing': []},
+        'delays': [],
+    }
     teams = defaultdict(lambda: Team(None, None, False, None))
     schedule = MatchSchedule(settings, {}, teams, 4)
 
-    finals = Match(num=0, display_name="Match 0",
-                   arena='A',
-                   teams=['AAA', 'BBB', 'CCC', 'DDD'],
-                   start_time=datetime.datetime(2014, 4, 25, 12, 0),
-                   end_time=datetime.datetime(2014, 4, 25, 12, 5),
-                   type=MatchType.knockout, use_resolved_ranking=False)
+    finals = Match(
+        num=0,
+        display_name="Match 0",
+        arena='A',
+        teams=['AAA', 'BBB', 'CCC', 'DDD'],
+        start_time=datetime.datetime(2014, 4, 25, 12, 0),
+        end_time=datetime.datetime(2014, 4, 25, 12, 5),
+        type=MatchType.knockout,
+        use_resolved_ranking=False,
+    )
     schedule.knockout_rounds = [[finals]]
     schedule.matches.append({'A':finals})
 
@@ -50,10 +62,12 @@ def make_finals_score(game_points):
 
 def test_tiebreaker():
     schedule = make_schedule()
-    scores = make_finals_score({'AAA': 1,
-                                'BBB': 1,
-                                'CCC': 1,
-                                'DDD': 0})
+    scores = make_finals_score({
+        'AAA': 1,
+        'BBB': 1,
+        'CCC': 1,
+        'DDD': 0,
+    })
 
     schedule.add_tiebreaker(scores, datetime.datetime(2014, 4, 25, 13, 0))
 
@@ -62,14 +76,18 @@ def test_tiebreaker():
     start_time = datetime.datetime(2014, 4, 25, 13,  0)
     end_time = datetime.datetime(2014, 4, 25, 13,  5)
 
-    tiebreaker_match = {'A': Match(num=1,
-                                   display_name="Tiebreaker (#1)",
-                                   arena='A',
-                                   teams=['BBB', 'AAA', None, 'CCC'],
-                                   start_time=start_time,
-                                   end_time=end_time,
-                                   type=MatchType.tiebreaker,
-                                   use_resolved_ranking=False)}
+    tiebreaker_match = {
+        'A': Match(
+            num=1,
+            display_name="Tiebreaker (#1)",
+            arena='A',
+            teams=['BBB', 'AAA', None, 'CCC'],
+            start_time=start_time,
+            end_time=end_time,
+            type=MatchType.tiebreaker,
+            use_resolved_ranking=False,
+        ),
+    }
 
     eq_(schedule.matches[-1], tiebreaker_match)
 
@@ -80,17 +98,21 @@ def test_tiebreaker():
 
     last_period_matches.pop() # simplify the next comparison
 
-    expected_period = MatchPeriod(start_time, end_time, end_time,
-                                  'Tiebreaker', [], MatchType.tiebreaker)
+    expected_period = MatchPeriod(
+        start_time, end_time, end_time,
+        'Tiebreaker', [], MatchType.tiebreaker,
+    )
 
     assert last_period == expected_period, "Wrong last period"
 
 def test_no_tiebreaker_if_winner():
     schedule = make_schedule()
-    scores = make_finals_score({'AAA': 2,
-                                'BBB': 1,
-                                'CCC': 1,
-                                'DDD': 0})
+    scores = make_finals_score({
+        'AAA': 2,
+        'BBB': 1,
+        'CCC': 1,
+        'DDD': 0,
+    })
 
     schedule.add_tiebreaker(scores, datetime.datetime(2014, 4, 25, 13, 0))
     eq_(schedule.n_matches(), 1)
@@ -123,10 +145,12 @@ def test_final_match_no_tiebreaker():
 
 def test_final_match_with_tiebreaker():
     schedule = make_schedule()
-    scores = make_finals_score({'AAA': 1,
-                                'BBB': 1,
-                                'CCC': 1,
-                                'DDD': 0})
+    scores = make_finals_score({
+        'AAA': 1,
+        'BBB': 1,
+        'CCC': 1,
+        'DDD': 0,
+    })
     schedule.add_tiebreaker(scores, datetime.datetime(2014, 4, 25, 13, 0))
 
     expected = schedule.matches[1]['A']

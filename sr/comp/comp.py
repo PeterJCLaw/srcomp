@@ -41,9 +41,11 @@ class SRComp(object):
     def __init__(self, root):
         self.root = root
 
-        self.state = check_output(('git', 'rev-parse', 'HEAD'),
-                                  universal_newlines=True,
-                                  cwd=root).strip()
+        self.state = check_output(
+            ('git', 'rev-parse', 'HEAD'),
+            universal_newlines=True,
+            cwd=root,
+        ).strip()
         """The current commit of the Compstate repository."""
 
         self.teams = teams.load_teams(os.path.join(root, 'teams.yaml'))
@@ -61,30 +63,43 @@ class SRComp(object):
         self.num_teams_per_arena = len(self.corners)
 
         scorer = load_scorer(root)
-        self.scores = scores.Scores(root, self.teams.keys(), scorer, self.num_teams_per_arena)
+        self.scores = scores.Scores(
+            root,
+            self.teams.keys(),
+            scorer,
+            self.num_teams_per_arena,
+        )
         """A :class:`sr.comp.scores.Scores` instance."""
 
         schedule_fname = os.path.join(root, 'schedule.yaml')
         league_fname = os.path.join(root, 'league.yaml')
-        self.schedule = matches.MatchSchedule.create(schedule_fname,
-                                                     league_fname, self.scores,
-                                                     self.arenas, self.num_teams_per_arena,
-                                                     self.teams)
+        self.schedule = matches.MatchSchedule.create(
+            schedule_fname,
+            league_fname,
+            self.scores,
+            self.arenas,
+            self.num_teams_per_arena,
+            self.teams,
+        )
         """A :class:`sr.comp.matches.MatchSchedule` instance."""
 
         self.timezone = self.schedule.timezone
         """The timezone of the competition."""
 
-        self.awards = compute_awards(self.scores,
-                                     self.schedule.final_match,
-                                     self.teams,
-                                     os.path.join(root, 'awards.yaml'))
+        self.awards = compute_awards(
+            self.scores,
+            self.schedule.final_match,
+            self.teams,
+            os.path.join(root, 'awards.yaml'),
+        )
         """A :class:`dict` mapping :class:`sr.comp.winners.Award` objects to
         a :class:`list` of teams."""
 
-        self.venue = venue.Venue(self.teams.keys(),
-                                 os.path.join(root, 'layout.yaml'),
-                                 os.path.join(root, 'shepherding.yaml'))
+        self.venue = venue.Venue(
+            self.teams.keys(),
+            os.path.join(root, 'layout.yaml'),
+            os.path.join(root, 'shepherding.yaml'),
+        )
         """A :class:`sr.comp.venue.Venue` instance."""
 
         self.venue.check_staging_times(self.schedule.staging_times)
@@ -92,7 +107,9 @@ class SRComp(object):
         pyver = sys.version_info
         if pyver[0] == 3 and (pyver < (3, 4, 4) or pyver == (3, 5, 0)):
             from warnings import warn
-            warn("Python 3 < 3.4.4, 3.5.1 has a known issue with timezones that "
-                 "have the same `dst()` and `utcoffset()` values (such as BST). "
-                 "Using Python 2 instead is recommended. "
-                 "See https://bugs.python.org/issue23600.")
+            warn(
+                "Python 3 < 3.4.4, 3.5.1 has a known issue with timezones that "
+                "have the same `dst()` and `utcoffset()` values (such as BST). "
+                "Using Python 2 instead is recommended. "
+                "See https://bugs.python.org/issue23600.",
+            )

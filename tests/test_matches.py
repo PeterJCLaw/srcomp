@@ -26,7 +26,7 @@ def get_basic_data():
             'pre': 90,
             'match': 180,
             'post': 30,
-            'total': 300
+            'total': 300,
         },
         'staging': {
             'opens': 300,
@@ -38,33 +38,33 @@ def get_basic_data():
             },
             'signal_teams': 240,
         },
-        'delays': [ {
+        'delays': [{
             'delay': 15,
-            'time':         datetime(2014, 3, 26,  13, 2)
-        } ],
+            'time': datetime(2014, 3, 26,  13, 2),
+        }],
         'match_periods': {
-            'league': [ {
+            'league': [{
                 'description': "A description of the period",
                 'start_time':   datetime(2014, 3, 26,  13),
                 'end_time':     datetime(2014, 3, 26,  17, 30),
-                'max_end_time': datetime(2014, 3, 26,  17, 40, 0)
-            } ],
-            'knockout': []
+                'max_end_time': datetime(2014, 3, 26,  17, 40, 0),
+            }],
+            'knockout': [],
         },
-        'league': { 'extra_spacing': [], },
+        'league': {'extra_spacing': []},
         'matches': {
             0: {
                 'A': ['CLY', 'TTN', 'SCC', 'DSF'],
-                'B': ['GRS', 'QMC', 'GRD', 'BRK']
+                'B': ['GRS', 'QMC', 'GRD', 'BRK'],
             },
             1: {
                 'A': ['WYC', 'QMS', 'LSS', 'EMM'],
-                'B': ['BPV', 'BDF', 'NHS', 'MEA']
+                'B': ['BPV', 'BDF', 'NHS', 'MEA'],
             },
             2: {
-                'A': ['WYC', 'QMS', 'LSS', 'EMM']
-            }
-        }
+                'A': ['WYC', 'QMS', 'LSS', 'EMM'],
+            },
+        },
     }
     return the_data
 
@@ -240,7 +240,7 @@ def test_extra_spacing_overlapping_with_delays():
     # Inject a delay which occurs during our extra spcing time
     the_data['delays'] = [{
         'delay': 15,
-        "time": datetime(2014, 3, 26,  13,  5, 10)
+        "time": datetime(2014, 3, 26,  13,  5, 10),
     }]
 
     matches = load_data(the_data)
@@ -516,7 +516,11 @@ def test_period_end_simple():
         start_time + timedelta(minutes=10),
     ]
 
-    assert_times(expected, matches.matches, "4 matches planned in a 12 minute period, no delay")
+    assert_times(
+        expected,
+        matches.matches,
+        "4 matches planned in a 12 minute period, no delay",
+    )
 
 def test_period_end_with_delay():
     the_data = get_basic_data()
@@ -543,7 +547,11 @@ def test_period_end_with_delay():
         start_time + timedelta(minutes=11),
     ]
 
-    assert_times(expected, matches.matches, "4 matches planned in a 12 minute period, simple delay")
+    assert_times(
+        expected,
+        matches.matches,
+        "4 matches planned in a 12 minute period, simple delay",
+    )
 
 def test_period_end_with_large_delay():
     the_data = get_basic_data()
@@ -569,7 +577,11 @@ def test_period_end_with_large_delay():
         start_time + timedelta(minutes=10),
     ]
 
-    assert_times(expected, matches.matches, "4 matches planned in a 12 minute period, large delay")
+    assert_times(
+        expected,
+        matches.matches,
+        "4 matches planned in a 12 minute period, large delay",
+    )
 
 def test_period_max_end_simple():
     the_data = get_basic_data()
@@ -594,7 +606,11 @@ def test_period_max_end_simple():
         start_time + timedelta(minutes=10),
     ]
 
-    assert_times(expected, matches.matches, "4 matches planned in a 12 minute period, overrun allowed, no delay")
+    assert_times(
+        expected,
+        matches.matches,
+        "4 matches planned in a 12 minute period, overrun allowed, no delay",
+    )
 
 def test_period_max_end_with_delay():
     the_data = get_basic_data()
@@ -622,7 +638,11 @@ def test_period_max_end_with_delay():
         start_time + timedelta(minutes=11),
     ]
 
-    assert_times(expected, matches.matches, "4 matches planned in a 12 minute period, overrun allowed, simple delay")
+    assert_times(
+        expected,
+        matches.matches,
+        "4 matches planned in a 12 minute period, overrun allowed, simple delay",
+    )
 
 def test_period_max_end_with_large_delay():
     the_data = get_basic_data()
@@ -651,7 +671,11 @@ def test_period_max_end_with_large_delay():
         start_time + timedelta(minutes=15),
     ]
 
-    assert_times(expected, matches.matches, "4 matches planned in a 12 minute period, overrun allowed, large delay")
+    assert_times(
+        expected,
+        matches.matches,
+        "4 matches planned in a 12 minute period, overrun allowed, large delay",
+    )
 
 
 def test_planned_matches():
@@ -659,7 +683,7 @@ def test_planned_matches():
 
     extra_match = {
                 'A': ['WYC2', 'QMS2', 'LSS2', 'EMM2'],
-                'B': ['BPV2', 'BDF2', 'NHS2', 'MEA2']
+                'B': ['BPV2', 'BDF2', 'NHS2', 'MEA2'],
             }
     the_data['matches'][2] = extra_match
 

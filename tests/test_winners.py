@@ -12,22 +12,34 @@ from nose.tools import eq_
 import mock
 
 
-FINAL_INFO = Match(num=1, display_name="Match 1", arena='A',
-                   teams=['AAA', 'BBB', 'CCC', 'DDD'],
-                   start_time=datetime(2014, 4, 26, 16, 30, tzinfo=tzutc()),
-                   end_time=datetime(2014, 4, 26, 16, 35, tzinfo=tzutc()),
-                   type=MatchType.knockout, use_resolved_ranking=False)
+FINAL_INFO = Match(
+    num=1,
+    display_name="Match 1",
+    arena='A',
+    teams=['AAA', 'BBB', 'CCC', 'DDD'],
+    start_time=datetime(2014, 4, 26, 16, 30, tzinfo=tzutc()),
+    end_time=datetime(2014, 4, 26, 16, 35, tzinfo=tzutc()),
+    type=MatchType.knockout,
+    use_resolved_ranking=False,
+)
 
-TIEBREAKER_INFO = Match(num=2, display_name="Tiebreaker (#2)", arena='A',
-                        teams=['AAA', 'BBB'],
-                        start_time=datetime(2014, 4, 26, 16, 30, tzinfo=tzutc()),
-                        end_time=datetime(2014, 4, 26, 16, 35, tzinfo=tzutc()),
-                        type=MatchType.tiebreaker, use_resolved_ranking=False)
+TIEBREAKER_INFO = Match(
+    num=2,
+    display_name="Tiebreaker (#2)",
+    arena='A',
+    teams=['AAA', 'BBB'],
+    start_time=datetime(2014, 4, 26, 16, 30, tzinfo=tzutc()),
+    end_time=datetime(2014, 4, 26, 16, 35, tzinfo=tzutc()),
+    type=MatchType.tiebreaker,
+    use_resolved_ranking=False,
+)
 
-TEAMS = {'AAA': Team(tla='AAA', name="AAA Squad", rookie=True, dropped_out_after=None),
-         'BBB': Team(tla='BBB', name="BBBees", rookie=False, dropped_out_after=None),
-         'CCC': Team(tla='CCC', name="Team CCC", rookie=True, dropped_out_after=None),
-         'DDD': Team(tla='DDD', name="DDD Robotics", rookie=False, dropped_out_after=None)}
+TEAMS = {
+    'AAA': Team(tla='AAA', name="AAA Squad", rookie=True, dropped_out_after=None),
+    'BBB': Team(tla='BBB', name="BBBees", rookie=False, dropped_out_after=None),
+    'CCC': Team(tla='CCC', name="Team CCC", rookie=True, dropped_out_after=None),
+    'DDD': Team(tla='DDD', name="DDD Robotics", rookie=False, dropped_out_after=None),
+}
 
 class MockScoreSet(object):
     def __init__(self, arena, game, scores, dsq=()):
@@ -52,10 +64,13 @@ class MockScoreSet(object):
 
 
 class MockScores(object):
-    def __init__(self, league={'AAA': 1, 'BBB': 2, 'CCC': 0, 'DDD': 0},
-                       league_dsq=(),
-                       knockout={'AAA': 0, 'BBB': 3, 'CCC': 0, 'DDD': 2},
-                       knockout_dsq=('CCC',)):
+    def __init__(
+        self,
+        league={'AAA': 1, 'BBB': 2, 'CCC': 0, 'DDD': 0},
+        league_dsq=(),
+        knockout={'AAA': 0, 'BBB': 3, 'CCC': 0, 'DDD': 2},
+        knockout_dsq=('CCC',),
+    ):
         self.knockout = MockScoreSet('A', 1, knockout, knockout_dsq)
         self.league = MockScoreSet('A', 0, league, league_dsq)
 
@@ -80,67 +95,100 @@ def test_third_tiebreaker():
     eq_(compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.third), ['DDD'])
 
 def test_first():
-    eq_(compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.first),
-        ['BBB'])
+    eq_(
+        compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.first),
+        ['BBB'],
+    )
 
 def test_second():
-    eq_(compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.second),
-        ['DDD'])
+    eq_(
+        compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.second),
+        ['DDD'],
+    )
 
 def test_third():
-    eq_(compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.third),
-        ['AAA'])
+    eq_(
+        compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.third),
+        ['AAA'],
+    )
 
 def test_tied():
-    eq_(compute_awards(MockScores(knockout={'AAA': 1, 'BBB': 1, 'CCC': 1, 'DDD': 1},
-                                  knockout_dsq=()), FINAL_INFO, TEAMS).get(Award.first),
-        ['AAA', 'BBB', 'CCC', 'DDD'])
+    eq_(
+        compute_awards(
+            MockScores(
+                knockout={'AAA': 1, 'BBB': 1, 'CCC': 1, 'DDD': 1},
+                knockout_dsq=(),
+            ),
+            FINAL_INFO,
+            TEAMS,
+        ).get(Award.first),
+        ['AAA', 'BBB', 'CCC', 'DDD'],
+    )
 
 def test_tied_partial():
-    eq_(compute_awards(MockScores(knockout={'AAA': 2, 'BBB': 1, 'CCC': 1, 'DDD': 1},
-                                  knockout_dsq=()), FINAL_INFO, TEAMS).get(Award.first),
-        ['AAA'])
+    eq_(
+        compute_awards(
+            MockScores(
+                knockout={'AAA': 2, 'BBB': 1, 'CCC': 1, 'DDD': 1},
+                knockout_dsq=(),
+            ), FINAL_INFO, TEAMS,
+        ).get(Award.first),
+        ['AAA'],
+    )
 
 def test_rookie():
-    eq_(compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.rookie),
-        ['AAA'])
+    eq_(
+        compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.rookie),
+        ['AAA'],
+    )
 
 def test_tied_rookie():
-    eq_(compute_awards(MockScores(league={'AAA': 0, 'BBB': 0, 'CCC': 0, 'DDD': 0}),
-                       FINAL_INFO,
-                       TEAMS).get(Award.rookie),
-        ['AAA', 'CCC'])
+    scores = MockScores(league={'AAA': 0, 'BBB': 0, 'CCC': 0, 'DDD': 0})
+    eq_(
+        compute_awards(scores, FINAL_INFO, TEAMS).get(Award.rookie),
+        ['AAA', 'CCC'],
+    )
 
 def test_override():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
         yaml_load.return_value = {'third': 'DDD'}
-        eq_(compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.third),
-            ['DDD'])
+        eq_(
+            compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.third),
+            ['DDD'],
+        )
         yaml_load.assert_called_with('.')
 
 def test_manual():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
         yaml_load.return_value = {'web': 'BBB'}
-        eq_(compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
-            ['BBB'])
+        eq_(
+            compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
+            ['BBB'],
+        )
         yaml_load.assert_called_with('.')
 
 def test_manual_no_award():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
         yaml_load.return_value = {'web': []}
-        eq_(compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
-            [])
+        eq_(
+            compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
+            [],
+        )
         yaml_load.assert_called_with('.')
 
 def test_manual_tie():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
         yaml_load.return_value = {'web': ['BBB', 'CCC']}
-        eq_(compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
-            ['BBB', 'CCC'])
+        eq_(
+            compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
+            ['BBB', 'CCC'],
+        )
         yaml_load.assert_called_with('.')
 
 def test_no_overrides_file():
     with mock.patch('os.path.exists') as test_file:
         test_file.return_value = False
-        eq_(compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.third),
-            ['AAA'])
+        eq_(
+            compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.third),
+            ['AAA'],
+        )

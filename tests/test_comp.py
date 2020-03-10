@@ -29,5 +29,7 @@ def test_timezone():
     global instance
     if instance is None:
         raise SkipTest("Timezone test skipped due to srcomp load failure.")
-    assert (instance.timezone.utcoffset(datetime.datetime(2014, 4, 26)) ==
-            datetime.timedelta(seconds=3600))
+    assert (
+        instance.timezone.utcoffset(datetime.datetime(2014, 4, 26)) ==
+        datetime.timedelta(seconds=3600)
+    )

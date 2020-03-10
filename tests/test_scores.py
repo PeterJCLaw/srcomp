@@ -6,12 +6,16 @@ from sr.comp.scores import Scores
 def test_last_scored_match_none():
 
     def check(league_lsm, knockout_lsm, tiebreaker_lsm, expected):
-        with mock.patch('sr.comp.scores.LeagueScores') as ls, \
-             mock.patch('sr.comp.scores.KnockoutScores') as ks, \
-             mock.patch('sr.comp.scores.TiebreakerScores') as ts:
-            ls.return_value = mock.Mock(last_scored_match = league_lsm)
-            ks.return_value = mock.Mock(last_scored_match = knockout_lsm)
-            ts.return_value = mock.Mock(last_scored_match = tiebreaker_lsm)
+        with mock.patch(
+            'sr.comp.scores.LeagueScores',
+        ) as ls, mock.patch(
+            'sr.comp.scores.KnockoutScores',
+        ) as ks, mock.patch(
+            'sr.comp.scores.TiebreakerScores',
+        ) as ts:
+            ls.return_value = mock.Mock(last_scored_match=league_lsm)
+            ks.return_value = mock.Mock(last_scored_match=knockout_lsm)
+            ts.return_value = mock.Mock(last_scored_match=tiebreaker_lsm)
 
             scores = Scores('', None, None, 0)
 

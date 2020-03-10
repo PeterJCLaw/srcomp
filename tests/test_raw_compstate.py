@@ -10,10 +10,25 @@ from sr.comp.raw_compstate import RawCompstate
 DUMMY_PATH = os.path.dirname(os.path.abspath(__file__)) + '/dummy'
 
 
-def build_match(num, arena, teams = None, start_time = None, \
-                end_time = None, type_ = None, use_resolved_ranking = False):
-    return Match(num, "Match {n}".format(n=num), arena, teams,
-                 start_time, end_time, type_, use_resolved_ranking)
+def build_match(
+    num,
+    arena,
+    teams=None,
+    start_time=None,
+    end_time=None,
+    type_=None,
+    use_resolved_ranking=False,
+):
+    return Match(
+        num,
+        "Match {n}".format(n=num),
+        arena,
+        teams,
+        start_time,
+        end_time,
+        type_,
+        use_resolved_ranking,
+    )
 
 
 def test_load():
@@ -48,22 +63,24 @@ def test_load_shepherds():
     shepherds = state.load_shepherds()
 
     expected = [
-        {'name': 'Blue',
-         'colour': '#A9A9F5',
-         'regions': ['a-group'],
-         'teams': ['BAY', 'BDF', 'BGS', 'BPV', 'BRK', 'BRN', 'BWS', \
-                   'CCR', 'CGS', 'CLF', 'CLY', 'CPR', 'CRB', 'DSF', \
-                   'EMM', 'GRD', 'GRS', 'GYG', 'HRS', 'HSO', 'HYP', \
-                   'HZW', 'ICE', 'JMS', 'KDE', 'KES', 'KHS', 'LFG'],
+        {
+            'name': 'Blue',
+            'colour': '#A9A9F5',
+            'regions': ['a-group'],
+            'teams': ['BAY', 'BDF', 'BGS', 'BPV', 'BRK', 'BRN', 'BWS',
+                      'CCR', 'CGS', 'CLF', 'CLY', 'CPR', 'CRB', 'DSF',
+                      'EMM', 'GRD', 'GRS', 'GYG', 'HRS', 'HSO', 'HYP',
+                      'HZW', 'ICE', 'JMS', 'KDE', 'KES', 'KHS', 'LFG'],
         },
-        {'name': 'Green',
-         'colour': 'green',
-         'regions': ['b-group'],
-         'teams': ['LSS', 'MAI', 'MAI2', 'MEA', 'MFG', 'NHS', 'PAG', \
-                   'PAS', 'PSC', 'QEH', 'QMC', 'QMS', 'RED', 'RGS', \
-                   'RUN', 'RWD', 'SCC', 'SEN', 'SGS', 'STA', 'SWI', \
-                   'TBG', 'TTN', 'TWG', 'WYC'],
-        }
+        {
+            'name': 'Green',
+            'colour': 'green',
+            'regions': ['b-group'],
+            'teams': ['LSS', 'MAI', 'MAI2', 'MEA', 'MFG', 'NHS', 'PAG',
+                      'PAS', 'PSC', 'QEH', 'QMC', 'QMS', 'RED', 'RGS',
+                      'RUN', 'RWD', 'SCC', 'SEN', 'SGS', 'STA', 'SWI',
+                      'TBG', 'TTN', 'TWG', 'WYC'],
+        },
     ]
 
     assert expected == shepherds, "Wrong shepherds data loaded"
@@ -110,8 +127,11 @@ def test_git_return_output_when_error():
     except subprocess.CalledProcessError:
         pass
     else:
-        msg = "Should have errored about bad command (returned '{0}').".format(output)
-        raise AssertionError(msg)
+        raise AssertionError(
+            "Should have errored about bad command (returned '{0}').".format(
+                output,
+            ),
+        )
 
 
 def test_git_when_error():
@@ -122,8 +142,11 @@ def test_git_when_error():
     except subprocess.CalledProcessError:
         pass
     else:
-        msg = "Should have errored about bad command (returned '{0}').".format(output)
-        raise AssertionError(msg)
+        raise AssertionError(
+            "Should have errored about bad command (returned '{0}').".format(
+                output,
+            ),
+        )
 
 
 def test_git_converts_error():
@@ -135,5 +158,8 @@ def test_git_converts_error():
     except RuntimeError as re:
         assert error_msg in str(re)
     else:
-        msg = "Should have errored about bad command (returned '{0}').".format(output)
-        raise AssertionError(msg)
+        raise AssertionError(
+            "Should have errored about bad command (returned '{0}').".format(
+                output,
+            ),
+        )

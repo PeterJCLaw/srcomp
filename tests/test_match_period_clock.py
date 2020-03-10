@@ -6,7 +6,7 @@ from sr.comp.match_period_clock import MatchPeriodClock, OutOfTimeException
 def build_match_period(start, end, max_end=None, desc=None, matches=None, type_=None):
     return MatchPeriod(start, end, max_end or end, desc, matches, type_)
 
-def check_out_of_time(clock, msg = None):
+def check_out_of_time(clock, msg=None):
     threw = False
     try:
         curr_time = clock.current_time
@@ -64,8 +64,10 @@ def test_current_time_at_max_end_no_delay():
 
     clock.advance_time(2)
 
-    check_out_of_time(clock, "Should be out of time when at max_end due" \
-                             " to over-advancing")
+    check_out_of_time(
+        clock,
+        "Should be out of time when at max_end due to over-advancing",
+    )
 
 def test_current_time_at_max_end_with_delay():
     period = build_match_period(0, 1, 2)

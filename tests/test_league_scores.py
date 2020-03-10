@@ -21,22 +21,22 @@ def get_basic_data():
             'JMS': {
                 'score': 4,
                 'disqualified': True,
-                'zone': 3
+                'zone': 3,
             },
             'PAS': {
                 'score': 0,
                 'present': False,
-                'zone': 4
+                'zone': 4,
             },
             'RUN': {
                 'score': 8,
-                'zone': 1
+                'zone': 1,
             },
             'ICE': {
                 'score': 2,
-                'zone': 2
-            }
-        }
+                'zone': 2,
+            },
+        },
     }
     return the_data
 
@@ -144,7 +144,7 @@ def test_last_scored_match_many_scores():
 
 
 def test_league_ranker_simple():
-    team_scores = { 'ABC': TeamScore(), 'DEF': TeamScore(4, 5) }
+    team_scores = {'ABC': TeamScore(), 'DEF': TeamScore(4, 5)}
     ranking = LeagueScores.rank_league(team_scores)
     expected_map = {
         'DEF': 1,

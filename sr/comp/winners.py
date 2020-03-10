@@ -49,9 +49,11 @@ def _compute_main_awards(scores, final_match_info):
         # We haven't scored the last match yet
         return {}
     awards = {}
-    for award, key in ((Award.first, 1),
-                       (Award.second, 2),
-                       (Award.third, 3)):
+    for award, key in (
+        (Award.first, 1),
+        (Award.second, 2),
+        (Award.third, 3),
+    ):
         candidates = positions.get(key, ())
         awards[award] = list(sorted(candidates))
 
@@ -68,18 +70,27 @@ def _compute_main_awards(scores, final_match_info):
 
 def _compute_rookie_award(scores, teams):
     """Compute the winner of the rookie award."""
-    rookie_positions = {team: position
-                        for team, position in scores.league.positions.items()
-                        if teams[team].rookie}
+    rookie_positions = {
+        team: position
+        for team, position in scores.league.positions.items()
+        if teams[team].rookie
+    }
     # It's possible there are no rookie teams, in which case nobody gets
     # the award.
     if not rookie_positions:
         return {Award.rookie: []}
     # Position go from 1 upwards (1 being first), so the best is the minimum
     best_position = min(rookie_positions.values())
-    return {Award.rookie:
-            list(sorted(team for team, position in rookie_positions.items()
-                        if position == best_position))}
+    return {
+        Award.rookie:
+        list(
+            sorted(
+                team
+                for team, position in rookie_positions.items()
+                if position == best_position
+            ),
+        ),
+    }
 
 
 def _compute_explicit_awards(path, teams):
@@ -90,8 +101,10 @@ def _compute_explicit_awards(path, teams):
     explicit_awards = yaml_loader.load(path)
     assert explicit_awards, "Awards file should not be present if empty."
 
-    awards = {Award(key): [value] if isinstance(value, str) else value
-            for key, value in explicit_awards.items()}
+    awards = {
+        Award(key): [value] if isinstance(value, str) else value
+        for key, value in explicit_awards.items()
+    }
 
     for award_teams in awards.values():
         for tla in award_teams:

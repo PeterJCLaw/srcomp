@@ -148,8 +148,11 @@ class RawCompstate(object):
         self.git(args, err_msg)
 
     def rev_parse(self, revision):
-        output = self.git(['rev-parse', '--verify', revision], return_output=True,
-                          err_msg="Unknown revision '{0}'.".format(revision))
+        output = self.git(
+            ['rev-parse', '--verify', revision],
+            return_output=True,
+            err_msg="Unknown revision '{0}'.".format(revision),
+        )
         return output.strip()
 
     def has_commit(self, commit):
@@ -163,8 +166,10 @@ class RawCompstate(object):
     def _is_parent(self, parent, child):
         try:
             revspec = '{0}..{1}'.format(parent, child)
-            revs = self.git(['rev-list', '-n1', revspec, '--'],
-                            return_output=True)
+            revs = self.git(
+                ['rev-list', '-n1', revspec, '--'],
+                return_output=True,
+            )
             # rev-list prints the revisions which are parents of 'child',
             # up to and including 'parent'; any output therefore tells us
             # that they're related
@@ -191,8 +196,10 @@ class RawCompstate(object):
         if self._local_only:
             return
 
-        self.git(['pull', '--ff-only', 'origin', 'master'],
-                 err_msg="Git pull failed, deal with the merge manually.")
+        self.git(
+            ['pull', '--ff-only', 'origin', 'master'],
+            err_msg="Git pull failed, deal with the merge manually.",
+        )
 
     def stage(self, file_path):
         """
@@ -222,5 +229,8 @@ class RawCompstate(object):
         if self._local_only:
             return
 
-        self.push('origin', 'master',
-                  err_msg="Git push failed, deal with the merge manually.")
+        self.push(
+            'origin',
+            'master',
+            err_msg="Git push failed, deal with the merge manually.",
+        )

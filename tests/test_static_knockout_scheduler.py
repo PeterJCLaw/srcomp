@@ -18,34 +18,34 @@ def get_four_team_config():
                     'arena': 'A',
                     'display_name': "Qualifier 1",
                     'start_time': datetime(2014, 4, 27, 14, 30),
-                    'teams': ['S3', 'S5', 'S8', 'S10']
+                    'teams': ['S3', 'S5', 'S8', 'S10'],
                 },
                 1: {
                     'arena': 'A',
                     'start_time': datetime(2014, 4, 27, 14, 35),
-                    'teams': ['S4', 'S6', 'S7', 'S9']
-                }
+                    'teams': ['S4', 'S6', 'S7', 'S9'],
+                },
             },
             1: {
                 0: {
                     'arena': 'A',
                     'start_time': datetime(2014, 4, 27, 14, 45),
-                    'teams': ['S2', '000', '002', '011']
+                    'teams': ['S2', '000', '002', '011'],
                 },
                 1: {
                     'arena': 'A',
                     'start_time': datetime(2014, 4, 27, 14, 50),
-                    'teams': ['S1', '001', '010', '012']
-                }
+                    'teams': ['S1', '001', '010', '012'],
+                },
             },
             2: {
                 0: {
                     'arena': 'A',
                     'start_time': datetime(2014, 4, 27, 15, 0),
-                    'teams': ['100', '101', '110', '111']
-                }
-            }
-        }
+                    'teams': ['100', '101', '110', '111'],
+                },
+            },
+        },
     }
 
 def get_two_team_config():
@@ -57,39 +57,45 @@ def get_two_team_config():
                     'arena': 'A',
                     'display_name': "Qualifier 1",
                     'start_time': datetime(2014, 4, 27, 14, 30),
-                    'teams': ['S3', 'S5']
+                    'teams': ['S3', 'S5'],
                 },
                 1: {
                     'arena': 'A',
                     'start_time': datetime(2014, 4, 27, 14, 35),
-                    'teams': ['S4', 'S6']
+                    'teams': ['S4', 'S6'],
                 },
             },
             1: {
                 0: {
                     'arena': 'A',
                     'start_time': datetime(2014, 4, 27, 14, 45),
-                    'teams': ['S1', '000']
+                    'teams': ['S1', '000'],
                 },
                 1: {
                     'arena': 'A',
                     'start_time': datetime(2014, 4, 27, 14, 50),
-                    'teams': ['S2', '010']
-                }
+                    'teams': ['S2', '010'],
+                },
             },
             2: {
                 0: {
                     'arena': 'A',
                     'start_time': datetime(2014, 4, 27, 15, 0),
-                    'teams': ['100', '110']
-                }
-            }
-        }
+                    'teams': ['100', '110'],
+                },
+            },
+        },
     }
 
-def get_scheduler(matches_config, matches = None, positions = None, \
-                    knockout_positions = None, league_game_points = None, \
-                    delays = None, teams = None):
+def get_scheduler(
+    matches_config,
+    matches=None,
+    positions=None,
+    knockout_positions=None,
+    league_game_points=None,
+    delays=None,
+    teams=None,
+):
     matches = matches or []
     delays = delays or []
     match_duration = timedelta(minutes = 5)
@@ -115,12 +121,15 @@ def get_scheduler(matches_config, matches = None, positions = None, \
         teams = {x: Team(x, x, False, None) for x in positions.keys()}
 
     mock_n_matches = mock.Mock(side_effect=lambda: len(matches))
-    league_schedule = mock.Mock(matches = matches, delays = delays, \
-                                match_duration = match_duration,
-                                n_matches = mock_n_matches)
-    league_scores = mock.Mock(positions = positions, game_points = league_game_points)
-    knockout_scores = mock.Mock(resolved_positions = knockout_positions)
-    scores = mock.Mock(league = league_scores, knockout = knockout_scores)
+    league_schedule = mock.Mock(
+        matches=matches,
+        delays=delays,
+        match_duration=match_duration,
+        n_matches=mock_n_matches,
+    )
+    league_scores = mock.Mock(positions=positions, game_points=league_game_points)
+    knockout_scores = mock.Mock(resolved_positions=knockout_positions)
+    scores = mock.Mock(league=league_scores, knockout=knockout_scores)
 
     num_teams_per_arena = matches_config.pop('teams_per_arena')
 
@@ -221,8 +230,7 @@ def test_four_teams_with_dropout_part_way_through():
     LAST_QUARTER_FINAL_MATCH_NUM = 1
 
     teams = {x: Team(x, x, False, None) for x in TLAs}
-    teams['BBB'] = Team('BBB', 'BBB', False,
-                        dropped_out_after=LAST_QUARTER_FINAL_MATCH_NUM)
+    teams['BBB'] = Team('BBB', 'BBB', False, dropped_out_after=LAST_QUARTER_FINAL_MATCH_NUM)
 
     expected_matches = build_5_matches([
         ['CCC', 'EEE', 'HHH', 'JJJ'],
@@ -277,11 +285,11 @@ def test_four_teams_partial_1():
         knockout_positions={
             # QF 1
             ('A', 0): OrderedDict([
-                        ('JJJ', 1),
-                        ('HHH', 2),
-                        ('EEE', 3),
-                        ('CCC', 4)
-                    ])
+                ('JJJ', 1),
+                ('HHH', 2),
+                ('EEE', 3),
+                ('CCC', 4),
+            ]),
         },
     )
 
@@ -300,18 +308,18 @@ def test_four_teams_partial_2():
         knockout_positions={
             # QF 1
             ('A', 0): OrderedDict([
-                    ('JJJ', 1),
-                    ('HHH', 2),
-                    ('EEE', 3),
-                    ('CCC', 4)
-                ]),
+                ('JJJ', 1),
+                ('HHH', 2),
+                ('EEE', 3),
+                ('CCC', 4),
+            ]),
             # QF 2
             ('A', 1): OrderedDict([
-                    ('III', 1),
-                    ('GGG', 2),
-                    ('FFF', 3),
-                    ('DDD', 4)
-                ])
+                ('III', 1),
+                ('GGG', 2),
+                ('FFF', 3),
+                ('DDD', 4),
+            ]),
         },
     )
 
@@ -361,9 +369,9 @@ def test_two_teams_partial_1():
         knockout_positions={
             # QF 1
             ('A', 0): OrderedDict([
-                    ('EEE', 1),
-                    ('CCC', 2)
-                ])
+                ('EEE', 1),
+                ('CCC', 2),
+            ]),
         },
     )
 
@@ -382,13 +390,13 @@ def test_two_teams_partial_2():
         knockout_positions={
             # QF 1
             ('A', 0): OrderedDict([
-                    ('EEE', 1),
-                    ('CCC', 2),
-                ]),
+                ('EEE', 1),
+                ('CCC', 2),
+            ]),
             # QF 2
             ('A', 1): OrderedDict([
-                    ('DDD', 1),
-                    ('FFF', 2),
-                ])
+                ('DDD', 1),
+                ('FFF', 2),
+            ]),
         },
     )

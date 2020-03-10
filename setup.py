@@ -9,7 +9,7 @@ with open('README.rst') as f:
 install_requires = [
     'PyYAML >=3.11, <5',
     'sr.comp.ranker >=1.3, <2',
-    'python-dateutil >=2.2, <3'
+    'python-dateutil >=2.2, <3',
 ]
 
 if sys.version_info < (3, 4):
@@ -26,7 +26,7 @@ setup(
     author_email='srobo-devel@googlegroups.com',
     install_requires=install_requires,
     setup_requires=[
-        'Sphinx >=1.3, <2'
+        'Sphinx >=1.3, <2',
     ],
     tests_require=[
         'mock >=1.0.1, <2',

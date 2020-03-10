@@ -15,12 +15,18 @@ def mock_first_round_seeding(side_effect):
         side_effect=side_effect,
     )
 
-def get_scheduler(matches = None, positions = None, \
-                    knockout_positions = None, league_game_points = None, \
-                    delays = None, teams=None, num_teams_per_arena = 4):
+def get_scheduler(
+    matches=None,
+    positions=None,
+    knockout_positions=None,
+    league_game_points=None,
+    delays=None,
+    teams=None,
+    num_teams_per_arena=4,
+):
     matches = matches or []
     delays = delays or []
-    match_duration = timedelta(minutes = 5)
+    match_duration = timedelta(minutes=5)
     league_game_points = league_game_points or {}
     knockout_positions = knockout_positions or {}
     if not positions:
@@ -28,11 +34,17 @@ def get_scheduler(matches = None, positions = None, \
         positions['ABC'] = 1
         positions['DEF'] = 2
 
-    league_schedule = mock.Mock(matches = matches, delays = delays, \
-                                match_duration = match_duration)
-    league_scores = mock.Mock(positions = positions, game_points = league_game_points)
-    knockout_scores = mock.Mock(resolved_positions = knockout_positions)
-    scores = mock.Mock(league = league_scores, knockout = knockout_scores)
+    league_schedule = mock.Mock(
+        matches=matches,
+        delays=delays,
+        match_duration=match_duration,
+    )
+    league_scores = mock.Mock(
+        positions=positions,
+        game_points=league_game_points,
+    )
+    knockout_scores = mock.Mock(resolved_positions=knockout_positions)
+    scores = mock.Mock(league=league_scores, knockout=knockout_scores)
 
     period_config = {
         'description': "A description of the period",
@@ -54,8 +66,14 @@ def get_scheduler(matches = None, positions = None, \
     arenas = ['A']
     if teams is None:
         teams = defaultdict(lambda: Team(None, None, False, None))
-    scheduler = KnockoutScheduler(league_schedule, scores, arenas, num_teams_per_arena,
-                                  teams, config)
+    scheduler = KnockoutScheduler(
+        league_schedule,
+        scores,
+        arenas,
+        num_teams_per_arena,
+        teams,
+        config,
+    )
     return scheduler
 
 
@@ -76,9 +94,9 @@ def test_knockout_match_winners_simple():
             ('GHI', 2),
             ('DEF', 3),
             ('ABC', 4),
-        ])
+        ]),
     }
-    scheduler = get_scheduler(knockout_positions = knockout_positions)
+    scheduler = get_scheduler(knockout_positions=knockout_positions)
 
     game = Match(2, "Match 2", 'A', [], None, None, None, False)
     winners = scheduler.get_winners(game)
@@ -88,14 +106,14 @@ def test_knockout_match_winners_simple():
 
 def test_knockout_match_winners_irrelevant_tie_1():
     knockout_positions = {
-        ('A', 2):  OrderedDict([
+        ('A', 2): OrderedDict([
             ('JKL', 1),
             ('GHI', 2),
             ('ABC', 3),
             ('DEF', 3),
-        ])
+        ]),
     }
-    scheduler = get_scheduler(knockout_positions = knockout_positions)
+    scheduler = get_scheduler(knockout_positions=knockout_positions)
 
     game = Match(2, "Match 2", 'A', [], None, None, None, False)
     winners = scheduler.get_winners(game)
@@ -109,7 +127,7 @@ def test_knockout_match_winners_irrelevant_tie_2():
             ('JKL', 2),
             ('DEF', 3),
             ('ABC', 4),
-        ])
+        ]),
     }
     positions = {
         'ABC': 1,
@@ -117,8 +135,10 @@ def test_knockout_match_winners_irrelevant_tie_2():
         'GHI': 3,
         'JKL': 4,
     }
-    scheduler = get_scheduler(knockout_positions = knockout_positions, \
-                                positions = positions)
+    scheduler = get_scheduler(
+        knockout_positions=knockout_positions,
+        positions=positions,
+    )
 
     game = Match(2, "Match 2", 'A', [], None, None, None, False)
     winners = scheduler.get_winners(game)
@@ -132,7 +152,7 @@ def test_knockout_match_winners_tie():
             ('GHI', 2),
             ('DEF', 3),
             ('ABC', 4),
-        ])
+        ]),
     }
     # Deliberately out of order as some python implementations
     # use the creation order of the tuples as a fallback sort comparison
@@ -142,14 +162,17 @@ def test_knockout_match_winners_tie():
         'GHI': 3,
         'JKL': 2,
     }
-    scheduler = get_scheduler(knockout_positions = knockout_positions, \
-                                positions = positions)
+    scheduler = get_scheduler(
+        knockout_positions=knockout_positions,
+        positions=positions,
+    )
 
     game = Match(2, "Match 2", 'A', [], None, None, None, False)
     winners = scheduler.get_winners(game)
 
-    assert set(winners) == set(['GHI', 'JKL']), \
-            "Should used the league positions to resolve the tie"
+    assert set(winners) == set(['GHI', 'JKL']), (
+        "Should used the league positions to resolve the tie"
+    )
 
 
 def test_first_round_before_league_end():
@@ -164,7 +187,7 @@ def test_first_round_before_league_end():
         {'A':Match(0, "Match 0", 'A', [], None, None, MatchType.league, False)},
         {'A':Match(1, "Match 1", 'A', [], None, None, MatchType.league, False)},
     ]
-    scheduler = get_scheduler(matches, positions = positions)
+    scheduler = get_scheduler(matches, positions=positions)
 
     def seeder(*args):
         assert args[0] == 4, "Wrong number of teams"
@@ -205,7 +228,7 @@ def check_first_round_single_dropout_from_first_match(teams):
 
     # Fake a couple of league matches
     matches = [{},{}]
-    scheduler = get_scheduler(matches, positions = positions, teams=teams)
+    scheduler = get_scheduler(matches, positions=positions, teams=teams)
 
     def seeder(*args):
         assert args[0] == 8, "Wrong number of teams"
@@ -271,7 +294,7 @@ def check_first_round_single_dropout_from_second_match(teams):
 
     # Fake a couple of league matches
     matches = [{},{}]
-    scheduler = get_scheduler(matches, positions = positions, teams=teams)
+    scheduler = get_scheduler(matches, positions=positions, teams=teams)
 
     def seeder(*args):
         assert args[0] == 8, "Wrong number of teams"
@@ -339,7 +362,7 @@ def test_timings_no_delays():
     for i in range(16):
         positions['team-{}'.format(i)] = i
 
-    scheduler = get_scheduler(positions = positions)
+    scheduler = get_scheduler(positions=positions)
     scheduler.add_knockouts()
 
     knockout_rounds = scheduler.knockout_rounds
@@ -366,7 +389,7 @@ def test_timings_no_delays():
         # bonus 12 second gap
 
         # Final
-        datetime(2014, 3, 27,  13, 31, 12)
+        datetime(2014, 3, 27,  13, 31, 12),
     ]
 
     assert expected_times == start_times, "Wrong start times"
@@ -377,13 +400,17 @@ def test_timings_with_delays():
         positions['team-{}'.format(i)] = i
 
     delays = [
-        Delay(time = datetime(2014, 3, 27,  13,  2),
-              delay = timedelta(minutes = 5)),
-        Delay(time = datetime(2014, 3, 27,  13, 12),
-              delay = timedelta(minutes = 5))
+        Delay(
+            time=datetime(2014, 3, 27,  13,  2),
+            delay=timedelta(minutes=5),
+        ),
+        Delay(
+            time=datetime(2014, 3, 27,  13, 12),
+            delay=timedelta(minutes=5),
+        ),
     ]
 
-    scheduler = get_scheduler(positions = positions, delays = delays)
+    scheduler = get_scheduler(positions=positions, delays=delays)
     scheduler.add_knockouts()
 
     knockout_rounds = scheduler.knockout_rounds
@@ -410,7 +437,7 @@ def test_timings_with_delays():
         # bonus 12 second gap
 
         # Final
-        datetime(2014, 3, 27,  13, 41, 12)
+        datetime(2014, 3, 27,  13, 41, 12),
     ]
 
     assert expected_times == start_times, "Wrong start times"
@@ -421,13 +448,17 @@ def test_timings_with_delays_during_gaps():
         positions['team-{}'.format(i)] = i
 
     delays = [
-        Delay(time = datetime(2014, 3, 27,  13, 20, 15),
-              delay = timedelta(minutes = 5)),
-        Delay(time = datetime(2014, 3, 27,  13, 36),
-              delay = timedelta(minutes = 5))
+        Delay(
+            time=datetime(2014, 3, 27,  13, 20, 15),
+            delay=timedelta(minutes=5),
+        ),
+        Delay(
+            time=datetime(2014, 3, 27,  13, 36),
+            delay=timedelta(minutes=5),
+        ),
     ]
 
-    scheduler = get_scheduler(positions = positions, delays = delays)
+    scheduler = get_scheduler(positions=positions, delays=delays)
     scheduler.add_knockouts()
 
     knockout_rounds = scheduler.knockout_rounds
@@ -455,7 +486,7 @@ def test_timings_with_delays_during_gaps():
         # bonus 12 second gap
 
         # Final
-        datetime(2014, 3, 27,  13, 41, 12)
+        datetime(2014, 3, 27,  13, 41, 12),
     ]
 
     assert expected_times == start_times, "Wrong start times"

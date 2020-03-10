@@ -23,8 +23,10 @@ class WrongNumberOfTeams(Exception):
         super(WrongNumberOfTeams, self).__init__(message)
 
 
-Delay = namedtuple('Delay',
-                   ['delay', 'time'])
+Delay = namedtuple('Delay', [
+    'delay',
+    'time',
+])
 
 def parse_ranges(ranges):
     """
@@ -109,8 +111,10 @@ class MatchSchedule(object):
             else:
                 max_end_time = e['end_time']
 
-            period = MatchPeriod(e['start_time'], e['end_time'], max_end_time,
-                                 e['description'], [], MatchType.league)
+            period = MatchPeriod(
+                e['start_time'], e['end_time'], max_end_time,
+                e['description'], [], MatchType.league,
+            )
             self.match_periods.append(period)
 
         self._load_match_slot_lengths(y['match_slot_lengths'])
@@ -135,8 +139,10 @@ class MatchSchedule(object):
         self.n_league_matches = self.n_matches()
 
     def _load_match_slot_lengths(self, yamldata):
-        durations = {key: datetime.timedelta(0, value)
-                     for key, value in yamldata.items()}
+        durations = {
+            key: datetime.timedelta(0, value)
+            for key, value in yamldata.items()
+        }
         pre = durations['pre']
         post = durations['post']
         match = durations['match']
@@ -149,8 +155,10 @@ class MatchSchedule(object):
     def _load_staging_times(self, yamldata):
         def to_timedeltas(item):
             if isinstance(item, dict):
-                return {key: to_timedeltas(value)
-                        for key, value in item.items()}
+                return {
+                    key: to_timedeltas(value)
+                    for key, value in item.items()
+                }
             else:
                 return datetime.timedelta(seconds=item)
 
@@ -174,15 +182,17 @@ class MatchSchedule(object):
         match_start = match.start_time + pre
         offsets = self.staging_times
 
-        signal_shepherds = {area: match_start - offset
-                            for area, offset in offsets['signal_shepherds'].items()}
+        signal_shepherds = {
+            area: match_start - offset
+            for area, offset in offsets['signal_shepherds'].items()
+        }
 
-        return  {
-            'opens':            match_start - offsets['opens'],
-            'closes':           match_start - offsets['closes'],
-            'duration':         self.staging_times['duration'],
+        return {
+            'opens': match_start - offsets['opens'],
+            'closes': match_start - offsets['closes'],
+            'duration': self.staging_times['duration'],
             'signal_shepherds': signal_shepherds,
-            'signal_teams':     match_start - offsets['signal_teams'],
+            'signal_teams': match_start - offsets['signal_teams'],
         }
 
     def _build_extra_spacing(self, yamldata):
@@ -296,9 +306,11 @@ class MatchSchedule(object):
             if len(teams) != self._num_corners:
                 raise WrongNumberOfTeams(match_n, arena_name, teams, self._num_corners)
 
-            match = Match(match_n, display_name, arena_name, teams,
-                          start_time, end_time, MatchType.league,
-                          use_resolved_ranking=False)
+            match = Match(
+                match_n, display_name, arena_name, teams,
+                start_time, end_time, MatchType.league,
+                use_resolved_ranking=False,
+            )
             match_slot[arena_name] = match
 
         return match_slot
@@ -398,28 +410,40 @@ class MatchSchedule(object):
             raise AssertionError("The only winning move is not to play.")
         if len(winners) > 1:  # Act surprised!
             # Start with the winning teams in the same order as in the finals
-            tiebreaker_teams = [team if team in winners else None
-                                for team in finals_info.teams]
+            tiebreaker_teams = [
+                team if team in winners else None
+                for team in finals_info.teams
+            ]
             # Use a static permutation
             permutation = [3, 2, 0, 1]
-            tiebreaker_teams = [tiebreaker_teams[permutation[n]]
-                                for n in permutation]
+            tiebreaker_teams = [
+                tiebreaker_teams[permutation[n]]
+                for n in permutation
+            ]
             # Inject new match
             end_time = time + self.match_duration
             num = self.n_matches()
             arena = finals_info.arena
-            match = Match(num=num,
-                          display_name="Tiebreaker (#{0})".format(num),
-                          arena=arena,
-                          teams=tiebreaker_teams,
-                          type=MatchType.tiebreaker,
-                          start_time=time,
-                          end_time=end_time,
-                          use_resolved_ranking=False)
+            match = Match(
+                num=num,
+                display_name="Tiebreaker (#{0})".format(num),
+                arena=arena,
+                teams=tiebreaker_teams,
+                type=MatchType.tiebreaker,
+                start_time=time,
+                end_time=end_time,
+                use_resolved_ranking=False,
+            )
             slot = {arena: match}
             self.matches.append(slot)
-            match_period = MatchPeriod(time, end_time, end_time,
-                                       'Tiebreaker', [slot], MatchType.tiebreaker)
+            match_period = MatchPeriod(
+                time,
+                end_time,
+                end_time,
+                'Tiebreaker',
+                [slot],
+                MatchType.tiebreaker,
+            )
             self.match_periods.append(match_period)
 
             # pylint: disable=attribute-defined-outside-init

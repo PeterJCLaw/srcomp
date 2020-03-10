@@ -52,8 +52,10 @@ class TeamScore(object):
 
     def __eq__(self, other):
         # pylint: disable=protected-access
-        return (isinstance(other, type(self)) and
-                self._ordering_key == other._ordering_key)
+        return (
+            isinstance(other, type(self)) and
+            self._ordering_key == other._ordering_key
+        )
 
     # total_ordering doesn't provide this!
     def __ne__(self, other):
@@ -68,8 +70,10 @@ class TeamScore(object):
         return self._ordering_key < other._ordering_key
 
     def __repr__(self):
-        return 'TeamScore({0}, {1})'.format(self.league_points,
-                                            self.game_points)
+        return 'TeamScore({0}, {1})'.format(
+            self.league_points,
+            self.game_points,
+        )
 
 
 def results_finder(root):
@@ -200,8 +204,10 @@ class BaseScores(object):
         for tla, scoreinfo in y['teams'].items():
             # disqualifications and non-presence are effectively the same
             # in terms of league points awarding.
-            if (scoreinfo.get('disqualified', False) or
-               not scoreinfo.get('present', True)):
+            if (
+                scoreinfo.get('disqualified', False) or
+                not scoreinfo.get('present', True)
+            ):
                 dsq.append(tla)
 
         positions = ranker.calc_positions(game_points, dsq)
@@ -238,9 +244,11 @@ class LeagueScores(BaseScores):
         # Both of these are used within the system -- the knockouts need
         # a list of teams to seed with, various awards (and humans) want
         # a result which allows for ties.
-        ranking = sorted(team_scores.items(),
-                         key=lambda x: (x[1], x[0]),
-                         reverse=True)
+        ranking = sorted(
+            team_scores.items(),
+            key=lambda x: (x[1], x[0]),
+            reverse=True,
+        )
         positions = OrderedDict()
         pos = 1
         last_score = None
@@ -326,23 +334,35 @@ class Scores(object):
     def __init__(self, root, teams, scorer, num_teams_per_arena):
         self.root = root
 
-        self.league = LeagueScores(os.path.join(root, 'league'),
-                                   teams, scorer, num_teams_per_arena)
+        self.league = LeagueScores(
+            os.path.join(root, 'league'),
+            teams,
+            scorer,
+            num_teams_per_arena,
+        )
         """
         The :class:`LeagueScores` for the competition.
         """
 
 
-        self.knockout = KnockoutScores(os.path.join(root, 'knockout'),
-                                       teams, scorer, num_teams_per_arena,
-                                       self.league.positions)
+        self.knockout = KnockoutScores(
+            os.path.join(root, 'knockout'),
+            teams,
+            scorer,
+            num_teams_per_arena,
+            self.league.positions,
+        )
         """
         The :class:`KnockoutScores` for the competition.
         """
 
-        self.tiebreaker = TiebreakerScores(os.path.join(root, 'tiebreaker'),
-                                           teams, scorer, num_teams_per_arena,
-                                           self.league.positions)
+        self.tiebreaker = TiebreakerScores(
+            os.path.join(root, 'tiebreaker'),
+            teams,
+            scorer,
+            num_teams_per_arena,
+            self.league.positions,
+        )
         """
         The :class:`TiebreakerScores` for the competition.
         """

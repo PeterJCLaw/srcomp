@@ -92,8 +92,10 @@ class BaseKnockoutScheduler(object):
             display_name = "Quarter {round_num} (#{global_num})"
         else:
             display_name = "Match {global_num}"
-        return display_name.format(round_num=round_num + 1,
-                                   global_num=global_num)
+        return display_name.format(
+            round_num=round_num + 1,
+            global_num=global_num,
+        )
 
     def get_ranking(self, game):
         """
@@ -115,8 +117,11 @@ class BaseKnockoutScheduler(object):
 
     def _get_non_dropped_out_teams(self, for_match):
         teams = list(self.scores.league.positions.keys())
-        teams = [tla for tla in teams
-                 if self.teams[tla].is_still_around(for_match)]
+        teams = [
+            tla
+            for tla in teams
+            if self.teams[tla].is_still_around(for_match)
+        ]
         return teams
 
     def add_knockouts(self):

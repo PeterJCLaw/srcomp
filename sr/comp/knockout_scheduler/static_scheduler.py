@@ -83,10 +83,13 @@ class StaticScheduler(BaseKnockoutScheduler):
 
         if len(teams) < self.num_teams_per_arena:
             # Fill empty zones with None
-            teams += [None] * (self.num_teams_per_arena-len(teams))
+            teams += [None] * (self.num_teams_per_arena - len(teams))
 
-        display_name = self.get_match_display_name(rounds_remaining, round_num,
-                                                   num)
+        display_name = self.get_match_display_name(
+            rounds_remaining,
+            round_num,
+            num,
+        )
 
         # allow overriding the name
         override_name = match_info.get('display_name')
@@ -94,8 +97,16 @@ class StaticScheduler(BaseKnockoutScheduler):
             display_name = "{} (#{})".format(override_name, num)
 
         is_final = rounds_remaining == 0
-        match = Match(num, display_name, arena, teams, start_time, end_time,
-                      MatchType.knockout, use_resolved_ranking=not is_final)
+        match = Match(
+            num,
+            display_name,
+            arena,
+            teams,
+            start_time,
+            end_time,
+            MatchType.knockout,
+            use_resolved_ranking=not is_final,
+        )
         self.knockout_rounds[-1].append(match)
 
         new_matches[match_info['arena']] = match

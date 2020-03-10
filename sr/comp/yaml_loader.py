@@ -14,9 +14,11 @@ try:
 except ImportError:
     from yaml import Loader as YAML_Loader
     from warnings import warn
-    warn("Using pure-python PyYAML (without libyaml)."
-         " srcomp reads many YAML files, this is liable to be very slow. "
-         "Installing libyaml is highly recommended.")
+    warn(
+        "Using pure-python PyYAML (without libyaml). "
+        "srcomp reads many YAML files, this is liable to be very slow. "
+        "Installing libyaml is highly recommended.",
+    )
 
 
 def time_constructor(_, node):

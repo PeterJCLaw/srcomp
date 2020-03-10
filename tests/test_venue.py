@@ -8,32 +8,34 @@ from sr.comp.venue import InvalidRegionException, \
                           Venue
 
 TEAMS = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQR']
-TIMES = {'signal_shepherds': {'Yellow': None, 'Pink': None } }
+TIMES = {'signal_shepherds': {'Yellow': None, 'Pink': None}}
 
 def mock_layout_loader():
-    return {'teams':[{
+    return {'teams': [
+        {
             'name': 'a-group',
             'display_name': "A group",
-            'teams': ['ABC', 'DEF', 'GHI']
+            'teams': ['ABC', 'DEF', 'GHI'],
         },
         {
             'name': 'b-group',
             'display_name': "B group",
-            'teams': ['JKL', 'MNO', 'PQR']
-        }
+            'teams': ['JKL', 'MNO', 'PQR'],
+        },
     ]}
 
 def mock_shepherding_loader():
-    return {'shepherds':[{
+    return {'shepherds': [
+        {
             'name': 'Yellow',
             'colour': 'colour-yellow',
-            'regions': ['a-group']
+            'regions': ['a-group'],
         },
         {
             'name': 'Pink',
             'colour': 'colour-pink',
-            'regions': ['b-group']
-        }
+            'regions': ['b-group'],
+        },
     ]}
 
 def mock_loader(name):
@@ -195,19 +197,19 @@ def test_locations():
                 'display_name': "A group",
                 'teams': ['ABC', 'DEF', 'GHI'],
                 'shepherds': {
-                        'name': 'Yellow',
-                        'colour': 'colour-yellow',
-                    },
+                    'name': 'Yellow',
+                    'colour': 'colour-yellow',
                 },
+            },
             'b-group': {
                 'name': 'b-group',
                 'display_name': "B group",
                 'teams': ['JKL', 'MNO', 'PQR'],
                 'shepherds': {
-                        'name': 'Pink',
-                        'colour': 'colour-pink',
-                    },
+                    'name': 'Pink',
+                    'colour': 'colour-pink',
                 },
+            },
         }
 
         locations = venue.locations

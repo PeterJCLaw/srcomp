@@ -39,7 +39,7 @@ def test_validate_match_unknowable_entrants():
     teams = set()
     knockout_match = {
         'A': Match(teams_a),
-        'B': Match(teams_b)
+        'B': Match(teams_b),
     }
 
     errors = validate_match(knockout_match, teams)
@@ -52,7 +52,7 @@ def test_validate_match_empty_corners():
     teams = set(['ABC', 'DEF', 'JKL', 'LMN', 'OPQ'])
     knockout_match = {
         'A': Match(teams_a),
-        'B': Match(teams_b)
+        'B': Match(teams_b),
     }
 
     errors = validate_match(knockout_match, teams)
@@ -64,7 +64,7 @@ def test_validate_match_duplicate_entrant():
     teams = set(teams_a + teams_b)
     bad_match = {
         'A': Match(teams_a),
-        'B': Match(teams_b)
+        'B': Match(teams_b),
     }
 
     errors = validate_match(bad_match, teams)
@@ -80,7 +80,7 @@ def test_validate_match_nonexistant_entrant():
     teams_b = ['LMN', 'OPQ', 'RST', 'UVW']
     bad_match = {
         'A': Match(teams_a),
-        'B': Match(teams_b)
+        'B': Match(teams_b),
     }
 
     errors = validate_match(bad_match, teams_a)
@@ -96,7 +96,7 @@ def test_validate_match_all():
     teams_b = ['LMN', 'OPQ', 'GHI', 'GHI']
     bad_match = {
         'A': Match(teams_a),
-        'B': Match(teams_b)
+        'B': Match(teams_b),
     }
 
     errors = validate_match(bad_match, teams_a)
@@ -216,13 +216,13 @@ def test_find_missing_scores_knockouts_ok():
 
     match_ids = [
         ('A', 1),
-        ('B', 1)
+        ('B', 1),
     ]
     last_match = 1
     schedule = [
         {'A': Match3(0, MatchType.league), 'B': Match3(0, MatchType.league)},
         {'A': Match3(1, MatchType.knockout), 'B': Match3(1, MatchType.knockout)},
-        {'A': Match3(2, MatchType.knockout)}
+        {'A': Match3(2, MatchType.knockout)},
     ]
 
     missing = find_missing_scores(MatchType.knockout, match_ids, last_match, schedule)
@@ -236,23 +236,25 @@ def test_find_missing_scores_knockouts_missing():
     # be checked separately.
 
     match_ids = [
-        ('B', 1)
+        ('B', 1),
     ]
     last_match = 1
     schedule = [
         {'A': Match3(0, MatchType.league), 'B': Match3(0, MatchType.league)},
         {'A': Match3(1, MatchType.knockout), 'B': Match3(1, MatchType.knockout)},
-        {'A': Match3(2, MatchType.knockout)}
+        {'A': Match3(2, MatchType.knockout)},
     ]
 
     missing = find_missing_scores(MatchType.knockout, match_ids, last_match, schedule)
 
-    expected = [ (1, set(['A'])) ]
+    expected = [
+        (1, set(['A'])),
+    ]
     assert missing == expected
 
 def test_find_missing_scores_arena():
     match_ids = [
-        ('A', 0)
+        ('A', 0),
     ]
     last_match = 0
     schedule = [
@@ -266,7 +268,7 @@ def test_find_missing_scores_arena():
 
 def test_find_missing_scores_match():
     match_ids = [
-        ('A', 1)
+        ('A', 1),
     ]
     last_match = 1
     schedule = [
@@ -283,7 +285,7 @@ def test_find_missing_scores_many_matches():
     match_ids = [
         ('A', 0),
         ('A', 2),
-        ('A', 4)
+        ('A', 4),
     ]
     last_match = 4
     schedule = [
@@ -298,7 +300,7 @@ def test_find_missing_scores_many_matches():
 
     expected = [
         (1, set(['A'])),
-        (3, set(['A']))
+        (3, set(['A'])),
     ]
     assert missing == expected
 
@@ -306,7 +308,7 @@ def test_find_missing_scores_ignore_future_matches():
     match_ids = [
         ('A', 0),
         ('A', 1),
-        ('A', 2)
+        ('A', 2),
     ]
     last_match = 2
     schedule = [
@@ -336,9 +338,11 @@ def test_find_missing_scores_ignore_no_matches():
 
 def test_validate_schedule_timings_ok():
 
-    matches = [{'A': Match2(1, datetime(2014, 4, 1, 12, 0, 0))},
-               {'A': Match2(2, datetime(2014, 4, 1, 13, 0, 0))}]
-    match_duration = timedelta(minutes = 5)
+    matches = [
+        {'A': Match2(1, datetime(2014, 4, 1, 12, 0, 0))},
+        {'A': Match2(2, datetime(2014, 4, 1, 13, 0, 0))},
+    ]
+    match_duration = timedelta(minutes=5)
 
     errors = validate_schedule_timings(matches, match_duration)
     assert len(errors) == 0
@@ -347,10 +351,12 @@ def test_validate_schedule_timings_same_time():
 
     time = datetime(2014, 4, 3, 12, 0, 0)
     time = datetime(2014, 4, 3, 12, 0, 0)
-    match_duration = timedelta(minutes = 5)
+    match_duration = timedelta(minutes=5)
     # choose match ids not in the date
-    matches = [{'A': Match2(8, time)},
-               {'A': Match2(9, time)}]
+    matches = [
+        {'A': Match2(8, time)},
+        {'A': Match2(9, time)},
+    ]
 
     errors = validate_schedule_timings(matches, match_duration)
 
@@ -365,10 +371,12 @@ def test_validate_schedule_timings_overlap():
 
     time_8 = datetime(2014, 4, 3, 12, 0, 0)
     time_9 = datetime(2014, 4, 3, 12, 0, 1)
-    match_duration = timedelta(minutes = 5)
+    match_duration = timedelta(minutes=5)
     # choose match ids not in the date
-    matches = [{'A': Match2(8, time_8)},
-               {'A': Match2(9, time_9)}]
+    matches = [
+        {'A': Match2(8, time_8)},
+        {'A': Match2(9, time_9)},
+    ]
 
     errors = validate_schedule_timings(matches, match_duration)
 
@@ -383,11 +391,13 @@ def test_validate_schedule_timings_overlap_2():
     time_7 = datetime(2014, 4, 3, 12, 0, 0)
     time_8 = datetime(2014, 4, 3, 12, 0, 3)
     time_9 = datetime(2014, 4, 3, 12, 0, 6)
-    match_duration = timedelta(minutes = 5)
+    match_duration = timedelta(minutes=5)
     # choose match ids not in the date
-    matches = [{'A': Match2(7, time_7)},
-               {'A': Match2(8, time_8)},
-               {'A': Match2(9, time_9)}]
+    matches = [
+        {'A': Match2(7, time_7)},
+        {'A': Match2(8, time_8)},
+        {'A': Match2(9, time_9)},
+    ]
 
     errors = validate_schedule_timings(matches, match_duration)
 
@@ -404,9 +414,11 @@ def test_validate_schedule_timings_overlap_2():
 
 
 def test_validate_schedule_arenas():
-    matches = [{'B': Match3(1, 'league')},
-               {'C': Match3(2, 'knockout')},
-               {'D': Match3(3, 'custom')}]
+    matches = [
+        {'B': Match3(1, 'league')},
+        {'C': Match3(2, 'knockout')},
+        {'D': Match3(3, 'custom')},
+    ]
     arenas = ['A']
 
     errors = validate_schedule_arenas(matches, arenas)
@@ -429,7 +441,7 @@ def test_teams_without_matches_ok():
     teams_b = ['LMN', 'OPQ']
     ok_match = {
         'A': Match4(teams_a, MatchType.league),
-        'B': Match4(teams_b, MatchType.league)
+        'B': Match4(teams_b, MatchType.league),
     }
 
     teams = find_teams_without_league_matches([ok_match], teams_a + teams_b)
@@ -441,8 +453,8 @@ def test_teams_without_matches_err():
     other_teams = ['NOPE']
     bad_matches = [{
         'A': Match4(teams_a, MatchType.league),
-        'B': Match4(teams_b, MatchType.league)
-        },{
+        'B': Match4(teams_b, MatchType.league),
+    }, {
         # Unless restricted, all teams end up in the knockouts.
         # We therefore ignore those for this consideration
         'A': Match4(other_teams, MatchType.knockout),
