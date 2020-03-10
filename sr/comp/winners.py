@@ -55,7 +55,7 @@ def _compute_main_awards(scores, final_match_info):
         (Award.third, 3),
     ):
         candidates = positions.get(key, ())
-        awards[award] = list(sorted(candidates))
+        awards[award] = sorted(candidates)
 
     if not awards[Award.third] and len(final_match_info.teams) == 2:
         # Look in the previous match to find the third place
@@ -63,7 +63,7 @@ def _compute_main_awards(scores, final_match_info):
         positions = scores.knockout.game_positions[final_key]
 
         candidates = positions.get(3, ())
-        awards[Award.third] = list(sorted(candidates))
+        awards[Award.third] = sorted(candidates)
 
     return awards
 
@@ -82,13 +82,10 @@ def _compute_rookie_award(scores, teams):
     # Position go from 1 upwards (1 being first), so the best is the minimum
     best_position = min(rookie_positions.values())
     return {
-        Award.rookie:
-        list(
-            sorted(
-                team
-                for team, position in rookie_positions.items()
-                if position == best_position
-            ),
+        Award.rookie: sorted(
+            team
+            for team, position in rookie_positions.items()
+            if position == best_position
         ),
     }
 

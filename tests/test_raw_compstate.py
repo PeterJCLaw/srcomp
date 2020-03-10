@@ -50,7 +50,7 @@ def test_load_score():
     assert score['arena_id'] == 'A', score
     assert score['match_number'] == 0, score
 
-    teams = list(sorted(score['teams'].keys()))
+    teams = sorted(score['teams'].keys())
     expected = ['CLY', 'TTN']
     assert expected == teams, score
 
