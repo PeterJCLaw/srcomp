@@ -1,5 +1,5 @@
-
 from sr.comp.teams import Team
+
 
 def test_plain():
     t = Team('ABC', "name", rookie=False, dropped_out_after=4)

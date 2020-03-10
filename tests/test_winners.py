@@ -41,6 +41,7 @@ TEAMS = {
     'DDD': Team(tla='DDD', name="DDD Robotics", rookie=False, dropped_out_after=None),
 }
 
+
 class MockScoreSet(object):
     def __init__(self, arena, game, scores, dsq=()):
         positions = calc_positions(scores, dsq)
@@ -74,6 +75,7 @@ class MockScores(object):
         self.knockout = MockScoreSet('A', 1, knockout, knockout_dsq)
         self.league = MockScoreSet('A', 0, league, league_dsq)
 
+
 def build_tiebreaker_scores():
     knockout_game_score = {'AAA': 2, 'BBB': 2, 'CCC': 1, 'DDD': 0}
     tiebreaker_game_score = {'AAA': 1, 'BBB': 2}
@@ -81,18 +83,22 @@ def build_tiebreaker_scores():
     scores.tiebreaker = MockScoreSet('A', 2, tiebreaker_game_score, ())
     return scores
 
+
 def test_first_tiebreaker():
     scores = build_tiebreaker_scores()
     eq_(compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.first), ['BBB'])
+
 
 def test_second_tiebreaker():
     scores = build_tiebreaker_scores()
     eq_(compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.second), ['AAA'])
 
+
 def test_third_tiebreaker():
     # Needs to look in the scores for the final
     scores = build_tiebreaker_scores()
     eq_(compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.third), ['DDD'])
+
 
 def test_first():
     eq_(
@@ -100,17 +106,20 @@ def test_first():
         ['BBB'],
     )
 
+
 def test_second():
     eq_(
         compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.second),
         ['DDD'],
     )
 
+
 def test_third():
     eq_(
         compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.third),
         ['AAA'],
     )
+
 
 def test_tied():
     eq_(
@@ -125,6 +134,7 @@ def test_tied():
         ['AAA', 'BBB', 'CCC', 'DDD'],
     )
 
+
 def test_tied_partial():
     eq_(
         compute_awards(
@@ -136,11 +146,13 @@ def test_tied_partial():
         ['AAA'],
     )
 
+
 def test_rookie():
     eq_(
         compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.rookie),
         ['AAA'],
     )
+
 
 def test_tied_rookie():
     scores = MockScores(league={'AAA': 0, 'BBB': 0, 'CCC': 0, 'DDD': 0})
@@ -148,6 +160,7 @@ def test_tied_rookie():
         compute_awards(scores, FINAL_INFO, TEAMS).get(Award.rookie),
         ['AAA', 'CCC'],
     )
+
 
 def test_override():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -158,6 +171,7 @@ def test_override():
         )
         yaml_load.assert_called_with('.')
 
+
 def test_manual():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
         yaml_load.return_value = {'web': 'BBB'}
@@ -166,6 +180,7 @@ def test_manual():
             ['BBB'],
         )
         yaml_load.assert_called_with('.')
+
 
 def test_manual_no_award():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -176,6 +191,7 @@ def test_manual_no_award():
         )
         yaml_load.assert_called_with('.')
 
+
 def test_manual_tie():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
         yaml_load.return_value = {'web': ['BBB', 'CCC']}
@@ -184,6 +200,7 @@ def test_manual_tie():
             ['BBB', 'CCC'],
         )
         yaml_load.assert_called_with('.')
+
 
 def test_no_overrides_file():
     with mock.patch('os.path.exists') as test_file:

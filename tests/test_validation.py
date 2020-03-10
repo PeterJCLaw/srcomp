@@ -1,4 +1,3 @@
-
 from collections import namedtuple
 from datetime import datetime, timedelta
 import mock
@@ -33,6 +32,10 @@ def test_dummy_is_valid():
         error_count = validate(comp)
         assert 0 == error_count, fake_stderr.getvalue()
 
+
+# Test validate_match
+
+
 def test_validate_match_unknowable_entrants():
     teams_a = [UNKNOWABLE_TEAM] * 4
     teams_b = [UNKNOWABLE_TEAM] * 4
@@ -44,6 +47,7 @@ def test_validate_match_unknowable_entrants():
 
     errors = validate_match(knockout_match, teams)
     assert len(errors) == 0
+
 
 def test_validate_match_empty_corners():
     """ Empty corner zones are represented by 'None' """
@@ -57,6 +61,7 @@ def test_validate_match_empty_corners():
 
     errors = validate_match(knockout_match, teams)
     assert len(errors) == 0
+
 
 def test_validate_match_duplicate_entrant():
     teams_a = ['ABC', 'DEF', 'GHI', 'JKL']
@@ -75,6 +80,7 @@ def test_validate_match_duplicate_entrant():
     assert 'GHI' in error
     assert 'JKL' in error
 
+
 def test_validate_match_nonexistant_entrant():
     teams_a = ['ABC', 'DEF', 'GHI', 'JKL']
     teams_b = ['LMN', 'OPQ', 'RST', 'UVW']
@@ -90,6 +96,7 @@ def test_validate_match_nonexistant_entrant():
     assert 'not exist' in error
     for t in teams_b:
         assert t in error
+
 
 def test_validate_match_all():
     teams_a = ['ABC', 'DEF', 'GHI', 'JKL']
@@ -107,6 +114,9 @@ def test_validate_match_all():
     assert 'not exist' in error
 
 
+# Test validate_match_score
+
+
 def test_validate_match_score_empty_corner():
     match = Match([None, 'ABC', 'DEF', 'GHI'])
 
@@ -118,6 +128,7 @@ def test_validate_match_score_empty_corner():
 
     errors = validate_match_score(MatchType.league, ok_score, match)
     assert len(errors) == 0
+
 
 def test_validate_match_score_empty_corner_2():
     match = Match([None, 'ABC', 'DEF', 'GHI'])
@@ -135,6 +146,7 @@ def test_validate_match_score_empty_corner_2():
 
     assert 'not scheduled in this league match' in error
     assert 'NOP' in error
+
 
 def test_validate_match_score_extra_team():
     match = Match(['ABC', 'DEF', 'GHI', 'JKL'])
@@ -155,6 +167,7 @@ def test_validate_match_score_extra_team():
     assert 'missing from this league match' in error
     assert 'JKL' in error
 
+
 def test_validate_match_score_extra_team_2():
     match = Match(['ABC', 'DEF', 'GHI', 'JKL'])
 
@@ -173,6 +186,7 @@ def test_validate_match_score_extra_team_2():
     assert 'not scheduled in this league match' in error
     assert 'NOP' in error
 
+
 def test_validate_match_score_missing_team():
     match = Match(['ABC', 'DEF', 'GHI', 'JKL'])
 
@@ -188,6 +202,7 @@ def test_validate_match_score_missing_team():
 
     assert 'missing from this league match' in error
     assert 'JKL' in error
+
 
 def test_validate_match_score_swapped_team():
     match = Match(['ABC', 'DEF', 'GHI', 'JKL'])
@@ -207,6 +222,9 @@ def test_validate_match_score_swapped_team():
     assert 'missing from this league match' in error
     assert 'JKL' in error
     assert 'NOP' in error
+
+
+# Test find_missing_scores
 
 
 def test_find_missing_scores_knockouts_ok():
@@ -230,6 +248,7 @@ def test_find_missing_scores_knockouts_ok():
     expected = []
     assert missing == expected
 
+
 def test_find_missing_scores_knockouts_missing():
     # When looking at the knockouts the league scores won't be passed
     # in, but we need to not error that they're missing since they'll
@@ -252,6 +271,7 @@ def test_find_missing_scores_knockouts_missing():
     ]
     assert missing == expected
 
+
 def test_find_missing_scores_arena():
     match_ids = [
         ('A', 0),
@@ -263,8 +283,11 @@ def test_find_missing_scores_arena():
 
     missing = find_missing_scores(MatchType.league, match_ids, last_match, schedule)
 
-    expected = [ (0, set(['B'])) ]
+    expected = [
+        (0, set(['B'])),
+    ]
     assert missing == expected
+
 
 def test_find_missing_scores_match():
     match_ids = [
@@ -278,8 +301,11 @@ def test_find_missing_scores_match():
 
     missing = find_missing_scores(MatchType.league, match_ids, last_match, schedule)
 
-    expected = [ (0, set(['A'])) ]
+    expected = [
+        (0, set(['A'])),
+    ]
     assert missing == expected
+
 
 def test_find_missing_scores_many_matches():
     match_ids = [
@@ -304,6 +330,7 @@ def test_find_missing_scores_many_matches():
     ]
     assert missing == expected
 
+
 def test_find_missing_scores_ignore_future_matches():
     match_ids = [
         ('A', 0),
@@ -323,6 +350,7 @@ def test_find_missing_scores_ignore_future_matches():
 
     assert missing == []
 
+
 def test_find_missing_scores_ignore_no_matches():
     schedule = [
         {'A': Match3(0, MatchType.league)},
@@ -336,6 +364,10 @@ def test_find_missing_scores_ignore_no_matches():
 
     assert not len(missing), "Cannot be any missing scores when none entered"
 
+
+# Test validate_schedule_timings
+
+
 def test_validate_schedule_timings_ok():
 
     matches = [
@@ -346,6 +378,7 @@ def test_validate_schedule_timings_ok():
 
     errors = validate_schedule_timings(matches, match_duration)
     assert len(errors) == 0
+
 
 def test_validate_schedule_timings_same_time():
 
@@ -367,6 +400,7 @@ def test_validate_schedule_timings_same_time():
     assert "8" in error
     assert "9" in error
 
+
 def test_validate_schedule_timings_overlap():
 
     time_8 = datetime(2014, 4, 3, 12, 0, 0)
@@ -385,6 +419,7 @@ def test_validate_schedule_timings_overlap():
     assert "Matches 9 start" in error
     assert "before matches 8 have finished" in error
     assert str(time_9) in error
+
 
 def test_validate_schedule_timings_overlap_2():
 
@@ -436,6 +471,10 @@ def test_validate_schedule_arenas():
     assert '3 (custom)' in error
     assert "arena 'D'" in error
 
+
+# Test teams_without_matches
+
+
 def test_teams_without_matches_ok():
     teams_a = ['ABC', 'DEF']
     teams_b = ['LMN', 'OPQ']
@@ -446,6 +485,7 @@ def test_teams_without_matches_ok():
 
     teams = find_teams_without_league_matches([ok_match], teams_a + teams_b)
     assert len(teams) == 0
+
 
 def test_teams_without_matches_err():
     teams_a = ['ABC', 'DEF']

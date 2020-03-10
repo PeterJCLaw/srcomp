@@ -104,6 +104,7 @@ class RawCompstate(object):
 
         if return_output:
             stderr = subprocess.STDOUT
+
             def func(*args, **kwargs):
                 return subprocess.check_output(*args, **kwargs).decode("utf-8")
         else:

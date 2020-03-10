@@ -9,11 +9,13 @@ from sr.comp.matches import Delay
 from sr.comp.match_period import Match, MatchType
 from sr.comp.knockout_scheduler import KnockoutScheduler, UNKNOWABLE_TEAM
 
+
 def mock_first_round_seeding(side_effect):
     return mock.patch(
         'sr.comp.knockout_scheduler.seeding.first_round_seeding',
         side_effect=side_effect,
     )
+
 
 def get_scheduler(
     matches=None,
@@ -48,8 +50,8 @@ def get_scheduler(
 
     period_config = {
         'description': "A description of the period",
-        'start_time':   datetime(2014, 3, 27,  13),
-        'end_time':     datetime(2014, 3, 27,  17, 30),
+        'start_time': datetime(2014, 3, 27, 13),
+        'end_time':   datetime(2014, 3, 27, 17, 30),  # noqa:E241
     }
     knockout_config = {
         'round_spacing': 30,
@@ -60,7 +62,7 @@ def get_scheduler(
         },
     }
     config = {
-        'match_periods': { 'knockout': [period_config] },
+        'match_periods': {'knockout': [period_config]},
         'knockout': knockout_config,
     }
     arenas = ['A']
@@ -81,11 +83,13 @@ def test_invalid_num_teams_per_arena():
     with assert_raises(ValueError):
         get_scheduler(num_teams_per_arena=2)
 
+
 def test_knockout_match_winners_empty():
     scheduler = get_scheduler()
     game = Match(2, "Match 2", 'A', [], None, None, None, False)
     winners = scheduler.get_winners(game)
     assert winners == [UNKNOWABLE_TEAM] * 2
+
 
 def test_knockout_match_winners_simple():
     knockout_positions = {
@@ -120,6 +124,7 @@ def test_knockout_match_winners_irrelevant_tie_1():
 
     assert set(winners) == set(['GHI', 'JKL'])
 
+
 def test_knockout_match_winners_irrelevant_tie_2():
     knockout_positions = {
         ('A', 2): OrderedDict([
@@ -144,6 +149,7 @@ def test_knockout_match_winners_irrelevant_tie_2():
     winners = scheduler.get_winners(game)
 
     assert set(winners) == set(['GHI', 'JKL'])
+
 
 def test_knockout_match_winners_tie():
     knockout_positions = {
@@ -184,14 +190,14 @@ def test_first_round_before_league_end():
 
     # Fake a couple of league matches that won't have been scored
     matches = [
-        {'A':Match(0, "Match 0", 'A', [], None, None, MatchType.league, False)},
-        {'A':Match(1, "Match 1", 'A', [], None, None, MatchType.league, False)},
+        {'A': Match(0, "Match 0", 'A', [], None, None, MatchType.league, False)},
+        {'A': Match(1, "Match 1", 'A', [], None, None, MatchType.league, False)},
     ]
     scheduler = get_scheduler(matches, positions=positions)
 
     def seeder(*args):
         assert args[0] == 4, "Wrong number of teams"
-        return [[0,1,2,3]]
+        return [[0, 1, 2, 3]]
 
     # Mock the random (even thought it's not really random)
     scheduler.R = mock.Mock()
@@ -227,12 +233,12 @@ def check_first_round_single_dropout_from_first_match(teams):
     positions['RST'] = 9
 
     # Fake a couple of league matches
-    matches = [{},{}]
+    matches = [{}, {}]
     scheduler = get_scheduler(matches, positions=positions, teams=teams)
 
     def seeder(*args):
         assert args[0] == 8, "Wrong number of teams"
-        return [[0,1,2,3],[4,5,6,7]]
+        return [[0, 1, 2, 3], [4, 5, 6, 7]]
 
     # Mock the random (even thought it's not really random)
     scheduler.R = mock.Mock()
@@ -256,10 +262,10 @@ def check_first_round_single_dropout_from_first_match(teams):
     assert semi_0.type == MatchType.knockout
     assert semi_0_teams == expected_0_teams
     semi_0_name = semi_0.display_name
-    assert semi_0_name == "Semi 1 (#2)" # labelling starts at 1
+    assert semi_0_name == "Semi 1 (#2)"  # labelling starts at 1
 
     period_matches = period.matches
-    expected_matches = [{'A':m} for r in knockout_rounds for m in r]
+    expected_matches = [{'A': m} for r in knockout_rounds for m in r]
 
     assert period_matches == expected_matches
     final = period_matches[2]['A']
@@ -267,11 +273,13 @@ def check_first_round_single_dropout_from_first_match(teams):
 
     assert final_teams == [UNKNOWABLE_TEAM] * 4
 
+
 def test_first_round_early_dropout_from_first_match():
     teams = defaultdict(lambda: Team(None, None, False, None))
     # dropped out after the first match
     teams['ABC'] = Team(None, None, False, 0)
     check_first_round_single_dropout_from_first_match(teams)
+
 
 def test_first_round_late_dropout_from_first_match():
     teams = defaultdict(lambda: Team(None, None, False, None))
@@ -293,12 +301,12 @@ def check_first_round_single_dropout_from_second_match(teams):
     positions['RST'] = 9
 
     # Fake a couple of league matches
-    matches = [{},{}]
+    matches = [{}, {}]
     scheduler = get_scheduler(matches, positions=positions, teams=teams)
 
     def seeder(*args):
         assert args[0] == 8, "Wrong number of teams"
-        return [[0,1,2,3],[4,5,6,7]]
+        return [[0, 1, 2, 3], [4, 5, 6, 7]]
 
     # Mock the random (even thought it's not really random)
     scheduler.R = mock.Mock()
@@ -322,7 +330,7 @@ def check_first_round_single_dropout_from_second_match(teams):
     assert semi_0.type == MatchType.knockout
     assert semi_0_teams == expected_0_teams
     semi_0_name = semi_0.display_name
-    assert semi_0_name == "Semi 1 (#2)" # labelling starts at 1
+    assert semi_0_name == "Semi 1 (#2)"  # labelling starts at 1
 
     semi_1 = semis[1]
     semi_1_teams = semi_1.teams
@@ -333,10 +341,10 @@ def check_first_round_single_dropout_from_second_match(teams):
     assert semi_1.type == MatchType.knockout
     assert semi_1_teams == expected_1_teams
     semi_1_name = semi_1.display_name
-    assert semi_1_name == "Semi 2 (#3)" # labelling starts at 1
+    assert semi_1_name == "Semi 2 (#3)"  # labelling starts at 1
 
     period_matches = period.matches
-    expected_matches = [{'A':m} for r in knockout_rounds for m in r]
+    expected_matches = [{'A': m} for r in knockout_rounds for m in r]
 
     assert period_matches == expected_matches
     final = period_matches[2]['A']
@@ -344,11 +352,13 @@ def check_first_round_single_dropout_from_second_match(teams):
 
     assert final_teams == [UNKNOWABLE_TEAM] * 4
 
+
 def test_first_round_early_dropout_from_second_match():
     teams = defaultdict(lambda: Team(None, None, False, None))
     # dropped out after the first match
     teams['IJK'] = Team(None, None, False, 0)
     check_first_round_single_dropout_from_second_match(teams)
+
 
 def test_first_round_late_dropout_from_second_match():
     teams = defaultdict(lambda: Team(None, None, False, None))
@@ -374,25 +384,26 @@ def test_timings_no_delays():
 
     expected_times = [
         # Quarter finals
-        datetime(2014, 3, 27,  13,  0),
-        datetime(2014, 3, 27,  13,  5),
-        datetime(2014, 3, 27,  13, 10),
-        datetime(2014, 3, 27,  13, 15),
+        datetime(2014, 3, 27, 13, 0),
+        datetime(2014, 3, 27, 13, 5),
+        datetime(2014, 3, 27, 13, 10),
+        datetime(2014, 3, 27, 13, 15),
 
         # 30 second gap
 
         # Semi finals
-        datetime(2014, 3, 27,  13, 20, 30),
-        datetime(2014, 3, 27,  13, 25, 30),
+        datetime(2014, 3, 27, 13, 20, 30),
+        datetime(2014, 3, 27, 13, 25, 30),
 
         # 30 second gap
         # bonus 12 second gap
 
         # Final
-        datetime(2014, 3, 27,  13, 31, 12),
+        datetime(2014, 3, 27, 13, 31, 12),
     ]
 
     assert expected_times == start_times, "Wrong start times"
+
 
 def test_timings_with_delays():
     positions = OrderedDict()
@@ -401,11 +412,11 @@ def test_timings_with_delays():
 
     delays = [
         Delay(
-            time=datetime(2014, 3, 27,  13,  2),
+            time=datetime(2014, 3, 27, 13, 2),
             delay=timedelta(minutes=5),
         ),
         Delay(
-            time=datetime(2014, 3, 27,  13, 12),
+            time=datetime(2014, 3, 27, 13, 12),
             delay=timedelta(minutes=5),
         ),
     ]
@@ -422,25 +433,26 @@ def test_timings_with_delays():
 
     expected_times = [
         # Quarter finals
-        datetime(2014, 3, 27,  13,  0),
-        datetime(2014, 3, 27,  13, 10), # affected by first delay only
-        datetime(2014, 3, 27,  13, 20), # affected by both delays
-        datetime(2014, 3, 27,  13, 25),
+        datetime(2014, 3, 27, 13, 0),
+        datetime(2014, 3, 27, 13, 10),  # affected by first delay only
+        datetime(2014, 3, 27, 13, 20),  # affected by both delays
+        datetime(2014, 3, 27, 13, 25),
 
         # 30 second gap
 
         # Semi finals
-        datetime(2014, 3, 27,  13, 30, 30),
-        datetime(2014, 3, 27,  13, 35, 30),
+        datetime(2014, 3, 27, 13, 30, 30),
+        datetime(2014, 3, 27, 13, 35, 30),
 
         # 30 second gap
         # bonus 12 second gap
 
         # Final
-        datetime(2014, 3, 27,  13, 41, 12),
+        datetime(2014, 3, 27, 13, 41, 12),
     ]
 
     assert expected_times == start_times, "Wrong start times"
+
 
 def test_timings_with_delays_during_gaps():
     positions = OrderedDict()
@@ -449,11 +461,11 @@ def test_timings_with_delays_during_gaps():
 
     delays = [
         Delay(
-            time=datetime(2014, 3, 27,  13, 20, 15),
+            time=datetime(2014, 3, 27, 13, 20, 15),
             delay=timedelta(minutes=5),
         ),
         Delay(
-            time=datetime(2014, 3, 27,  13, 36),
+            time=datetime(2014, 3, 27, 13, 36),
             delay=timedelta(minutes=5),
         ),
     ]
@@ -470,23 +482,23 @@ def test_timings_with_delays_during_gaps():
 
     expected_times = [
         # Quarter finals
-        datetime(2014, 3, 27,  13,  0),
-        datetime(2014, 3, 27,  13,  5),
-        datetime(2014, 3, 27,  13, 10),
-        datetime(2014, 3, 27,  13, 15),
+        datetime(2014, 3, 27, 13, 0),
+        datetime(2014, 3, 27, 13, 5),
+        datetime(2014, 3, 27, 13, 10),
+        datetime(2014, 3, 27, 13, 15),
 
         # 30 second gap
         # first delay
 
         # Semi finals
-        datetime(2014, 3, 27,  13, 25, 30),
-        datetime(2014, 3, 27,  13, 30, 30),
+        datetime(2014, 3, 27, 13, 25, 30),
+        datetime(2014, 3, 27, 13, 30, 30),
 
         # 30 second gap
         # bonus 12 second gap
 
         # Final
-        datetime(2014, 3, 27,  13, 41, 12),
+        datetime(2014, 3, 27, 13, 41, 12),
     ]
 
     assert expected_times == start_times, "Wrong start times"

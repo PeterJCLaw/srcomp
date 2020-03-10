@@ -1,7 +1,7 @@
-
 from collections import OrderedDict
 
 from sr.comp.scores import KnockoutScores
+
 
 def test_positions_simple():
     knockout_points = {
@@ -22,6 +22,7 @@ def test_positions_simple():
 
     assert expected == positions
 
+
 def test_positions_tie_bottom():
     knockout_points = {
         'ABC': 1.5,
@@ -40,6 +41,7 @@ def test_positions_tie_bottom():
     ])
 
     assert expected == positions
+
 
 def test_positions_tie_top_with_league_positions():
     knockout_points = {
@@ -65,6 +67,7 @@ def test_positions_tie_top_with_league_positions():
     ])
 
     assert expected == positions
+
 
 def test_knockout_match_winners_tie():
     knockout_points = {

@@ -8,7 +8,7 @@ import os
 from . import yaml_loader
 
 # For reasons which are not clear, Pylint on Travis doesn't find the ranker.
-from sr.comp import ranker # pylint: disable=no-name-in-module,relative-import
+from sr.comp import ranker  # pylint: disable=no-name-in-module,relative-import
 
 
 class InvalidTeam(Exception):
@@ -343,7 +343,6 @@ class Scores(object):
         """
         The :class:`LeagueScores` for the competition.
         """
-
 
         self.knockout = KnockoutScores(
             os.path.join(root, 'knockout'),

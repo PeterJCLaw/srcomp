@@ -1,10 +1,9 @@
-
 import mock
 
 from sr.comp.scores import Scores
 
-def test_last_scored_match_none():
 
+def test_last_scored_match_none():
     def check(league_lsm, knockout_lsm, tiebreaker_lsm, expected):
         with mock.patch(
             'sr.comp.scores.LeagueScores',

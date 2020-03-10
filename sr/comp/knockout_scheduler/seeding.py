@@ -4,7 +4,7 @@ import math
 def bit_mask(n):
     """Return an n-bit mask of 1's."""
 
-    return 2 ** n-1
+    return 2 ** n - 1
 
 
 def reverse_bits(n, width):

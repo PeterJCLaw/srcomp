@@ -1,4 +1,3 @@
-
 import os
 import datetime
 
@@ -10,6 +9,7 @@ DUMMY_PATH = os.path.dirname(os.path.abspath(__file__)) + '/dummy'
 
 # Only instantiate SRComp once: it is a slow process!
 instance = None
+
 
 def test_load():
     "Test that loading the dummy state works"
@@ -23,6 +23,7 @@ def test_load():
     assert instance.arenas
     assert instance.corners
     assert isinstance(instance.awards, dict)
+
 
 def test_timezone():
     # Test that one can get the timezone from the dummy state

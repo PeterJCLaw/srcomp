@@ -97,11 +97,9 @@ class Venue(object):
                 missing_areas,
             )
 
-
     @staticmethod
     def _get_duplicates(items):
         return [item for item, count in Counter(items).items() if count > 1]
-
 
     @classmethod
     def check_teams(cls, teams, teams_layout):
@@ -128,7 +126,6 @@ class Venue(object):
 
         if duplicate_teams or extra_teams or missing_teams:
             raise LayoutTeamsException(duplicate_teams, extra_teams, missing_teams)
-
 
     def __init__(self, teams, layout_file, shepherding_file):
 
@@ -177,10 +174,8 @@ class Venue(object):
                     'colour': area['colour'],
                 }
 
-
     def check_staging_times(self, staging_times):
         self._check_staging_times(self._shepherding_areas, staging_times)
-
 
     def get_team_location(self, team):
         """

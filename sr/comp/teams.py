@@ -11,6 +11,8 @@ _Team = namedtuple('Team', [
     'rookie',
     'dropped_out_after',
 ])
+
+
 class Team(_Team):
     def is_still_around(self, match_number):
         """

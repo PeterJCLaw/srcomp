@@ -59,7 +59,7 @@ def _compute_main_awards(scores, final_match_info):
 
     if not awards[Award.third] and len(final_match_info.teams) == 2:
         # Look in the previous match to find the third place
-        final_key = (final_match_info.arena, final_match_info.num-1)
+        final_key = (final_match_info.arena, final_match_info.num - 1)
         positions = scores.knockout.game_positions[final_key]
 
         candidates = positions.get(3, ())

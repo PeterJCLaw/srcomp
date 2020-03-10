@@ -1,7 +1,7 @@
-
 import mock
 
 from sr.comp.scores import LeagueScores, TeamScore
+
 
 class FakeScorer(object):
     def __init__(self, score_data, arena_data_unused=None):
@@ -12,6 +12,7 @@ class FakeScorer(object):
         for team, info in self.score_data.items():
             scores[team] = info['score']
         return scores
+
 
 def get_basic_data():
     the_data = {
@@ -40,13 +41,16 @@ def get_basic_data():
     }
     return the_data
 
+
 def load_data(the_data):
     teams = the_data['teams'].keys()
     return load_datas([the_data], teams)
 
+
 def load_datas(the_datas, teams):
     my_datas = the_datas[:]
     the_files = ['whatever-{0}.yaml'.format(i) for i in range(len(the_datas))]
+
     def loader(*args):
         assert len(my_datas), "Should not be loading additional files"
         return my_datas.pop(0)
@@ -65,8 +69,10 @@ def load_datas(the_datas, teams):
         )
         return scores
 
+
 def load_basic_data():
     return load_data(get_basic_data())
+
 
 def test_game_points():
     scores = load_basic_data()
@@ -81,6 +87,7 @@ def test_game_points():
 
     assert game == {'JMS': 4, 'PAS': 0, 'RUN': 8, 'ICE': 2}
 
+
 def test_league_points():
     scores = load_basic_data()
 
@@ -93,6 +100,7 @@ def test_league_points():
     league = leagues[id_]
 
     assert league == {'JMS': 0, 'PAS': 0, 'RUN': 8, 'ICE': 6}
+
 
 def test_team_points():
     scores = load_basic_data()
@@ -116,17 +124,20 @@ def test_last_scored_match():
     lsm = scores.last_scored_match
     assert lsm == 1, "Should match id of only match present."
 
+
 def test_last_scored_match_none():
     scores = load_datas([], [])
 
     lsm = scores.last_scored_match
     assert lsm is None, "Should be none when there are no scores."
 
+
 def test_last_scored_match_some_missing():
     scores = load_basic_data()
 
     lsm = scores.last_scored_match
     assert lsm == 123, "Should match id of only match present."
+
 
 def test_last_scored_match_many_scores():
     m_1 = get_basic_data()
@@ -156,6 +167,7 @@ def test_league_ranker_simple():
     order = list(ranking.keys())
     assert expected_order == order
 
+
 def test_league_ranker_league_tie():
     team_scores = {
         'ABC': TeamScore(4, 0),
@@ -173,6 +185,7 @@ def test_league_ranker_league_tie():
     assert expected_map == ranking
     order = list(ranking.keys())
     assert expected_order == order
+
 
 def test_league_ranker_game_tie():
     team_scores = {
@@ -192,8 +205,10 @@ def test_league_ranker_game_tie():
     order = list(ranking.keys())
     assert expected_order == order
 
+
 ## TODO: how do we resolve full ties?
 ## TODO: build something to alert us that we have a full tie.
+
 
 def test_league_ranker_full_tie():
     team_scores = {

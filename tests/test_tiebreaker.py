@@ -45,9 +45,10 @@ def make_schedule():
         use_resolved_ranking=False,
     )
     schedule.knockout_rounds = [[finals]]
-    schedule.matches.append({'A':finals})
+    schedule.matches.append({'A': finals})
 
     return schedule
+
 
 def make_finals_score(game_points):
     positions = calc_positions(game_points)
@@ -59,6 +60,7 @@ def make_finals_score(game_points):
     scores = mock.Mock()
     scores.knockout = ko_scores
     return scores
+
 
 def test_tiebreaker():
     schedule = make_schedule()
@@ -73,8 +75,8 @@ def test_tiebreaker():
 
     assert schedule.tiebreaker
 
-    start_time = datetime.datetime(2014, 4, 25, 13,  0)
-    end_time = datetime.datetime(2014, 4, 25, 13,  5)
+    start_time = datetime.datetime(2014, 4, 25, 13, 0)
+    end_time = datetime.datetime(2014, 4, 25, 13, 5)
 
     tiebreaker_match = {
         'A': Match(
@@ -96,7 +98,7 @@ def test_tiebreaker():
 
     assert last_period_matches == [tiebreaker_match], "Wrong matches in last period"
 
-    last_period_matches.pop() # simplify the next comparison
+    last_period_matches.pop()  # simplify the next comparison
 
     expected_period = MatchPeriod(
         start_time, end_time, end_time,
@@ -104,6 +106,7 @@ def test_tiebreaker():
     )
 
     assert last_period == expected_period, "Wrong last period"
+
 
 def test_no_tiebreaker_if_winner():
     schedule = make_schedule()
@@ -120,6 +123,7 @@ def test_no_tiebreaker_if_winner():
     with assert_raises(AttributeError):
         assert not schedule.tiebreaker
 
+
 def test_no_tiebreaker_if_no_final():
     schedule = make_schedule()
     scores = mock.Mock()
@@ -134,6 +138,7 @@ def test_no_tiebreaker_if_no_final():
     with assert_raises(AttributeError):
         assert not schedule.tiebreaker
 
+
 def test_final_match_no_tiebreaker():
     schedule = make_schedule()
 
@@ -142,6 +147,7 @@ def test_final_match_no_tiebreaker():
 
     assert expected.display_name == 'Match 0', "Sanity check"
     assert expected == final_info
+
 
 def test_final_match_with_tiebreaker():
     schedule = make_schedule()

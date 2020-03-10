@@ -45,7 +45,6 @@ class MatchPeriodClock(object):
 
         return valid_delays
 
-
     def __init__(self, period, delays):
         """Create a new clock for the given period and collection of delays."""
         self._period = period

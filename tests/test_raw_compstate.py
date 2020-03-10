@@ -1,4 +1,3 @@
-
 import os.path
 import subprocess
 
@@ -55,7 +54,6 @@ def test_load_score():
     teams = list(sorted(score['teams'].keys()))
     expected = ['CLY', 'TTN']
     assert expected == teams, score
-
 
 
 def test_load_shepherds():

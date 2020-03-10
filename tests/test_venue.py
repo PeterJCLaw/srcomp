@@ -1,4 +1,3 @@
-
 from copy import deepcopy
 import mock
 
@@ -9,6 +8,7 @@ from sr.comp.venue import InvalidRegionException, \
 
 TEAMS = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQR']
 TIMES = {'signal_shepherds': {'Yellow': None, 'Pink': None}}
+
 
 def mock_layout_loader():
     return {'teams': [
@@ -24,6 +24,7 @@ def mock_layout_loader():
         },
     ]}
 
+
 def mock_shepherding_loader():
     return {'shepherds': [
         {
@@ -37,6 +38,7 @@ def mock_shepherding_loader():
             'regions': ['b-group'],
         },
     ]}
+
 
 def mock_loader(name):
     if name == 'LYT':
@@ -79,6 +81,7 @@ def test_extra_teams():
         else:
             assert False, "Should have errored about the extra teams"
 
+
 def test_duplicate_teams():
     def my_mock_loader(name):
         res = mock_loader(name)
@@ -98,6 +101,7 @@ def test_duplicate_teams():
         else:
             assert False, "Should have errored about the extra teams"
 
+
 def test_missing_teams():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
         yaml_load.side_effect = mock_loader
@@ -110,6 +114,7 @@ def test_missing_teams():
             assert lte.extras == set()
         else:
             assert False, "Should have errored about the missing team"
+
 
 def test_missing_and_extra_teams():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -132,6 +137,7 @@ def test_right_shepherding_areas():
         venue = Venue(TEAMS, 'LYT', 'SHPD')
         venue.check_staging_times(TIMES)
 
+
 def test_extra_shepherding_areas():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
         yaml_load.side_effect = mock_loader
@@ -149,6 +155,7 @@ def test_extra_shepherding_areas():
         else:
             assert False, "Should have errored about the extra shepherding area"
 
+
 def test_missing_shepherding_areas():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
         yaml_load.side_effect = mock_loader
@@ -165,6 +172,7 @@ def test_missing_shepherding_areas():
             assert lte.duplicates == []
         else:
             assert False, "Should have errored about the missing shepherding area"
+
 
 def test_missing_and_extra_shepherding_areas():
     with mock.patch('sr.comp.yaml_loader.load') as yaml_load:

@@ -1,4 +1,3 @@
-
 from collections import OrderedDict
 from datetime import datetime, timedelta
 import mock
@@ -8,6 +7,7 @@ from sr.comp.knockout_scheduler import StaticScheduler, UNKNOWABLE_TEAM
 from sr.comp.teams import Team
 
 TLAs = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF', 'GGG', 'HHH', 'III', 'JJJ']
+
 
 def get_four_team_config():
     return {
@@ -48,6 +48,7 @@ def get_four_team_config():
         },
     }
 
+
 def get_two_team_config():
     return {
         'teams_per_arena': 2,
@@ -87,6 +88,7 @@ def get_two_team_config():
         },
     }
 
+
 def get_scheduler(
     matches_config,
     matches=None,
@@ -98,7 +100,7 @@ def get_scheduler(
 ):
     matches = matches or []
     delays = delays or []
-    match_duration = timedelta(minutes = 5)
+    match_duration = timedelta(minutes=5)
     league_game_points = league_game_points or {}
     knockout_positions = knockout_positions or {}
 
@@ -135,11 +137,11 @@ def get_scheduler(
 
     period_config = {
         "description": "A description of the period",
-        "start_time":   datetime(2014, 3, 27,  13),
-        "end_time":     datetime(2014, 3, 27,  17, 30),
+        "start_time":   datetime(2014, 3, 27, 13),  # noqa:E241
+        "end_time":     datetime(2014, 3, 27, 17, 30),  # noqa:E241
     }
     config = {
-        'match_periods': { 'knockout': [period_config] },
+        'match_periods': {'knockout': [period_config]},
         'static_knockout': matches_config,
     }
     arenas = ['A']
@@ -154,14 +156,16 @@ def get_scheduler(
     )
     return scheduler
 
+
 def build_5_matches(places):
     return [
-        {'A': Match(0, "Qualifier 1 (#0)", 'A', places[0], datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(1, "Quarter 2 (#1)", 'A', places[1], datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(2, "Semi 1 (#2)", 'A', places[2], datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(3, "Semi 2 (#3)", 'A', places[3], datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(4, "Final (#4)", 'A', places[4], datetime(2014, 4, 27, 15,  0), datetime(2014, 4, 27, 15,  5), MatchType.knockout, use_resolved_ranking=False) },
+        {'A': Match(0, "Qualifier 1 (#0)", 'A', places[0], datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(1, "Quarter 2 (#1)", 'A', places[1], datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(2, "Semi 1 (#2)", 'A', places[2], datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(3, "Semi 2 (#3)", 'A', places[3], datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(4, "Final (#4)", 'A', places[4], datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5), MatchType.knockout, use_resolved_ranking=False)},
     ]
+
 
 def assertMatches(expected_matches, **kwargs):
     scheduler = get_scheduler(**kwargs)
@@ -174,16 +178,17 @@ def assertMatches(expected_matches, **kwargs):
 
         assert e == a, "Match {0} in the knockouts".format(i)
 
+
 def test_four_teams_before():
     # Add an unscored league match so that we don't appear to have played them all
-    league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False) }]
+    league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False)}]
 
     expected = [
-        {'A': Match(1, "Qualifier 1 (#1)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(2, "Quarter 2 (#2)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(3, "Semi 1 (#3)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(4, "Semi 2 (#4)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(5, "Final (#5)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 15,  0), datetime(2014, 4, 27, 15,  5), MatchType.knockout, use_resolved_ranking=False) },
+        {'A': Match(1, "Qualifier 1 (#1)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(2, "Quarter 2 (#2)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(3, "Semi 1 (#3)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(4, "Semi 2 (#4)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(5, "Final (#5)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5), MatchType.knockout, use_resolved_ranking=False)},
     ]
 
     assertMatches(
@@ -191,6 +196,7 @@ def test_four_teams_before():
         matches_config=get_four_team_config(),
         matches=league_matches,
     )
+
 
 def test_four_teams_start():
     expected_matches = build_5_matches([
@@ -205,6 +211,7 @@ def test_four_teams_start():
         expected_matches,
         matches_config=get_four_team_config(),
     )
+
 
 def test_four_teams_start():
     config = get_four_team_config()
@@ -226,6 +233,7 @@ def test_four_teams_start():
         matches_config=config,
     )
 
+
 def test_four_teams_with_dropout_part_way_through():
     LAST_QUARTER_FINAL_MATCH_NUM = 1
 
@@ -245,6 +253,7 @@ def test_four_teams_with_dropout_part_way_through():
         matches_config=get_four_team_config(),
         teams=teams,
     )
+
 
 def test_four_teams_with_dropout_before_start():
     teams = {x: Team(x, x, False, None) for x in TLAs}
@@ -270,6 +279,7 @@ def test_four_teams_with_dropout_before_start():
         teams=teams,
     )
 
+
 def test_four_teams_partial_1():
     expected_matches = build_5_matches([
         ['CCC', 'EEE', 'HHH', 'JJJ'],
@@ -292,6 +302,7 @@ def test_four_teams_partial_1():
             ]),
         },
     )
+
 
 def test_four_teams_partial_2():
     expected_matches = build_5_matches([
@@ -323,15 +334,16 @@ def test_four_teams_partial_2():
         },
     )
 
+
 def test_two_teams_before():
-    league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False) }]
+    league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False)}]
 
     expected = [
-        {'A': Match(1, "Qualifier 1 (#1)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(2, "Quarter 2 (#2)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(3, "Semi 1 (#3)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(4, "Semi 2 (#4)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True) },
-        {'A': Match(5, "Final (#5)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 15,  0), datetime(2014, 4, 27, 15,  5), MatchType.knockout, use_resolved_ranking=False) },
+        {'A': Match(1, "Qualifier 1 (#1)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(2, "Quarter 2 (#2)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(3, "Semi 1 (#3)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(4, "Semi 2 (#4)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True)},
+        {'A': Match(5, "Final (#5)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5), MatchType.knockout, use_resolved_ranking=False)},
     ]
 
     assertMatches(
@@ -339,6 +351,7 @@ def test_two_teams_before():
         matches_config=get_two_team_config(),
         matches=league_matches,
     )
+
 
 def test_two_teams_start():
     expected_matches = build_5_matches([
@@ -353,6 +366,7 @@ def test_two_teams_start():
         expected_matches,
         matches_config=get_two_team_config(),
     )
+
 
 def test_two_teams_partial_1():
     expected_matches = build_5_matches([
@@ -374,6 +388,7 @@ def test_two_teams_partial_1():
             ]),
         },
     )
+
 
 def test_two_teams_partial_2():
     expected_matches = build_5_matches([

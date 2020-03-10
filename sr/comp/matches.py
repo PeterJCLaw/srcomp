@@ -28,6 +28,7 @@ Delay = namedtuple('Delay', [
     'time',
 ])
 
+
 def parse_ranges(ranges):
     """
     Parse a comma seprated list of numbers which may include ranges
@@ -45,6 +46,7 @@ def parse_ranges(ranges):
             a = int(part)
             result.append(a)
     return set(result)
+
 
 class MatchSchedule(object):
     """
