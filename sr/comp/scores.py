@@ -6,7 +6,7 @@ from collections import OrderedDict
 from functools import total_ordering
 
 # For reasons which are not clear, Pylint on Travis doesn't find the ranker.
-from sr.comp import ranker  # pylint: disable=no-name-in-module,relative-import
+from sr.comp import ranker  # pylint: disable=no-name-in-module
 
 from . import yaml_loader
 
