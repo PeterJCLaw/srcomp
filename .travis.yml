@@ -16,4 +16,4 @@ script:
   # Deliberately after running the real tests so that we can't accidentally
   # depend on it
   - pip install pylint
-  - ./lint
+  - script/linting/pylint
