@@ -13,7 +13,7 @@ class InvalidRegionException(Exception):
     """
     def __init__(self, region, area):
         tpl = "Invalid region '{0}' found in shepherding area '{1}'"
-        super(InvalidRegionException, self).__init__(tpl.format(region, area))
+        super().__init__(tpl.format(region, area))
 
         self.region = region
         self.area = area
@@ -37,7 +37,7 @@ class MismatchException(Exception):
         assert details, "No bad items given to {0}!".format(self.__class__)
 
         detail = "; ".join(details)
-        super(MismatchException, self).__init__(tpl.format(detail))
+        super().__init__(tpl.format(detail))
 
         self.duplicates = duplicates
         self.extras = extras
@@ -51,7 +51,7 @@ class LayoutTeamsException(MismatchException):
     """
     def __init__(self, duplicate_teams, extra_teams, missing_teams):
         tpl = "Duplicate, extra or missing teams in the layout! ({0})"
-        super(LayoutTeamsException, self).__init__(tpl, duplicate_teams, extra_teams, missing_teams)
+        super().__init__(tpl, duplicate_teams, extra_teams, missing_teams)
 
 
 class ShepherdingAreasException(MismatchException):
@@ -61,10 +61,10 @@ class ShepherdingAreasException(MismatchException):
     """
     def __init__(self, where, duplicate, extra, missing):
         tpl = "Duplicate, extra or missing shepherding areas {0}! ({{0}})".format(where)
-        super(ShepherdingAreasException, self).__init__(tpl, duplicate, extra, missing)
+        super().__init__(tpl, duplicate, extra, missing)
 
 
-class Venue(object):
+class Venue:
     """A class providing information about the layout within the venue."""
 
     @staticmethod

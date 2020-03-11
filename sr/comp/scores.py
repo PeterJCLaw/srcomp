@@ -16,7 +16,7 @@ class InvalidTeam(Exception):
 
     def __init__(self, tla, context):
         message = "Team {0} (found in {1}) does not exist.".format(tla, context)
-        super(InvalidTeam, self).__init__(message)
+        super().__init__(message)
         self.tla = tla
 
 
@@ -28,12 +28,12 @@ class DuplicateScoresheet(Exception):
 
     def __init__(self, match_id):
         message = "Scoresheet for {0} has already been added.".format(match_id)
-        super(DuplicateScoresheet, self).__init__(message)
+        super().__init__(message)
         self.match_id = match_id
 
 
 @total_ordering
-class TeamScore(object):
+class TeamScore:
     """
     A team score.
 
@@ -131,7 +131,7 @@ def degroup(grouped_positions):
 # with libproton in its Proton 2.0.0-rc1 form.
 # See https://github.com/PeterJCLaw/proton and
 # http://srobo.org/cgit/comp/libproton.git.
-class BaseScores(object):
+class BaseScores:
     """
     A generic class that holds scores.
 
@@ -260,7 +260,7 @@ class LeagueScores(BaseScores):
         return positions
 
     def __init__(self, resultdir, teams, scorer, num_teams_per_arena):
-        super(LeagueScores, self).__init__(resultdir, teams, scorer, num_teams_per_arena)
+        super().__init__(resultdir, teams, scorer, num_teams_per_arena)
 
         # Sum the league scores for each team
         for match_id, match in self.ranked_points.items():
@@ -305,7 +305,7 @@ class KnockoutScores(BaseScores):
         return ranking
 
     def __init__(self, resultdir, teams, scorer, num_teams_per_arena, league_positions):
-        super(KnockoutScores, self).__init__(resultdir, teams, scorer, num_teams_per_arena)
+        super().__init__(resultdir, teams, scorer, num_teams_per_arena)
 
         self.resolved_positions = {}
         """
@@ -326,7 +326,7 @@ class TiebreakerScores(KnockoutScores):
     pass
 
 
-class Scores(object):
+class Scores:
     """
     A simple class which stores references to the league and knockout scores.
     """

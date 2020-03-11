@@ -1,7 +1,7 @@
 from collections import defaultdict, OrderedDict
 from datetime import datetime, timedelta
+from unittest import mock
 
-import mock
 from nose.tools import assert_raises
 
 from sr.comp.knockout_scheduler import KnockoutScheduler, UNKNOWABLE_TEAM

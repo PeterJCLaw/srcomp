@@ -20,7 +20,7 @@ class WrongNumberOfTeams(Exception):
             len(teams),
             num_teams_per_arena,
         )
-        super(WrongNumberOfTeams, self).__init__(message)
+        super().__init__(message)
 
 
 Delay = namedtuple('Delay', [
@@ -48,7 +48,7 @@ def parse_ranges(ranges):
     return set(result)
 
 
-class MatchSchedule(object):
+class MatchSchedule:
     """
     A match schedule.
     """

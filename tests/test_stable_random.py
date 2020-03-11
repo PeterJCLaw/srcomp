@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 from nose.tools import eq_
 
 from sr.comp.knockout_scheduler.stable_random import Random

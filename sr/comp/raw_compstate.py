@@ -8,7 +8,7 @@ import yaml
 from .comp import SRComp
 
 
-class RawCompstate(object):
+class RawCompstate:
     """
     Helper class to interact with a Compstate as raw files in a Git repository
     on disk.

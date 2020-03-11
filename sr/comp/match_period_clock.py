@@ -8,7 +8,7 @@ class OutOfTimeException(Exception):
     """
 
 
-class MatchPeriodClock(object):
+class MatchPeriodClock:
     """
     A clock for use in scheduling matches within a ``MatchPeriod``.
 

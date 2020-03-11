@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from datetime import datetime
+from unittest import mock
 
-import mock
 from dateutil.tz import tzutc
 from nose.tools import eq_
 
@@ -41,7 +41,7 @@ TEAMS = {
 }
 
 
-class MockScoreSet(object):
+class MockScoreSet:
     def __init__(self, arena, game, scores, dsq=()):
         positions = calc_positions(scores, dsq)
         league_points = calc_ranked_points(positions, dsq)
@@ -63,7 +63,7 @@ class MockScoreSet(object):
                 self.positions[team] = position
 
 
-class MockScores(object):
+class MockScores:
     def __init__(
         self,
         league={'AAA': 1, 'BBB': 2, 'CCC': 0, 'DDD': 0},

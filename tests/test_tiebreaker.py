@@ -1,7 +1,7 @@
 import datetime
 from collections import defaultdict
+from unittest import mock
 
-import mock
 from nose.tools import assert_raises, eq_
 
 from sr.comp.match_period import Match, MatchPeriod, MatchType

@@ -23,7 +23,7 @@ class StaticScheduler(BaseKnockoutScheduler):
     """
 
     def __init__(self, *args, **kwargs):
-        super(StaticScheduler, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Collect a list of the teams eligible for the knockouts, in seeded order.
         last_league_match_num = self.schedule.n_matches()

@@ -1,11 +1,9 @@
 """A stable random number generator implementation."""
 
-from __future__ import print_function
-
 import hashlib
 
 
-class Random(object):
+class Random:
     """
     Our own random number generator that is guaranteed to be stable.
 

@@ -6,7 +6,7 @@ from ..match_period import MatchPeriod, MatchType
 UNKNOWABLE_TEAM = '???'
 
 
-class BaseKnockoutScheduler(object):
+class BaseKnockoutScheduler:
     """
     Base class for knockout schedulers offering common functionality.
 

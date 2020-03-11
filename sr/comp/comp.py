@@ -31,7 +31,7 @@ def load_scorer(root):
     return imported_library.Scorer
 
 
-class SRComp(object):
+class SRComp:
     """
     A class containing all the various parts of a competition.
 

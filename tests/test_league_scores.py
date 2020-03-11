@@ -1,9 +1,9 @@
-import mock
+from unittest import mock
 
 from sr.comp.scores import LeagueScores, TeamScore
 
 
-class FakeScorer(object):
+class FakeScorer:
     def __init__(self, score_data, arena_data_unused=None):
         self.score_data = score_data
 

@@ -1,8 +1,7 @@
 import os
 from collections import namedtuple
 from datetime import datetime, timedelta
-
-import mock
+from unittest import mock
 
 from sr.comp.comp import SRComp
 from sr.comp.knockout_scheduler import UNKNOWABLE_TEAM

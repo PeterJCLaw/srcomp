@@ -1,7 +1,6 @@
 from collections import OrderedDict
 from datetime import datetime, timedelta
-
-import mock
+from unittest import mock
 
 from sr.comp.knockout_scheduler import StaticScheduler, UNKNOWABLE_TEAM
 from sr.comp.match_period import Match, MatchType

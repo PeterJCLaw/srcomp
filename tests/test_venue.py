@@ -1,6 +1,5 @@
 from copy import deepcopy
-
-import mock
+from unittest import mock
 
 from sr.comp.venue import (
     InvalidRegionException,
