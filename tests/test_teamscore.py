@@ -15,8 +15,8 @@ def test_ctor_args():
 
 def test_not_equal_none():
     ts = TeamScore(game=5, league=4.2)
-    assert not ts == None
-    assert ts != None
+    assert not ts == None  # noqa:E711  # intentional None equality check
+    assert ts != None  # noqa:E711  # intentional None equality check
 
 
 def test_not_equal_empty():
