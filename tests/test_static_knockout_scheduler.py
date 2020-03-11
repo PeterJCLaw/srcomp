@@ -214,7 +214,7 @@ def test_four_teams_start():
     )
 
 
-def test_four_teams_start():
+def test_four_teams_start_only_progressing_winner_from_quarters():
     config = get_four_team_config()
 
     semis = config['matches'][1]
