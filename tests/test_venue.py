@@ -62,7 +62,7 @@ def test_invalid_region():
         yaml_load.side_effect = my_mock_loader
 
         try:
-            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            Venue(TEAMS, 'LYT', 'SHPD')
         except InvalidRegionException as ire:
             assert ire.region == 'invalid-region'
             assert ire.area == 'Yellow'
@@ -75,7 +75,7 @@ def test_extra_teams():
         yaml_load.side_effect = mock_loader
 
         try:
-            venue = Venue(['ABC', 'DEF', 'GHI'], 'LYT', 'SHPD')
+            Venue(['ABC', 'DEF', 'GHI'], 'LYT', 'SHPD')
         except LayoutTeamsException as lte:
             assert lte.extras == set(['JKL', 'MNO', 'PQR'])
             assert lte.duplicates == []
@@ -95,7 +95,7 @@ def test_duplicate_teams():
         yaml_load.side_effect = my_mock_loader
 
         try:
-            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            Venue(TEAMS, 'LYT', 'SHPD')
         except LayoutTeamsException as lte:
             assert lte.duplicates == ['ABC']
             assert lte.extras == set()
@@ -109,7 +109,7 @@ def test_missing_teams():
         yaml_load.side_effect = mock_loader
 
         try:
-            venue = Venue(TEAMS + ['Missing'], 'LYT', 'SHPD')
+            Venue(TEAMS + ['Missing'], 'LYT', 'SHPD')
         except LayoutTeamsException as lte:
             assert lte.missing == set(['Missing'])
             assert lte.duplicates == []
@@ -123,7 +123,7 @@ def test_missing_and_extra_teams():
         yaml_load.side_effect = mock_loader
 
         try:
-            venue = Venue(['ABC', 'DEF', 'GHI', 'Missing'], 'LYT', 'SHPD')
+            Venue(['ABC', 'DEF', 'GHI', 'Missing'], 'LYT', 'SHPD')
         except LayoutTeamsException as lte:
             assert lte.extras == set(['JKL', 'MNO', 'PQR'])
             assert lte.missing == set(['Missing'])
