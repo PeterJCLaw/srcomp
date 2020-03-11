@@ -118,15 +118,12 @@ class RawCompstate:
             if err_msg:
                 if e.output:
                     err_msg += '\n\n' + e.output
-
                 raise RuntimeError(err_msg)
-            else:
-                raise
+            raise
         except OSError:
             if err_msg:
                 raise RuntimeError(err_msg)
-            else:
-                raise
+            raise
 
     @property
     def has_changes(self):
