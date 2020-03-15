@@ -46,7 +46,6 @@ Requirements
 -  python-dateutil
 -  PyYAML
 -  nose (for testing)
--  mock (for testing)
 
 Test with
 ---------
