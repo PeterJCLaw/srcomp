@@ -159,7 +159,7 @@ def get_scheduler(
     return scheduler
 
 
-def build_5_matches(places):
+def build_5_matches(places, *, first_match_number=0):
     if len(places) != 5:
         raise ValueError("Bad list of team places")
 
@@ -181,7 +181,7 @@ def build_5_matches(places):
     matches = [
         Match(idx, name.format(idx), 'A', teams, start, end, MatchType.knockout, True)
         for (idx, name), (start, end), teams in zip(
-            enumerate(names),
+            enumerate(names, start=first_match_number),
             times,
             places,
         )
@@ -209,13 +209,10 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
         # Add an unscored league match so that we don't appear to have played them all
         league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False)}]
 
-        expected = [
-            {'A': Match(1, "Qualifier 1 (#1)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True)},
-            {'A': Match(2, "Quarter 2 (#2)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True)},
-            {'A': Match(3, "Semi 1 (#3)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True)},
-            {'A': Match(4, "Semi 2 (#4)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True)},
-            {'A': Match(5, "Final (#5)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5), MatchType.knockout, use_resolved_ranking=False)},
-        ]
+        expected = build_5_matches(
+            places=[[UNKNOWABLE_TEAM] * 4] * 5,
+            first_match_number=1,
+        )
 
         self.assertMatches(
             expected,
@@ -362,13 +359,10 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
     def test_two_teams_before(self):
         league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False)}]
 
-        expected = [
-            {'A': Match(1, "Qualifier 1 (#1)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True)},
-            {'A': Match(2, "Quarter 2 (#2)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True)},
-            {'A': Match(3, "Semi 1 (#3)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True)},
-            {'A': Match(4, "Semi 2 (#4)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True)},
-            {'A': Match(5, "Final (#5)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5), MatchType.knockout, use_resolved_ranking=False)},
-        ]
+        expected = build_5_matches(
+            places=[[UNKNOWABLE_TEAM] * 2] * 5,
+            first_match_number=1,
+        )
 
         self.assertMatches(
             expected,
