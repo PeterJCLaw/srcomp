@@ -118,7 +118,8 @@ def get_scheduler(
         positions['III'] = 9
         positions['JJJ'] = 10
 
-    assert sorted(positions.keys()) == TLAs, "Must use common TLAs"
+    if sorted(positions.keys()) != TLAs:
+        raise ValueError("Must use common TLAs")
 
     if teams is None:
         teams = {x: Team(x, x, False, None) for x in positions.keys()}

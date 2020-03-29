@@ -71,8 +71,10 @@ def load_data(the_data):
 
 def load_basic_data():
     matches = load_data(get_basic_data())
-    assert len(matches.match_periods) == 1
-    assert len(matches.matches) == 3
+    if len(matches.match_periods) != 1:
+        raise ValueError("Unexpected number of match periods")
+    if len(matches.matches) != 3:
+        raise ValueError("Unexpected number of matches")
     return matches
 
 

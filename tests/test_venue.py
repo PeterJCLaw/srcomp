@@ -49,7 +49,7 @@ def mock_loader(name):
     elif name == 'SHPD':
         return mock_shepherding_loader()
     else:
-        assert False, "Unexpected file name passed '{0}'".format(name)
+        raise ValueError("Unexpected file name passed '{0}'".format(name))
 
 
 class VenueTests(unittest.TestCase):

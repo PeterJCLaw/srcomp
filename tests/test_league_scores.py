@@ -53,7 +53,8 @@ def load_datas(the_datas, teams):
     the_files = ['whatever-{0}.yaml'.format(i) for i in range(len(the_datas))]
 
     def loader(*args):
-        assert len(my_datas), "Should not be loading additional files"
+        if not my_datas:
+            raise ValueError("Should not be loading additional files")
         return my_datas.pop(0)
 
     with mock.patch('sr.comp.matches.yaml_loader.load') as mock_loader, \
