@@ -17,7 +17,8 @@ setup(
         'league-ranker <0.1',
         'python-dateutil >=2.2, <3',
     ],
-    python_requires='>=3.5',
+    # Note: there are known timezone issues in 3.5.0 (see https://bugs.python.org/issue23600)
+    python_requires='>=3.5.1',
     setup_requires=[
         'Sphinx >=1.3, <2',
     ],
