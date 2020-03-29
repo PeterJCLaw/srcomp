@@ -723,10 +723,5 @@ class MatchesTests(unittest.TestCase):
             '1-,4',
         ]:
             with self.subTest(input=range_str):
-                try:
-                    actual = parse_ranges(range_str)
-                except:
-                    pass
-                else:
-                    msg = "Should have errored, got: {0}".format(repr(actual))
-                    raise AssertionError(msg)
+                with self.assertRaises(ValueError):
+                    parse_ranges(range_str)

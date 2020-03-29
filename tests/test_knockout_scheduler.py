@@ -3,8 +3,6 @@ from collections import defaultdict, OrderedDict
 from datetime import datetime, timedelta
 from unittest import mock
 
-from nose.tools import assert_raises
-
 from sr.comp.knockout_scheduler import KnockoutScheduler, UNKNOWABLE_TEAM
 from sr.comp.match_period import Match, MatchType
 from sr.comp.matches import Delay
@@ -82,7 +80,7 @@ def get_scheduler(
 
 class KnockoutSchedulerTests(unittest.TestCase):
     def test_invalid_num_teams_per_arena(self):
-        with assert_raises(ValueError):
+        with self.assertRaises(ValueError):
             get_scheduler(num_teams_per_arena=2)
 
     def test_knockout_match_winners_empty(self):

@@ -63,26 +63,30 @@ class VenueTests(unittest.TestCase):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = my_mock_loader
 
-            try:
+            with self.assertRaises(
+                InvalidRegionException,
+                msg="Should have errored about the invalid region",
+            ) as cm:
                 Venue(TEAMS, 'LYT', 'SHPD')
-            except InvalidRegionException as ire:
-                assert ire.region == 'invalid-region'
-                assert ire.area == 'Yellow'
-            else:
-                assert False, "Should have errored about the invalid region"
+
+            ire = cm.exception
+            assert ire.region == 'invalid-region'
+            assert ire.area == 'Yellow'
 
     def test_extra_teams(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
-            try:
+            with self.assertRaises(
+                LayoutTeamsException,
+                msg="Should have errored about the extra teams",
+            ) as cm:
                 Venue(['ABC', 'DEF', 'GHI'], 'LYT', 'SHPD')
-            except LayoutTeamsException as lte:
-                assert lte.extras == set(['JKL', 'MNO', 'PQR'])
-                assert lte.duplicates == []
-                assert lte.missing == set()
-            else:
-                assert False, "Should have errored about the extra teams"
+
+            lte = cm.exception
+            assert lte.extras == set(['JKL', 'MNO', 'PQR'])
+            assert lte.duplicates == []
+            assert lte.missing == set()
 
     def test_duplicate_teams(self):
         def my_mock_loader(name):
@@ -94,40 +98,46 @@ class VenueTests(unittest.TestCase):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = my_mock_loader
 
-            try:
+            with self.assertRaises(
+                LayoutTeamsException,
+                msg="Should have errored about the extra teams",
+            ) as cm:
                 Venue(TEAMS, 'LYT', 'SHPD')
-            except LayoutTeamsException as lte:
-                assert lte.duplicates == ['ABC']
-                assert lte.extras == set()
-                assert lte.missing == set()
-            else:
-                assert False, "Should have errored about the extra teams"
+
+            lte = cm.exception
+            assert lte.duplicates == ['ABC']
+            assert lte.extras == set()
+            assert lte.missing == set()
 
     def test_missing_teams(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
-            try:
+            with self.assertRaises(
+                LayoutTeamsException,
+                msg="Should have errored about the missing team",
+            ) as cm:
                 Venue(TEAMS + ['Missing'], 'LYT', 'SHPD')
-            except LayoutTeamsException as lte:
-                assert lte.missing == set(['Missing'])
-                assert lte.duplicates == []
-                assert lte.extras == set()
-            else:
-                assert False, "Should have errored about the missing team"
+
+            lte = cm.exception
+            assert lte.missing == set(['Missing'])
+            assert lte.duplicates == []
+            assert lte.extras == set()
 
     def test_missing_and_extra_teams(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
-            try:
+            with self.assertRaises(
+                LayoutTeamsException,
+                msg="Should have errored about the extra and missing teams",
+            ) as cm:
                 Venue(['ABC', 'DEF', 'GHI', 'Missing'], 'LYT', 'SHPD')
-            except LayoutTeamsException as lte:
-                assert lte.extras == set(['JKL', 'MNO', 'PQR'])
-                assert lte.missing == set(['Missing'])
-                assert lte.duplicates == []
-            else:
-                assert False, "Should have errored about the extra and missing teams"
+
+            lte = cm.exception
+            assert lte.extras == set(['JKL', 'MNO', 'PQR'])
+            assert lte.missing == set(['Missing'])
+            assert lte.duplicates == []
 
     def test_right_shepherding_areas(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -144,14 +154,16 @@ class VenueTests(unittest.TestCase):
             times = deepcopy(TIMES)
             times['signal_shepherds']['Blue'] = None
 
-            try:
+            with self.assertRaises(
+                ShepherdingAreasException,
+                msg="Should have errored about the extra shepherding area",
+            ) as cm:
                 venue.check_staging_times(times)
-            except ShepherdingAreasException as lte:
-                assert lte.extras == set(['Blue'])
-                assert lte.duplicates == []
-                assert lte.missing == set()
-            else:
-                assert False, "Should have errored about the extra shepherding area"
+
+            lte = cm.exception
+            assert lte.extras == set(['Blue'])
+            assert lte.duplicates == []
+            assert lte.missing == set()
 
     def test_missing_shepherding_areas(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -161,14 +173,16 @@ class VenueTests(unittest.TestCase):
             times = deepcopy(TIMES)
             del times['signal_shepherds']['Pink']
 
-            try:
+            with self.assertRaises(
+                ShepherdingAreasException,
+                msg="Should have errored about the missing shepherding area",
+            ) as cm:
                 venue.check_staging_times(times)
-            except ShepherdingAreasException as lte:
-                assert lte.missing == set(['Pink'])
-                assert lte.extras == set()
-                assert lte.duplicates == []
-            else:
-                assert False, "Should have errored about the missing shepherding area"
+
+            lte = cm.exception
+            assert lte.missing == set(['Pink'])
+            assert lte.extras == set()
+            assert lte.duplicates == []
 
     def test_missing_and_extra_shepherding_areas(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -179,14 +193,16 @@ class VenueTests(unittest.TestCase):
             times['signal_shepherds']['Blue'] = None
             del times['signal_shepherds']['Pink']
 
-            try:
+            with self.assertRaises(
+                ShepherdingAreasException,
+                msg="Should have errored about the extra and missing shepherding areas",
+            ) as cm:
                 venue.check_staging_times(times)
-            except ShepherdingAreasException as lte:
-                assert lte.missing == set(['Pink'])
-                assert lte.extras == set(['Blue'])
-                assert lte.duplicates == []
-            else:
-                assert False, "Should have errored about the extra and missing shepherding areas"
+
+            lte = cm.exception
+            assert lte.missing == set(['Pink'])
+            assert lte.extras == set(['Blue'])
+            assert lte.duplicates == []
 
     def test_locations(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:

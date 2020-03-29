@@ -71,12 +71,8 @@ class TeamScoreRichComparisonTests(unittest.TestCase):
         self.assertRichComparisons(1, 2)
 
     def test_assertion_helper_fail(self):
-        try:
+        with self.assertRaises(AssertionError):
             self.assertRichComparisons(2, 1)
-        except:
-            pass
-        else:
-            assert False, "Should have found 1 < 2"
 
     def test_none(self):
         ts = TeamScore(game=5, league=4)

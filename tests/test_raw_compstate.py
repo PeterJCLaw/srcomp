@@ -112,42 +112,32 @@ class RawCompstateTests(unittest.TestCase):
     def test_git_return_output_when_error(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
 
-        try:
+        with self.assertRaises(
+            subprocess.CalledProcessError,
+            msg="Should have errored about bad command (returned '{0}').",
+        ):
             output = state.git(['this-is-not-a-valid-command'], return_output=True)
-        except subprocess.CalledProcessError:
-            pass
-        else:
-            raise AssertionError(
-                "Should have errored about bad command (returned '{0}').".format(
-                    output,
-                ),
-            )
+            print(output)
 
     def test_git_when_error(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
 
-        try:
+        with self.assertRaises(
+            subprocess.CalledProcessError,
+            msg="Should have errored about bad command (returned '{0}').",
+        ):
             output = state.git(['this-is-not-a-valid-command'])
-        except subprocess.CalledProcessError:
-            pass
-        else:
-            raise AssertionError(
-                "Should have errored about bad command (returned '{0}').".format(
-                    output,
-                ),
-            )
+            print(output)
 
     def test_git_converts_error(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
         error_msg = "Our message that something went wrong"
 
-        try:
+        with self.assertRaises(
+            RuntimeError,
+            msg="Should have errored about bad command (returned '{0}').",
+        ) as cm:
             output = state.git(['this-is-not-a-valid-command'], err_msg=error_msg)
-        except RuntimeError as re:
-            assert error_msg in str(re)
-        else:
-            raise AssertionError(
-                "Should have errored about bad command (returned '{0}').".format(
-                    output,
-                ),
-            )
+            print(output)
+
+        assert error_msg in str(cm.exception)

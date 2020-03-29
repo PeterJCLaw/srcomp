@@ -4,7 +4,7 @@ from collections import defaultdict
 from unittest import mock
 
 from league_ranker import calc_positions, calc_ranked_points
-from nose.tools import assert_raises, eq_
+from nose.tools import eq_
 
 from sr.comp.match_period import Match, MatchPeriod, MatchType
 from sr.comp.matches import MatchSchedule
@@ -122,8 +122,8 @@ class TiebreakerTests(unittest.TestCase):
         schedule.add_tiebreaker(scores, datetime.datetime(2014, 4, 25, 13, 0))
         eq_(schedule.n_matches(), 1)
 
-        with assert_raises(AttributeError):
-            assert not schedule.tiebreaker
+        with self.assertRaises(AttributeError):
+            schedule.tiebreaker
 
     def test_no_tiebreaker_if_no_final(self):
         schedule = make_schedule()
@@ -136,8 +136,8 @@ class TiebreakerTests(unittest.TestCase):
         schedule.add_tiebreaker(scores, datetime.datetime(2014, 4, 25, 13, 0))
         eq_(schedule.n_matches(), 1)
 
-        with assert_raises(AttributeError):
-            assert not schedule.tiebreaker
+        with self.assertRaises(AttributeError):
+            schedule.tiebreaker
 
     def test_final_match_no_tiebreaker(self):
         schedule = make_schedule()

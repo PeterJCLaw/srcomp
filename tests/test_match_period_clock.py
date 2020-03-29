@@ -9,18 +9,14 @@ class MatchPeriodClockTestsBase(unittest.TestCase):
     def build_match_period(self, start, end, max_end=None, desc=None, matches=None, type_=None):
         return MatchPeriod(start, end, max_end or end, desc, matches, type_)
 
-    def assertOutOfTime(self, clock, msg=None):
-        threw = False
-        try:
+    def assertOutOfTime(
+        self,
+        clock,
+        msg="Should signal that we're beyond the end of the period",
+    ):
+        with self.assertRaises(OutOfTimeException, msg=msg):
             curr_time = clock.current_time
             print(curr_time)  # Useful for debugging, also prevents 'unused variable' warnings
-        except OutOfTimeException:
-            threw = True
-
-        msg = msg or "Should signal that we're beyond the end of the period" \
-                     " by raising a '{}'".format(OutOfTimeException)
-
-        assert threw, msg
 
 
 class CurrentTimeTests(MatchPeriodClockTestsBase):
