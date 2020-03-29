@@ -1,6 +1,7 @@
 import os
 from collections import namedtuple
 from datetime import datetime, timedelta
+from io import StringIO
 from unittest import mock
 
 from sr.comp.comp import SRComp
@@ -15,11 +16,6 @@ from sr.comp.validation import (
     validate_schedule_arenas,
     validate_schedule_timings,
 )
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 
 Match = namedtuple('Match', ['teams'])
