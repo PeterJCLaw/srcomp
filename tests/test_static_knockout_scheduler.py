@@ -207,7 +207,16 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
 
     def test_four_teams_before(self):
         # Add an unscored league match so that we don't appear to have played them all
-        league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False)}]
+        league_matches = [{'A': Match(
+            0,
+            "Match 0",
+            'A',
+            [],
+            datetime(2014, 4, 27, 12, 30),
+            datetime(2014, 4, 27, 12, 35),
+            MatchType.league,
+            use_resolved_ranking=False,
+        )}]
 
         expected = build_5_matches(
             places=[[UNKNOWABLE_TEAM] * 4] * 5,
@@ -357,7 +366,16 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
         )
 
     def test_two_teams_before(self):
-        league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False)}]
+        league_matches = [{'A': Match(
+            0,
+            "Match 0",
+            'A',
+            [],
+            datetime(2014, 4, 27, 12, 30),
+            datetime(2014, 4, 27, 12, 35),
+            MatchType.league,
+            use_resolved_ranking=False,
+        )}]
 
         expected = build_5_matches(
             places=[[UNKNOWABLE_TEAM] * 2] * 5,
