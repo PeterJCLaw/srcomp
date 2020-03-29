@@ -87,16 +87,25 @@ def build_tiebreaker_scores():
 class WinnersTests(unittest.TestCase):
     def test_first_tiebreaker(self):
         scores = build_tiebreaker_scores()
-        eq_(compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.first), ['BBB'])
+        eq_(
+            compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.first),
+            ['BBB'],
+        )
 
     def test_second_tiebreaker(self):
         scores = build_tiebreaker_scores()
-        eq_(compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.second), ['AAA'])
+        eq_(
+            compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.second),
+            ['AAA'],
+        )
 
     def test_third_tiebreaker(self):
         # Needs to look in the scores for the final
         scores = build_tiebreaker_scores()
-        eq_(compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.third), ['DDD'])
+        eq_(
+            compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.third),
+            ['DDD'],
+        )
 
     def test_first(self):
         eq_(
