@@ -34,7 +34,7 @@ def parse_ranges(ranges):
     Parse a comma seprated list of numbers which may include ranges
     specified as hyphen-separated numbers.
 
-    From https://stackoverflow.com/questions/6405208/how-to-convert-numeric-string-ranges-to-a-list-in-python
+    From https://stackoverflow.com/questions/6405208
     """
     result = []
     for part in ranges.split(','):
