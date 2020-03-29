@@ -237,7 +237,12 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
         LAST_QUARTER_FINAL_MATCH_NUM = 1
 
         teams = {x: Team(x, x, False, None) for x in TLAs}
-        teams['BBB'] = Team('BBB', 'BBB', False, dropped_out_after=LAST_QUARTER_FINAL_MATCH_NUM)
+        teams['BBB'] = Team(
+            'BBB',
+            'BBB',
+            False,
+            dropped_out_after=LAST_QUARTER_FINAL_MATCH_NUM,
+        )
 
         expected_matches = build_5_matches([
             ['CCC', 'EEE', 'HHH', 'JJJ'],
