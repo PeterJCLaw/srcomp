@@ -668,7 +668,8 @@ class MatchesTests(unittest.TestCase):
             start_time,
             # 5 minute matches, 5 minute delay
             start_time + timedelta(minutes=10),
-            # Third match would have originally been at start+10, so is allowed to occur in the overrun period
+            # Third match would have originally been at start+10, so is allowed
+            # to occur in the overrun period
             start_time + timedelta(minutes=15),
         ]
 

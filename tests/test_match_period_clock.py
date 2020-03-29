@@ -6,7 +6,15 @@ from sr.comp.matches import Delay
 
 
 class MatchPeriodClockTestsBase(unittest.TestCase):
-    def build_match_period(self, start, end, max_end=None, desc=None, matches=None, type_=None):
+    def build_match_period(
+        self,
+        start,
+        end,
+        max_end=None,
+        desc=None,
+        matches=None,
+        type_=None,
+    ):
         return MatchPeriod(start, end, max_end or end, desc, matches, type_)
 
     def assertOutOfTime(
