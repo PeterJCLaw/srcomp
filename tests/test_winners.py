@@ -126,26 +126,28 @@ class WinnersTests(unittest.TestCase):
         )
 
     def test_tied(self):
+        awards = compute_awards(
+            MockScores(
+                knockout={'AAA': 1, 'BBB': 1, 'CCC': 1, 'DDD': 1},
+                knockout_dsq=(),
+            ),
+            FINAL_INFO,
+            TEAMS,
+        )
         eq_(
-            compute_awards(
-                MockScores(
-                    knockout={'AAA': 1, 'BBB': 1, 'CCC': 1, 'DDD': 1},
-                    knockout_dsq=(),
-                ),
-                FINAL_INFO,
-                TEAMS,
-            ).get(Award.first),
+            awards.get(Award.first),
             ['AAA', 'BBB', 'CCC', 'DDD'],
         )
 
     def test_tied_partial(self):
+        awards = compute_awards(
+            MockScores(
+                knockout={'AAA': 2, 'BBB': 1, 'CCC': 1, 'DDD': 1},
+                knockout_dsq=(),
+            ), FINAL_INFO, TEAMS,
+        )
         eq_(
-            compute_awards(
-                MockScores(
-                    knockout={'AAA': 2, 'BBB': 1, 'CCC': 1, 'DDD': 1},
-                    knockout_dsq=(),
-                ), FINAL_INFO, TEAMS,
-            ).get(Award.first),
+            awards.get(Award.first),
             ['AAA'],
         )
 
