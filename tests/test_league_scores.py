@@ -81,27 +81,27 @@ class LeagueScoresTests(unittest.TestCase):
         scores = load_basic_data()
 
         games = scores.game_points
-        assert len(games) == 1
+        self.assertEqual(1, len(games))
 
         id_ = ('A', 123)
-        assert id_ in games
+        self.assertIn(id_, games)
 
         game = games[id_]
 
-        assert game == {'JMS': 4, 'PAS': 0, 'RUN': 8, 'ICE': 2}
+        self.assertEqual({'JMS': 4, 'PAS': 0, 'RUN': 8, 'ICE': 2}, game)
 
     def test_league_points(self):
         scores = load_basic_data()
 
         leagues = scores.ranked_points
-        assert len(leagues) == 1
+        self.assertEqual(1, len(leagues))
 
         id_ = ('A', 123)
-        assert id_ in leagues
+        self.assertIn(id_, leagues)
 
         league = leagues[id_]
 
-        assert league == {'JMS': 0, 'PAS': 0, 'RUN': 8, 'ICE': 6}
+        self.assertEqual({'JMS': 0, 'PAS': 0, 'RUN': 8, 'ICE': 6}, league)
 
     def test_team_points(self):
         scores = load_basic_data()
@@ -113,28 +113,35 @@ class LeagueScoresTests(unittest.TestCase):
             'ICE': TeamScore(6, 2),
         }
 
-        teams_data = scores.teams
-        assert teams_data == expected
+        self.assertEqual(expected, scores.teams)
 
     def test_last_scored_match(self):
         m_1 = get_basic_data()
         m_1['match_number'] = 1
         scores = load_data(m_1)
 
-        lsm = scores.last_scored_match
-        assert lsm == 1, "Should match id of only match present."
+        self.assertEqual(
+            1,
+            scores.last_scored_match,
+            "Should match id of only match present.",
+        )
 
     def test_last_scored_match_none(self):
         scores = load_datas([], [])
 
-        lsm = scores.last_scored_match
-        assert lsm is None, "Should be none when there are no scores."
+        self.assertIsNone(
+            scores.last_scored_match,
+            "Should be none when there are no scores.",
+        )
 
     def test_last_scored_match_some_missing(self):
         scores = load_basic_data()
 
-        lsm = scores.last_scored_match
-        assert lsm == 123, "Should match id of only match present."
+        self.assertEqual(
+            123,
+            scores.last_scored_match,
+            "Should match id of only match present.",
+        )
 
     def test_last_scored_match_many_scores(self):
         m_1 = get_basic_data()
@@ -146,9 +153,11 @@ class LeagueScoresTests(unittest.TestCase):
 
         scores = load_datas([m_1, m_2B], m_1['teams'].keys())
 
-        lsm = scores.last_scored_match
-
-        assert lsm == 2, "Should latest match id, even when in other arena."
+        self.assertEqual(
+            2,
+            scores.last_scored_match,
+            "Should latest match id, even when in other arena.",
+        )
 
     def test_league_ranker_simple(self):
         team_scores = {'ABC': TeamScore(), 'DEF': TeamScore(4, 5)}
@@ -159,9 +168,9 @@ class LeagueScoresTests(unittest.TestCase):
         }
         expected_order = ['DEF', 'ABC']
 
-        assert expected_map == ranking
+        self.assertEqual(expected_map, ranking)
         order = list(ranking.keys())
-        assert expected_order == order
+        self.assertEqual(expected_order, order)
 
     def test_league_ranker_league_tie(self):
         team_scores = {
@@ -177,9 +186,9 @@ class LeagueScoresTests(unittest.TestCase):
         }
         expected_order = ['DEF', 'ABC', 'GHI']
 
-        assert expected_map == ranking
+        self.assertEqual(expected_map, ranking)
         order = list(ranking.keys())
-        assert expected_order == order
+        self.assertEqual(expected_order, order)
 
     def test_league_ranker_game_tie(self):
         team_scores = {
@@ -195,9 +204,9 @@ class LeagueScoresTests(unittest.TestCase):
         }
         expected_order = ['DEF', 'ABC', 'GHI']
 
-        assert expected_map == ranking
+        self.assertEqual(expected_map, ranking)
         order = list(ranking.keys())
-        assert expected_order == order
+        self.assertEqual(expected_order, order)
 
     # TODO: how do we resolve full ties?
     # TODO: build something to alert us that we have a full tie.
@@ -216,6 +225,6 @@ class LeagueScoresTests(unittest.TestCase):
         }
         expected_order = ['DEF', 'ABC', 'GHI']
 
-        assert expected_map == ranking
+        self.assertEqual(expected_map, ranking)
         order = list(ranking.keys())
-        assert expected_order == order
+        self.assertEqual(expected_order, order)

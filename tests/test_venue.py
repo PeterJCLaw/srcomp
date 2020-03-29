@@ -70,8 +70,8 @@ class VenueTests(unittest.TestCase):
                 Venue(TEAMS, 'LYT', 'SHPD')
 
             ire = cm.exception
-            assert ire.region == 'invalid-region'
-            assert ire.area == 'Yellow'
+            self.assertEqual('invalid-region', ire.region)
+            self.assertEqual('Yellow', ire.area)
 
     def test_extra_teams(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -84,9 +84,9 @@ class VenueTests(unittest.TestCase):
                 Venue(['ABC', 'DEF', 'GHI'], 'LYT', 'SHPD')
 
             lte = cm.exception
-            assert lte.extras == set(['JKL', 'MNO', 'PQR'])
-            assert lte.duplicates == []
-            assert lte.missing == set()
+            self.assertEqual(set(['JKL', 'MNO', 'PQR']), lte.extras)
+            self.assertEqual([], lte.duplicates)
+            self.assertEqual(set(), lte.missing)
 
     def test_duplicate_teams(self):
         def my_mock_loader(name):
@@ -105,9 +105,9 @@ class VenueTests(unittest.TestCase):
                 Venue(TEAMS, 'LYT', 'SHPD')
 
             lte = cm.exception
-            assert lte.duplicates == ['ABC']
-            assert lte.extras == set()
-            assert lte.missing == set()
+            self.assertEqual(['ABC'], lte.duplicates)
+            self.assertEqual(set(), lte.extras)
+            self.assertEqual(set(), lte.missing)
 
     def test_missing_teams(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -120,9 +120,9 @@ class VenueTests(unittest.TestCase):
                 Venue(TEAMS + ['Missing'], 'LYT', 'SHPD')
 
             lte = cm.exception
-            assert lte.missing == set(['Missing'])
-            assert lte.duplicates == []
-            assert lte.extras == set()
+            self.assertEqual(set(['Missing']), lte.missing)
+            self.assertEqual([], lte.duplicates)
+            self.assertEqual(set(), lte.extras)
 
     def test_missing_and_extra_teams(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -135,9 +135,9 @@ class VenueTests(unittest.TestCase):
                 Venue(['ABC', 'DEF', 'GHI', 'Missing'], 'LYT', 'SHPD')
 
             lte = cm.exception
-            assert lte.extras == set(['JKL', 'MNO', 'PQR'])
-            assert lte.missing == set(['Missing'])
-            assert lte.duplicates == []
+            self.assertEqual(set(['JKL', 'MNO', 'PQR']), lte.extras)
+            self.assertEqual(set(['Missing']), lte.missing)
+            self.assertEqual([], lte.duplicates)
 
     def test_right_shepherding_areas(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -161,9 +161,9 @@ class VenueTests(unittest.TestCase):
                 venue.check_staging_times(times)
 
             lte = cm.exception
-            assert lte.extras == set(['Blue'])
-            assert lte.duplicates == []
-            assert lte.missing == set()
+            self.assertEqual(set(['Blue']), lte.extras)
+            self.assertEqual([], lte.duplicates)
+            self.assertEqual(set(), lte.missing)
 
     def test_missing_shepherding_areas(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -180,9 +180,9 @@ class VenueTests(unittest.TestCase):
                 venue.check_staging_times(times)
 
             lte = cm.exception
-            assert lte.missing == set(['Pink'])
-            assert lte.extras == set()
-            assert lte.duplicates == []
+            self.assertEqual(set(['Pink']), lte.missing)
+            self.assertEqual(set(), lte.extras)
+            self.assertEqual([], lte.duplicates)
 
     def test_missing_and_extra_shepherding_areas(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -200,9 +200,9 @@ class VenueTests(unittest.TestCase):
                 venue.check_staging_times(times)
 
             lte = cm.exception
-            assert lte.missing == set(['Pink'])
-            assert lte.extras == set(['Blue'])
-            assert lte.duplicates == []
+            self.assertEqual(set(['Pink']), lte.missing)
+            self.assertEqual(set(['Blue']), lte.extras)
+            self.assertEqual([], lte.duplicates)
 
     def test_locations(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -232,7 +232,7 @@ class VenueTests(unittest.TestCase):
             }
 
             locations = venue.locations
-            assert locations == expected
+            self.assertEqual(expected, locations)
 
     def test_get_team_location(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -240,4 +240,8 @@ class VenueTests(unittest.TestCase):
 
             venue = Venue(TEAMS, 'LYT', 'SHPD')
             loc = venue.get_team_location('DEF')
-            assert loc == 'a-group', "Wrong location for team 'DEF'"
+            self.assertEqual(
+                'a-group',
+                loc,
+                "Wrong location for team 'DEF'",
+            )

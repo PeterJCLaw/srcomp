@@ -34,25 +34,28 @@ class RawCompstateTests(unittest.TestCase):
     def test_load(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
         comp = state.load()
-        assert isinstance(comp, SRComp)
+        self.assertIsInstance(comp, SRComp)
 
     def test_get_score_path(self):
         m = build_match(0, 'A', type_=MatchType.league)
         state = RawCompstate(DUMMY_PATH, local_only=True)
         path = state.get_score_path(m)
-        assert os.path.exists(path), "Path expected to exist within dummy state"
+        self.assertTrue(
+            os.path.exists(path),
+            "Path expected to exist within dummy state",
+        )
 
     def test_load_score(self):
         m = build_match(0, 'A', type_=MatchType.league)
         state = RawCompstate(DUMMY_PATH, local_only=True)
         score = state.load_score(m)
 
-        assert score['arena_id'] == 'A', score
-        assert score['match_number'] == 0, score
+        self.assertEqual('A', score['arena_id'], score)
+        self.assertEqual(0, score['match_number'], score)
 
         teams = sorted(score['teams'].keys())
         expected = ['CLY', 'TTN']
-        assert expected == teams, score
+        self.assertEqual(expected, teams, score)
 
     def test_load_shepherds(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
@@ -79,35 +82,35 @@ class RawCompstateTests(unittest.TestCase):
             },
         ]
 
-        assert expected == shepherds, "Wrong shepherds data loaded"
+        self.assertEqual(expected, shepherds, "Wrong shepherds data loaded")
 
     def test_shepherding(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
-        assert state.shepherding
+        self.assertTrue(state.shepherding)
 
     def test_layout(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
-        assert state.layout
+        self.assertTrue(state.layout)
 
     def test_contains_HEAD(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
 
         has_HEAD = state.has_commit('HEAD')
-        assert has_HEAD, "Should have HEAD commit!"
+        self.assertTrue(has_HEAD, "Should have HEAD commit!")
 
     def test_git_return_output(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
 
         output = state.git(['show'], return_output=True)
 
-        assert output.startswith('commit '), output
+        self.assertTrue(output.startswith('commit '), output)
 
     def test_git_no_return_output(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
 
         output = state.git(['rev-parse', 'HEAD'])
 
-        assert output == 0, "Should succeed and return exit code"
+        self.assertEqual(0, output, "Should succeed and return exit code")
 
     def test_git_return_output_when_error(self):
         state = RawCompstate(DUMMY_PATH, local_only=True)
@@ -140,4 +143,4 @@ class RawCompstateTests(unittest.TestCase):
             output = state.git(['this-is-not-a-valid-command'], err_msg=error_msg)
             print(output)
 
-        assert error_msg in str(cm.exception)
+        self.assertIn(error_msg, str(cm.exception))

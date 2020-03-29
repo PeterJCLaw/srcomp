@@ -88,30 +88,30 @@ class MatchesTests(unittest.TestCase):
         start_times = times(starts)
 
         # Times alone are easier to debug
-        assert expected_times == start_times, message + " (times)"
+        self.assertEqual(expected_times, start_times, message + " (times)")
 
-        assert expected == starts, message + " (datetimes)"
+        self.assertEqual(expected, starts, message + " (datetimes)")
 
     def test_basic_data(self):
         matches = load_basic_data()
 
         first = matches.matches[0]
-        assert len(first) == 2
-        assert 'A' in first
-        assert 'B' in first
+        self.assertEqual(2, len(first))
+        self.assertIn('A', first)
+        self.assertIn('B', first)
 
         a = first['A']
         b = first['B']
 
         a_start = a.start_time
         b_start = b.start_time
-        assert a_start == datetime(2014, 3, 26, 13)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13), a_start)
+        self.assertEqual(b_start, a_start)
 
         a_end = a.end_time
         b_end = b.end_time
-        assert a_end == datetime(2014, 3, 26, 13, 5)
-        assert a_end == b_end
+        self.assertEqual(datetime(2014, 3, 26, 13, 5), a_end)
+        self.assertEqual(b_end, a_end)
 
         expected_staging = {
             'opens': timedelta(seconds=300),
@@ -126,7 +126,11 @@ class MatchesTests(unittest.TestCase):
 
         staging_times = matches.staging_times
 
-        assert expected_staging == staging_times, "Wrong values loaded from state"
+        self.assertEqual(
+            expected_staging,
+            staging_times,
+            "Wrong values loaded from state",
+        )
 
     def test_get_staging_times(self):
         start = datetime(2014, 3, 26, 13, 0, 0)
@@ -147,7 +151,11 @@ class MatchesTests(unittest.TestCase):
             'signal_teams':     datetime(2014, 3, 26, 12, 57, 30),  # noqa:E241
         }
 
-        assert expected == staging_times, "Wrong staging times for given match"
+        self.assertEqual(
+            expected,
+            staging_times,
+            "Wrong staging times for given match",
+        )
 
     def test_extra_spacing_no_delays(self):
         the_data = get_basic_data()
@@ -164,19 +172,19 @@ class MatchesTests(unittest.TestCase):
         first_b = matches.matches[0]['B']
         a_start = first_a.start_time
         b_start = first_b.start_time
-        assert a_start == datetime(2014, 3, 26, 13)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13), a_start)
+        self.assertEqual(b_start, a_start)
 
         second_a = matches.matches[1]['A']
         second_b = matches.matches[1]['B']
         a_start = second_a.start_time
         b_start = second_b.start_time
-        assert a_start == datetime(2014, 3, 26, 13, 5, 30)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13, 5, 30), a_start)
+        self.assertEqual(b_start, a_start)
 
         third_a = matches.matches[2]['A']
         a_start = third_a.start_time
-        assert a_start == datetime(2014, 3, 26, 13, 10, 30)
+        self.assertEqual(datetime(2014, 3, 26, 13, 10, 30), a_start)
 
     def test_extra_spacing_first_match(self):
         the_data = get_basic_data()
@@ -193,19 +201,19 @@ class MatchesTests(unittest.TestCase):
         first_b = matches.matches[0]['B']
         a_start = first_a.start_time
         b_start = first_b.start_time
-        assert a_start == datetime(2014, 3, 26, 13, 0)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13, 0), a_start)
+        self.assertEqual(b_start, a_start)
 
         second_a = matches.matches[1]['A']
         second_b = matches.matches[1]['B']
         a_start = second_a.start_time
         b_start = second_b.start_time
-        assert a_start == datetime(2014, 3, 26, 13, 5)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13, 5), a_start)
+        self.assertEqual(b_start, a_start)
 
         third_a = matches.matches[2]['A']
         a_start = third_a.start_time
-        assert a_start == datetime(2014, 3, 26, 13, 10)
+        self.assertEqual(datetime(2014, 3, 26, 13, 10), a_start)
 
     def test_extra_spacing_with_delays(self):
         the_data = get_basic_data()
@@ -221,19 +229,19 @@ class MatchesTests(unittest.TestCase):
         first_b = matches.matches[0]['B']
         a_start = first_a.start_time
         b_start = first_b.start_time
-        assert a_start == datetime(2014, 3, 26, 13)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13), a_start)
+        self.assertEqual(b_start, a_start)
 
         second_a = matches.matches[1]['A']
         second_b = matches.matches[1]['B']
         a_start = second_a.start_time
         b_start = second_b.start_time
-        assert a_start == datetime(2014, 3, 26, 13, 5, 45)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13, 5, 45), a_start)
+        self.assertEqual(b_start, a_start)
 
         third_a = matches.matches[2]['A']
         a_start = third_a.start_time
-        assert a_start == datetime(2014, 3, 26, 13, 10, 45)
+        self.assertEqual(datetime(2014, 3, 26, 13, 10, 45), a_start)
 
     def test_extra_spacing_overlapping_with_delays(self):
         the_data = get_basic_data()
@@ -254,28 +262,28 @@ class MatchesTests(unittest.TestCase):
         first_b = matches.matches[0]['B']
         a_start = first_a.start_time
         b_start = first_b.start_time
-        assert a_start == datetime(2014, 3, 26, 13)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13), a_start)
+        self.assertEqual(b_start, a_start)
 
         second_a = matches.matches[1]['A']
         second_b = matches.matches[1]['B']
         a_start = second_a.start_time
         b_start = second_b.start_time
-        assert a_start == datetime(2014, 3, 26, 13, 5, 45)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13, 5, 45), a_start)
+        self.assertEqual(b_start, a_start)
 
         third_a = matches.matches[2]['A']
         a_start = third_a.start_time
-        assert a_start == datetime(2014, 3, 26, 13, 10, 45)
+        self.assertEqual(datetime(2014, 3, 26, 13, 10, 45), a_start)
 
     def test_dropped_out_team(self):
         matches = load_basic_data()
 
         match = matches.matches[1]
-        assert match['A'].teams == ['WYC', 'QMS', 'LSS', 'EMM']
+        self.assertEqual(['WYC', 'QMS', 'LSS', 'EMM'], match['A'].teams)
 
         match = matches.matches[2]
-        assert match['A'].teams == [None, 'QMS', 'LSS', 'EMM']
+        self.assertEqual([None, 'QMS', 'LSS', 'EMM'], match['A'].teams)
 
     def test_period_at_start_time(self):
         match_sched = load_basic_data()
@@ -285,7 +293,7 @@ class MatchesTests(unittest.TestCase):
 
         expected = match_sched.match_periods[0]
 
-        assert period == expected
+        self.assertEqual(expected, period)
 
     def test_period_between_max_and_end_time(self):
         match_sched = load_basic_data()
@@ -296,7 +304,7 @@ class MatchesTests(unittest.TestCase):
 
         expected = match_sched.match_periods[0]
 
-        assert period == expected
+        self.assertEqual(expected, period)
 
     def test_no_period_at_max_end_time(self):
         match_sched = load_basic_data()
@@ -305,7 +313,7 @@ class MatchesTests(unittest.TestCase):
         when = datetime(2014, 3, 26, 17, 40)
         period = match_sched.period_at(when)
 
-        assert period is None
+        self.assertIsNone(period)
 
     def test_no_period_at_time(self):
         match_sched = load_basic_data()
@@ -313,7 +321,7 @@ class MatchesTests(unittest.TestCase):
         when = datetime(2013, 3, 26)
         period = match_sched.period_at(when)
 
-        assert period is None
+        self.assertIsNone(period)
 
     def test_matches_at_no_delays(self):
         the_data = get_basic_data()
@@ -341,7 +349,7 @@ class MatchesTests(unittest.TestCase):
         ]:
             with self.subTest(time=when.time()):
                 actual = list(matches.matches_at(when))
-                assert expected == actual
+                self.assertEqual(actual, expected)
 
     def test_matches_at_with_delays(self):
         matches = load_basic_data()
@@ -365,23 +373,21 @@ class MatchesTests(unittest.TestCase):
         ]:
             with self.subTest(time=when.time()):
                 actual = list(matches.matches_at(when))
-                assert expected == actual
+                self.assertEqual(actual, expected)
 
     def test_no_matches(self):
         the_data = get_basic_data()
         the_data['matches'] = None
         matches = load_data(the_data)
 
-        assert matches, "Should have at least loaded the data"
-
         n_matches = matches.n_matches()
-        assert n_matches == 0, "Number actually scheduled"
+        self.assertEqual(0, n_matches, "Number actually scheduled")
 
         n_planned_matches = matches.n_planned_league_matches
-        assert n_planned_matches == 0, "Number originally planned for the league"
+        self.assertEqual(0, n_planned_matches, "Number originally planned for the league")
 
         n_league_matches = matches.n_league_matches
-        assert n_league_matches == 0, "Number actually scheduled for the league"
+        self.assertEqual(0, n_league_matches, "Number actually scheduled for the league")
 
     def test_delay_at_no_period(self):
         match_sched = load_basic_data()
@@ -389,7 +395,7 @@ class MatchesTests(unittest.TestCase):
         when = datetime(2013, 3, 26)
         delay = match_sched.delay_at(when)
 
-        assert delay == timedelta()
+        self.assertEqual(timedelta(), delay)
 
     def test_delay_at_no_delays(self):
         the_data = get_basic_data()
@@ -399,7 +405,7 @@ class MatchesTests(unittest.TestCase):
         when = datetime(2014, 3, 26, 13, 10)
         delay = match_sched.delay_at(when)
 
-        assert delay == timedelta()
+        self.assertEqual(timedelta(), delay)
 
     def test_delay_at_before_delays(self):
         match_sched = load_basic_data()
@@ -407,7 +413,7 @@ class MatchesTests(unittest.TestCase):
         when = datetime(2014, 3, 26, 13, 1)
         delay = match_sched.delay_at(when)
 
-        assert delay == timedelta()
+        self.assertEqual(timedelta(), delay)
 
     def test_delay_at_at_delay_time(self):
         match_sched = load_basic_data()
@@ -415,7 +421,7 @@ class MatchesTests(unittest.TestCase):
         when = datetime(2014, 3, 26, 13, 2)
         delay = match_sched.delay_at(when)
 
-        assert delay == timedelta(seconds=15)
+        self.assertEqual(timedelta(seconds=15), delay)
 
     def test_basic_delay(self):
         matches = load_basic_data()
@@ -427,13 +433,13 @@ class MatchesTests(unittest.TestCase):
 
         a_start = a.start_time
         b_start = b.start_time
-        assert a_start == datetime(2014, 3, 26, 13, 5, 15)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13, 5, 15), a_start)
+        self.assertEqual(b_start, a_start)
 
         a_end = a.end_time
         b_end = b.end_time
-        assert a_end == datetime(2014, 3, 26, 13, 10, 15)
-        assert a_end == b_end
+        self.assertEqual(datetime(2014, 3, 26, 13, 10, 15), a_end)
+        self.assertEqual(b_end, a_end)
 
     def test_no_delays(self):
         the_data = get_basic_data()
@@ -441,22 +447,22 @@ class MatchesTests(unittest.TestCase):
         matches = load_data(the_data)
 
         first = matches.matches[0]
-        assert len(first) == 2
-        assert 'A' in first
-        assert 'B' in first
+        self.assertEqual(2, len(first))
+        self.assertIn('A', first)
+        self.assertIn('B', first)
 
         a = first['A']
         b = first['B']
 
         a_start = a.start_time
         b_start = b.start_time
-        assert a_start == datetime(2014, 3, 26, 13)
-        assert a_start == b_start
+        self.assertEqual(datetime(2014, 3, 26, 13), a_start)
+        self.assertEqual(b_start, a_start)
 
         a_end = a.end_time
         b_end = b.end_time
-        assert a_end == datetime(2014, 3, 26, 13, 5)
-        assert a_end == b_end
+        self.assertEqual(datetime(2014, 3, 26, 13, 5), a_end)
+        self.assertEqual(b_end, a_end)
 
     def test_two_overlapping_delays(self):
         the_data = get_basic_data()
@@ -695,13 +701,13 @@ class MatchesTests(unittest.TestCase):
         matches = load_data(the_data)
 
         n_matches = matches.n_matches()
-        assert n_matches == 2, "Number actually scheduled"
+        self.assertEqual(2, n_matches, "Number actually scheduled")
 
         n_planned_matches = matches.n_planned_league_matches
-        assert n_planned_matches == 3, "Number originally planned for the league"
+        self.assertEqual(3, n_planned_matches, "Number originally planned for the league")
 
         n_league_matches = matches.n_league_matches
-        assert n_league_matches == 2, "Number actually scheduled for the league"
+        self.assertEqual(2, n_league_matches, "Number actually scheduled for the league")
 
     def test_parse_ranges(self):
         for range_str, expected in [
@@ -714,7 +720,7 @@ class MatchesTests(unittest.TestCase):
         ]:
             with self.subTest(input=range_str):
                 actual = parse_ranges(range_str)
-                assert expected == actual, "Wrong ranges parsed"
+                self.assertEqual(expected, actual, "Wrong ranges parsed")
 
     def test_parse_bad_ranges(self):
         for range_str in [

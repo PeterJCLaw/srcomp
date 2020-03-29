@@ -87,7 +87,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
         scheduler = get_scheduler()
         game = Match(2, "Match 2", 'A', [], None, None, None, False)
         winners = scheduler.get_winners(game)
-        assert winners == [UNKNOWABLE_TEAM] * 2
+        self.assertEqual([UNKNOWABLE_TEAM] * 2, winners)
 
     def test_knockout_match_winners_simple(self):
         knockout_positions = {
@@ -103,7 +103,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
         game = Match(2, "Match 2", 'A', [], None, None, None, False)
         winners = scheduler.get_winners(game)
 
-        assert set(winners) == set(['GHI', 'JKL'])
+        self.assertEqual(set(winners), set(['GHI', 'JKL']))
 
     def test_knockout_match_winners_irrelevant_tie_1(self):
         knockout_positions = {
@@ -119,7 +119,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
         game = Match(2, "Match 2", 'A', [], None, None, None, False)
         winners = scheduler.get_winners(game)
 
-        assert set(winners) == set(['GHI', 'JKL'])
+        self.assertEqual(set(winners), set(['GHI', 'JKL']))
 
     def test_knockout_match_winners_irrelevant_tie_2(self):
         knockout_positions = {
@@ -144,7 +144,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
         game = Match(2, "Match 2", 'A', [], None, None, None, False)
         winners = scheduler.get_winners(game)
 
-        assert set(winners) == set(['GHI', 'JKL'])
+        self.assertEqual(set(winners), set(['GHI', 'JKL']))
 
     def test_knockout_match_winners_tie(self):
         knockout_positions = {
@@ -171,8 +171,10 @@ class KnockoutSchedulerTests(unittest.TestCase):
         game = Match(2, "Match 2", 'A', [], None, None, None, False)
         winners = scheduler.get_winners(game)
 
-        assert set(winners) == set(['GHI', 'JKL']), (
-            "Should used the league positions to resolve the tie"
+        self.assertEqual(
+            set(winners),
+            set(['GHI', 'JKL']),
+            "Should used the league positions to resolve the tie",
         )
 
     def test_first_round_before_league_end(self):
@@ -190,7 +192,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
         scheduler = get_scheduler(matches, positions=positions)
 
         def seeder(*args):
-            assert args[0] == 4, "Wrong number of teams"
+            self.assertEqual(args[0], 4, "Wrong number of teams")
             return [[0, 1, 2, 3]]
 
         # Mock the random (even thought it's not really random)
@@ -201,17 +203,21 @@ class KnockoutSchedulerTests(unittest.TestCase):
 
         knockout_rounds = scheduler.knockout_rounds
 
-        assert len(knockout_rounds) == 1, "Should be finals only"
+        self.assertEqual(1, len(knockout_rounds), "Should be finals only")
         finals = knockout_rounds[0]
 
-        assert len(finals) == 1, "Should be one final"
+        self.assertEqual(1, len(finals), "Should be one final")
         final = finals[0]
         final_teams = final.teams
 
         # No scores yet -- should just list as ???
         expected_teams = [UNKNOWABLE_TEAM] * 4
 
-        assert expected_teams == final_teams, "Should not show teams until league complete"
+        self.assertEqual(
+            expected_teams,
+            final_teams,
+            "Should not show teams until league complete",
+        )
 
     def assertFirstRoundSingleDropoutFromFirstMatch(self, teams):
         positions = OrderedDict()
@@ -229,8 +235,8 @@ class KnockoutSchedulerTests(unittest.TestCase):
         matches = [{}, {}]
         scheduler = get_scheduler(matches, positions=positions, teams=teams)
 
-        def seeder(*args):
-            assert args[0] == 8, "Wrong number of teams"
+        def seeder(n_teams, *args):
+            self.assertEqual(8, n_teams, "Wrong number of teams")
             return [[0, 1, 2, 3], [4, 5, 6, 7]]
 
         # Mock the random (even thought it's not really random)
@@ -242,29 +248,29 @@ class KnockoutSchedulerTests(unittest.TestCase):
         knockout_rounds = scheduler.knockout_rounds
         period = scheduler.period
 
-        assert len(knockout_rounds) == 2, "Should be semis and finals"
+        self.assertEqual(2, len(knockout_rounds), "Should be semis and finals")
         semis = knockout_rounds[0]
 
-        assert len(semis) == 2, "Should be two semis"
+        self.assertEqual(2, len(semis), "Should be two semis")
         semi_0 = semis[0]
         semi_0_teams = semi_0.teams
         # Thanks to our mocking of the seeder...
         expected_0_teams = list(positions.keys())[1:5]  # 0th team has dropped out
 
-        assert semi_0.num == 2, "Match number should carry on above league matches"
-        assert semi_0.type == MatchType.knockout
-        assert semi_0_teams == expected_0_teams
+        self.assertEqual(2, semi_0.num, "Match number should carry on above league matches")
+        self.assertEqual(MatchType.knockout, semi_0.type)
+        self.assertEqual(expected_0_teams, semi_0_teams)
         semi_0_name = semi_0.display_name
-        assert semi_0_name == "Semi 1 (#2)"  # labelling starts at 1
+        self.assertEqual("Semi 1 (#2)", semi_0_name)   # labelling starts at 1
 
         period_matches = period.matches
         expected_matches = [{'A': m} for r in knockout_rounds for m in r]
 
-        assert period_matches == expected_matches
+        self.assertEqual(expected_matches, period_matches)
         final = period_matches[2]['A']
         final_teams = final.teams
 
-        assert final_teams == [UNKNOWABLE_TEAM] * 4
+        self.assertEqual([UNKNOWABLE_TEAM] * 4, final_teams)
 
     def test_first_round_early_dropout_from_first_match(self):
         teams = defaultdict(lambda: Team(None, None, False, None))
@@ -294,8 +300,8 @@ class KnockoutSchedulerTests(unittest.TestCase):
         matches = [{}, {}]
         scheduler = get_scheduler(matches, positions=positions, teams=teams)
 
-        def seeder(*args):
-            assert args[0] == 8, "Wrong number of teams"
+        def seeder(n_teams, *args):
+            self.assertEqual(8, n_teams, "Wrong number of teams")
             return [[0, 1, 2, 3], [4, 5, 6, 7]]
 
         # Mock the random (even thought it's not really random)
@@ -307,40 +313,40 @@ class KnockoutSchedulerTests(unittest.TestCase):
         knockout_rounds = scheduler.knockout_rounds
         period = scheduler.period
 
-        assert len(knockout_rounds) == 2, "Should be semis and finals"
+        self.assertEqual(2, len(knockout_rounds), "Should be semis and finals")
         semis = knockout_rounds[0]
 
-        assert len(semis) == 2, "Should be two semis"
+        self.assertEqual(2, len(semis), "Should be two semis")
         semi_0 = semis[0]
         semi_0_teams = semi_0.teams
         # Thanks to our mocking of the seeder...
         expected_0_teams = list(positions.keys())[:4]  # 5th team has dropped out
 
-        assert semi_0.num == 2, "Match number should carry on above league matches"
-        assert semi_0.type == MatchType.knockout
-        assert semi_0_teams == expected_0_teams
+        self.assertEqual(2, semi_0.num, "Match number should carry on above league matches")
+        self.assertEqual(MatchType.knockout, semi_0.type)
+        self.assertEqual(expected_0_teams, semi_0_teams)
         semi_0_name = semi_0.display_name
-        assert semi_0_name == "Semi 1 (#2)"  # labelling starts at 1
+        self.assertEqual("Semi 1 (#2)", semi_0_name)  # labelling starts at 1
 
         semi_1 = semis[1]
         semi_1_teams = semi_1.teams
         # Thanks to our mocking of the seeder...
         expected_1_teams = list(positions.keys())[5:]  # 5th team has dropped out
 
-        assert semi_1.num == 3, "Match number should carry on above league matches"
-        assert semi_1.type == MatchType.knockout
-        assert semi_1_teams == expected_1_teams
+        self.assertEqual(3, semi_1.num, "Match number should carry on above league matches")
+        self.assertEqual(MatchType.knockout, semi_1.type)
+        self.assertEqual(expected_1_teams, semi_1_teams)
         semi_1_name = semi_1.display_name
-        assert semi_1_name == "Semi 2 (#3)"  # labelling starts at 1
+        self.assertEqual("Semi 2 (#3)", semi_1_name)  # labelling starts at 1
 
         period_matches = period.matches
         expected_matches = [{'A': m} for r in knockout_rounds for m in r]
 
-        assert period_matches == expected_matches
+        self.assertEqual(expected_matches, period_matches)
         final = period_matches[2]['A']
         final_teams = final.teams
 
-        assert final_teams == [UNKNOWABLE_TEAM] * 4
+        self.assertEqual(final_teams, [UNKNOWABLE_TEAM] * 4)
 
     def test_first_round_early_dropout_from_second_match(self):
         teams = defaultdict(lambda: Team(None, None, False, None))
@@ -365,7 +371,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
         knockout_rounds = scheduler.knockout_rounds
         num_rounds = len(knockout_rounds)
 
-        assert num_rounds == 3, "Should be quarters, semis and finals"
+        self.assertEqual(3, num_rounds, "Should be quarters, semis and finals")
 
         start_times = [m['A'].start_time for m in scheduler.period.matches]
 
@@ -389,7 +395,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
             datetime(2014, 3, 27, 13, 31, 12),
         ]
 
-        assert expected_times == start_times, "Wrong start times"
+        self.assertEqual(expected_times, start_times, "Wrong start times")
 
     def test_timings_with_delays(self):
         positions = OrderedDict()
@@ -413,7 +419,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
         knockout_rounds = scheduler.knockout_rounds
         num_rounds = len(knockout_rounds)
 
-        assert num_rounds == 3, "Should be quarters, semis and finals"
+        self.assertEqual(3, num_rounds, "Should be quarters, semis and finals")
 
         start_times = [m['A'].start_time for m in scheduler.period.matches]
 
@@ -437,7 +443,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
             datetime(2014, 3, 27, 13, 41, 12),
         ]
 
-        assert expected_times == start_times, "Wrong start times"
+        self.assertEqual(expected_times, start_times, "Wrong start times")
 
     def test_timings_with_delays_during_gaps(self):
         positions = OrderedDict()
@@ -461,7 +467,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
         knockout_rounds = scheduler.knockout_rounds
         num_rounds = len(knockout_rounds)
 
-        assert num_rounds == 3, "Should be quarters, semis and finals"
+        self.assertEqual(3, num_rounds, "Should be quarters, semis and finals")
 
         start_times = [m['A'].start_time for m in scheduler.period.matches]
 
@@ -486,4 +492,4 @@ class KnockoutSchedulerTests(unittest.TestCase):
             datetime(2014, 3, 27, 13, 41, 12),
         ]
 
-        assert expected_times == start_times, "Wrong start times"
+        self.assertEqual(expected_times, start_times, "Wrong start times")

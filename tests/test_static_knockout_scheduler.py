@@ -179,7 +179,7 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
         for i, e in enumerate(expected_matches):
             a = period.matches[i]
 
-            assert e == a, "Match {0} in the knockouts".format(i)
+            self.assertEqual(e, a, "Match {0} in the knockouts".format(i))
 
     def test_four_teams_before(self):
         # Add an unscored league match so that we don't appear to have played them all
@@ -260,7 +260,7 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
         config = get_four_team_config()
         qualifier_teams = config['matches'][0][0]['teams']
 
-        assert qualifier_teams[-1] == 'S10', "Setup self-check failed!"
+        self.assertEqual('S10', qualifier_teams[-1], "Setup self-check failed!")
         qualifier_teams[-1] = None
 
         expected_matches = build_5_matches([

@@ -2,70 +2,74 @@ import unittest
 
 from sr.comp.scores import TeamScore
 
+# Note: these tests deliberately have inline comparisons rather than making
+# "better" use of the various helpers in `unittest.TestCase` because we're
+# testing that the comparisons work and this is clearer what's being tested.
+
 
 class TeamScoreTests(unittest.TestCase):
     def test_empty_ctor(self):
         ts = TeamScore()
-        assert ts.game_points == 0
-        assert ts.league_points == 0
+        self.assertTrue(ts.game_points == 0)
+        self.assertTrue(ts.league_points == 0)
 
     def test_ctor_args(self):
         ts = TeamScore(game=5, league=4.2)
-        assert ts.game_points == 5
-        assert ts.league_points == 4.2
+        self.assertTrue(ts.game_points == 5)
+        self.assertTrue(ts.league_points == 4.2)
 
     def test_not_equal_none(self):
         ts = TeamScore(game=5, league=4.2)
-        assert not ts == None  # noqa:E711  # intentional None equality check
-        assert ts != None  # noqa:E711  # intentional None equality check
+        self.assertFalse(ts == None)  # noqa:E711  # intentional None equality check
+        self.assertTrue(ts != None)  # noqa:E711  # intentional None equality check
 
     def test_not_equal_empty(self):
         ts1 = TeamScore()
         ts2 = TeamScore(game=5, league=4.2)
-        assert ts1 != ts2
-        assert ts2 != ts1
-        assert not ts1 == ts2
-        assert not ts2 == ts1
+        self.assertTrue(ts1 != ts2)
+        self.assertTrue(ts2 != ts1)
+        self.assertFalse(ts1 == ts2)
+        self.assertFalse(ts2 == ts1)
 
     def test_equal_self_empty(self):
         ts = TeamScore()
-        assert ts == ts
-        assert not ts != ts
+        self.assertTrue(ts == ts)
+        self.assertFalse(ts != ts)
 
     def test_equal_self(self):
         ts = TeamScore(game=5, league=4.5)
-        assert ts == ts
-        assert not ts != ts
+        self.assertTrue(ts == ts)
+        self.assertFalse(ts != ts)
 
     def test_equal_other_same_values(self):
         ts1 = TeamScore(game=5, league=4.5)
         ts2 = TeamScore(game=5, league=4.5)
-        assert ts1 == ts2
-        assert ts2 == ts1
-        assert not ts1 != ts2
-        assert not ts2 != ts1
+        self.assertTrue(ts1 == ts2)
+        self.assertTrue(ts2 == ts1)
+        self.assertFalse(ts1 != ts2)
+        self.assertFalse(ts2 != ts1)
 
     def test_not_equal_other_similar_values(self):
         ts1 = TeamScore(game=5, league=4)
         ts2 = TeamScore(game=5, league=4.5)
-        assert ts1 != ts2
-        assert ts2 != ts1
-        assert not ts1 == ts2
-        assert not ts2 == ts1
+        self.assertTrue(ts1 != ts2)
+        self.assertTrue(ts2 != ts1)
+        self.assertFalse(ts1 == ts2)
+        self.assertFalse(ts2 == ts1)
 
 
 class TeamScoreRichComparisonTests(unittest.TestCase):
     # Scores with more points are greater than those with fewer
 
     def assertRichComparisons(self, smaller, larger):
-        assert smaller < larger
-        assert smaller <= larger
-        assert larger > smaller
-        assert larger >= smaller
-        assert not smaller > larger
-        assert not smaller >= larger
-        assert not larger < smaller
-        assert not larger <= smaller
+        self.assertTrue(smaller < larger)
+        self.assertTrue(smaller <= larger)
+        self.assertTrue(larger > smaller)
+        self.assertTrue(larger >= smaller)
+        self.assertFalse(smaller > larger)
+        self.assertFalse(smaller >= larger)
+        self.assertFalse(larger < smaller)
+        self.assertFalse(larger <= smaller)
 
     def test_assertion_helper(self):
         self.assertRichComparisons(1, 2)
@@ -85,18 +89,18 @@ class TeamScoreRichComparisonTests(unittest.TestCase):
 
     def test_self(self):
         ts = TeamScore(game=5, league=4)
-        assert ts >= ts
-        assert ts <= ts
-        assert not ts > ts
-        assert not ts < ts
+        self.assertTrue(ts >= ts)
+        self.assertTrue(ts <= ts)
+        self.assertFalse(ts > ts)
+        self.assertFalse(ts < ts)
 
     def test_same_values(self):
         ts1 = TeamScore(game=5, league=4)
         ts2 = TeamScore(game=5, league=4)
-        assert ts1 >= ts2
-        assert ts1 <= ts2
-        assert not ts1 > ts2
-        assert not ts1 < ts2
+        self.assertTrue(ts1 >= ts2)
+        self.assertTrue(ts1 <= ts2)
+        self.assertFalse(ts1 > ts2)
+        self.assertFalse(ts1 < ts2)
 
     def test_same_game(self):
         ts1 = TeamScore(game=5, league=4)

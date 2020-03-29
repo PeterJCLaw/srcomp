@@ -36,7 +36,7 @@ class CurrentTimeTests(MatchPeriodClockTestsBase):
 
         curr_time = clock.current_time
 
-        assert 0 == curr_time, "Should start at the start of the period"
+        self.assertEqual(0, curr_time, "Should start at the start of the period")
 
     def test_at_start_delayed(self):
         period = self.build_match_period(0, 4)
@@ -44,7 +44,7 @@ class CurrentTimeTests(MatchPeriodClockTestsBase):
 
         curr_time = clock.current_time
 
-        assert 1 == curr_time, "Start time should include delays"
+        self.assertEqual(1, curr_time, "Start time should include delays")
 
     def test_at_start_delayed_twice(self):
         period = self.build_match_period(0, 10)
@@ -56,7 +56,7 @@ class CurrentTimeTests(MatchPeriodClockTestsBase):
 
         curr_time = clock.current_time
 
-        assert 5 == curr_time, "Start time should include cumilative delays"
+        self.assertEqual(5, curr_time, "Start time should include cumilative delays")
 
     # At end
 
@@ -67,7 +67,7 @@ class CurrentTimeTests(MatchPeriodClockTestsBase):
         clock.advance_time(1)
 
         curr_time = clock.current_time
-        assert 1 == curr_time, "Should be able to query time when at end"
+        self.assertEqual(1, curr_time, "Should be able to query time when at end")
 
     def test_at_max_end_no_delay(self):
         period = self.build_match_period(0, 1, 2)
@@ -87,8 +87,11 @@ class CurrentTimeTests(MatchPeriodClockTestsBase):
         clock.advance_time(1)
 
         curr_time = clock.current_time
-        assert 2 == curr_time, "Should be able to query time when at max_end" \
-                               " due to delays"
+        self.assertEqual(
+            2,
+            curr_time,
+            "Should be able to query time when at max_end due to delays",
+        )
 
     # Beyond end
 
@@ -128,17 +131,17 @@ class AdvanceTimeTests(MatchPeriodClockTestsBase):
         period = self.build_match_period(0, 10)
         clock = MatchPeriodClock(period, [])
         curr_time = clock.current_time
-        assert 0 == curr_time, "Should start at the start of the period"
+        self.assertEqual(0, curr_time, "Should start at the start of the period")
 
         clock.advance_time(1)
 
         curr_time = clock.current_time
-        assert 1 == curr_time, "Time should advance by the given amount (1)"
+        self.assertEqual(1, curr_time, "Time should advance by the given amount (1)")
 
         clock.advance_time(2)
 
         curr_time = clock.current_time
-        assert 3 == curr_time, "Time should advance by the given amount (2)"
+        self.assertEqual(3, curr_time, "Time should advance by the given amount (2)")
 
     def test_with_delays(self):
         period = self.build_match_period(0, 50)
@@ -148,31 +151,47 @@ class AdvanceTimeTests(MatchPeriodClockTestsBase):
         ]
         clock = MatchPeriodClock(period, delays)
         curr_time = clock.current_time
-        assert 0 == curr_time, "Should start at the start of the period"
+        self.assertEqual(0, curr_time, "Should start at the start of the period")
 
         clock.advance_time(1)  # plus a delay of 2 at time=1
 
         curr_time = clock.current_time
-        assert 2 == curr_time, "Time should advance by the given amount (1)" \
-                               " plus the size of the delay it meets"
+        self.assertEqual(
+            2,
+            curr_time,
+            "Time should advance by the given amount (1) plus the size of the "
+            "delay it meets",
+        )
 
         clock.advance_time(2)
 
         curr_time = clock.current_time
-        assert 4 == curr_time, "Time should advance by the given amount (2)" \
-                               " only; there are no intervening delays"
+        self.assertEqual(
+            4,
+            curr_time,
+            "Time should advance by the given amount (2) only; there are no "
+            "intervening delays",
+        )
 
         clock.advance_time(2)  # takes us to 6, plus a delay of 2 at time=5
 
         curr_time = clock.current_time
-        assert 8 == curr_time, "Time should advance by the given amount (2)" \
-                               " plus the size of the intervening delay (2)"
+        self.assertEqual(
+            8,
+            curr_time,
+            "Time should advance by the given amount (2) plus the size of the "
+            "intervening delay (2)",
+        )
 
         clock.advance_time(2)
 
         curr_time = clock.current_time
-        assert 10 == curr_time, "Time should advance by the given amount (2)" \
-                                " only; there are no intervening delays"
+        self.assertEqual(
+            10,
+            curr_time,
+            "Time should advance by the given amount (2) only; there are no "
+            "intervening delays",
+        )
 
     def test_overlapping_delays(self):
         period = self.build_match_period(0, 10)
@@ -182,13 +201,17 @@ class AdvanceTimeTests(MatchPeriodClockTestsBase):
         ]
         clock = MatchPeriodClock(period, delays)
         curr_time = clock.current_time
-        assert 0 == curr_time, "Should start at the start of the period"
+        self.assertEqual(0, curr_time, "Should start at the start of the period")
 
         clock.advance_time(2)  # plus a total delay of 3
 
         curr_time = clock.current_time
-        assert 5 == curr_time, "Time should advance by the given amount (2)" \
-                               " plus the size of the intervening delays (1+2)"
+        self.assertEqual(
+            5,
+            curr_time,
+            "Time should advance by the given amount (2) plus the size of the "
+            "intervening delays (1+2)",
+        )
 
     def test_touching_delays(self):
         period = self.build_match_period(0, 10)
@@ -198,13 +221,17 @@ class AdvanceTimeTests(MatchPeriodClockTestsBase):
         ]
         clock = MatchPeriodClock(period, delays)
         curr_time = clock.current_time
-        assert 0 == curr_time, "Should start at the start of the period"
+        self.assertEqual(0, curr_time, "Should start at the start of the period")
 
         clock.advance_time(2)  # plus a total delay of 2
 
         curr_time = clock.current_time
-        assert 4 == curr_time, "Time should advance by the given amount (2)" \
-                               " plus the size of the intervening delays (1+1)"
+        self.assertEqual(
+            4,
+            curr_time,
+            "Time should advance by the given amount (2) plus the size of the "
+            "intervening delays (1+1)",
+        )
 
 
 class SlotsTests(MatchPeriodClockTestsBase):
@@ -213,43 +240,43 @@ class SlotsTests(MatchPeriodClockTestsBase):
         clock = MatchPeriodClock(period, [])
         slots = list(clock.iterslots(1))
         expected = list(range(5))
-        assert expected == slots
+        self.assertEqual(expected, slots)
 
     def test_no_delays_2(self):
         period = self.build_match_period(0, 4)
         clock = MatchPeriodClock(period, [])
         slots = list(clock.iterslots(2))
         expected = [0, 2, 4]
-        assert expected == slots
+        self.assertEqual(expected, slots)
 
     def test_delay_before(self):
         period = self.build_match_period(0, 4)
         clock = MatchPeriodClock(period, [Delay(time=-1, delay=2)])
 
         curr_time = clock.current_time
-        assert 0 == curr_time, "Should start at the start of the period"
+        self.assertEqual(0, curr_time, "Should start at the start of the period")
 
         slots = list(clock.iterslots(1))
         expected = list(range(5))
-        assert expected == slots
+        self.assertEqual(expected, slots)
 
     def test_delay_after(self):
         period = self.build_match_period(0, 4)
         clock = MatchPeriodClock(period, [Delay(time=6, delay=2)])
 
         curr_time = clock.current_time
-        assert 0 == curr_time, "Should start at the start of the period"
+        self.assertEqual(0, curr_time, "Should start at the start of the period")
 
         slots = list(clock.iterslots(1))
         expected = list(range(5))
-        assert expected == slots
+        self.assertEqual(expected, slots)
 
     def test_delay_during(self):
         period = self.build_match_period(0, 4, 5)
         clock = MatchPeriodClock(period, [Delay(time=1, delay=3)])
         slots = list(clock.iterslots(2))
         expected = [0, 5]
-        assert expected == slots
+        self.assertEqual(expected, slots)
 
     def test_extra_gap(self):
         period = self.build_match_period(0, 6)
@@ -264,4 +291,4 @@ class SlotsTests(MatchPeriodClockTestsBase):
                 # Now at 5
                 first_time = False
         expected = [0, 5]
-        assert expected == slots
+        self.assertEqual(expected, slots)

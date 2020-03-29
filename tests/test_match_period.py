@@ -12,4 +12,4 @@ class MatchPeriodTests(unittest.TestCase):
 
         string = str(period)
 
-        assert "desc (13:12–20:06)" == string, "Wrong string"
+        self.assertEqual("desc (13:12–20:06)", string, "Wrong string")

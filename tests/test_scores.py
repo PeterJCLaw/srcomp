@@ -19,8 +19,7 @@ class ScoresTests(unittest.TestCase):
 
             scores = Scores('', None, None, 0)
 
-            lsm = scores.last_scored_match
-            assert expected == lsm
+            self.assertEqual(expected, scores.last_scored_match)
 
     def test_no_scores_yet(self):
         self.assertScores(None, None, None, None)

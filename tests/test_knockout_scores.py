@@ -22,7 +22,7 @@ class KnockoutScoresTests(unittest.TestCase):
             ('ABC', 4),
         ])
 
-        assert expected == positions
+        self.assertEqual(expected, positions)
 
     def test_positions_tie_bottom(self):
         knockout_points = {
@@ -41,7 +41,7 @@ class KnockoutScoresTests(unittest.TestCase):
             ('DEF', 3),
         ])
 
-        assert expected == positions
+        self.assertEqual(expected, positions)
 
     def test_positions_tie_top_with_league_positions(self):
         knockout_points = {
@@ -66,7 +66,7 @@ class KnockoutScoresTests(unittest.TestCase):
             ('ABC', 4),
         ])
 
-        assert expected == positions
+        self.assertEqual(expected, positions)
 
     def test_knockout_match_winners_tie(self):
         knockout_points = {
@@ -93,4 +93,4 @@ class KnockoutScoresTests(unittest.TestCase):
             ('ABC', 4),
         ])
 
-        assert expected == positions
+        self.assertEqual(expected, positions)

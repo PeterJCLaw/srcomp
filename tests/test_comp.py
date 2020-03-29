@@ -14,19 +14,21 @@ class CompTests(unittest.TestCase):
 
     def test_load(self):
         "Test that loading the dummy state works"
-        assert self.srcomp_instance.root
-        assert self.srcomp_instance.state
-        assert self.srcomp_instance.teams
-        assert self.srcomp_instance.schedule
-        assert self.srcomp_instance.scores
-        assert self.srcomp_instance.arenas
-        assert self.srcomp_instance.corners
-        assert isinstance(self.srcomp_instance.awards, dict)
+        self.assertIsNotNone(self.srcomp_instance.root)
+        self.assertIsNotNone(self.srcomp_instance.state)
+        self.assertIsNotNone(self.srcomp_instance.teams)
+        self.assertIsNotNone(self.srcomp_instance.schedule)
+        self.assertIsNotNone(self.srcomp_instance.scores)
+        self.assertIsNotNone(self.srcomp_instance.arenas)
+        self.assertIsNotNone(self.srcomp_instance.corners)
+        self.assertIsInstance(self.srcomp_instance.awards, dict)
 
     def test_timezone(self):
         # Test that one can get the timezone from the dummy state
 
-        assert (
-            self.srcomp_instance.timezone.utcoffset(datetime.datetime(2014, 4, 26)) ==
-            datetime.timedelta(seconds=3600)
+        self.assertEqual(
+            datetime.timedelta(seconds=3600),
+            self.srcomp_instance.timezone.utcoffset(
+                datetime.datetime(2014, 4, 26),
+            ),
         )
