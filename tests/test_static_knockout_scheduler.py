@@ -160,13 +160,37 @@ def get_scheduler(
 
 
 def build_5_matches(places):
-    return [
-        {'A': Match(0, "Qualifier 1 (#0)", 'A', places[0], datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(1, "Quarter 2 (#1)", 'A', places[1], datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(2, "Semi 1 (#2)", 'A', places[2], datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(3, "Semi 2 (#3)", 'A', places[3], datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(4, "Final (#4)", 'A', places[4], datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5), MatchType.knockout, use_resolved_ranking=False)},
+    if len(places) != 5:
+        raise ValueError("Bad list of team places")
+
+    names = [
+        "Qualifier 1 (#{})",
+        "Quarter 2 (#{})",
+        "Semi 1 (#{})",
+        "Semi 2 (#{})",
+        "Final (#{})",
     ]
+    times = [
+        (datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35)),
+        (datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40)),
+        (datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50)),
+        (datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55)),
+        (datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5)),
+    ]
+
+    matches = [
+        Match(idx, name.format(idx), 'A', teams, start, end, MatchType.knockout, True)
+        for (idx, name), (start, end), teams in zip(
+            enumerate(names),
+            times,
+            places,
+        )
+    ]
+
+    # Final has different resolution expectations
+    matches[-1] = matches[-1]._replace(use_resolved_ranking=False)
+
+    return [{'A': match} for match in matches]
 
 
 class StaticKnockoutSchedulerTests(unittest.TestCase):
