@@ -49,7 +49,7 @@ class ValidateMatchTests(unittest.TestCase):
         assert len(errors) == 0
 
     def test_empty_corners(self):
-        """ Empty corner zones are represented by 'None' """
+        # Empty corner zones are represented by 'None'
         teams_a = ['ABC', 'DEF', None, 'JKL']
         teams_b = ['LMN', 'OPQ', None, None]
         teams = set(['ABC', 'DEF', 'JKL', 'LMN', 'OPQ'])
