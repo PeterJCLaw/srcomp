@@ -22,9 +22,6 @@ setup(
     setup_requires=[
         'Sphinx >=1.3, <2',
     ],
-    tests_require=[
-        'nose >=1.3, <2',
-    ],
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
