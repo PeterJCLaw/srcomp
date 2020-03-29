@@ -15,3 +15,5 @@ script:
   # depend on it
   - pip install pylint
   - script/linting/pylint
+  - pip install -r script/linting/requirements.txt
+  - script/linting/lint
