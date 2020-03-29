@@ -1,7 +1,5 @@
 import unittest
 
-from nose.tools import eq_
-
 from sr.comp.knockout_scheduler.stable_random import Random
 
 # Tests primarily to ensure stable behaviour across Python versions
@@ -13,7 +11,7 @@ class StableRandomTests(unittest.TestCase):
         rnd.seed(b'this is a seed')
         bits = rnd.getrandbits(32)
 
-        eq_(bits, 4025750249)
+        self.assertEqual(4025750249, bits)
 
     def test_seeds_differ(self):
         # A different seed than test_getrandbits above
@@ -21,14 +19,14 @@ class StableRandomTests(unittest.TestCase):
         rnd.seed(b'this is another seed')
         bits = rnd.getrandbits(32)
 
-        eq_(bits, 682087810)
+        self.assertEqual(682087810, bits)
 
     def test_random(self):
         rnd = Random()
         rnd.seed(b'this is a seed')
         num = rnd.random()
 
-        eq_(num, 0.9373180216643959)
+        self.assertEqual(0.9373180216643959, num)
 
     def test_shuffle(self):
         rnd = Random()
@@ -39,4 +37,4 @@ class StableRandomTests(unittest.TestCase):
 
         expected = [15, 3, 10, 2, 11, 1, 13, 5, 4, 12, 7, 0, 8, 9, 6, 14]
 
-        eq_(numbers, expected)
+        self.assertEqual(expected, numbers)

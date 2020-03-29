@@ -4,7 +4,6 @@ from collections import defaultdict
 from unittest import mock
 
 from league_ranker import calc_positions, calc_ranked_points
-from nose.tools import eq_
 
 from sr.comp.match_period import Match, MatchPeriod, MatchType
 from sr.comp.matches import MatchSchedule
@@ -76,7 +75,7 @@ class TiebreakerTests(unittest.TestCase):
 
         schedule.add_tiebreaker(scores, datetime.datetime(2014, 4, 25, 13, 0))
 
-        assert schedule.tiebreaker
+        self.assertIsNotNone(schedule.tiebreaker)
 
         start_time = datetime.datetime(2014, 4, 25, 13, 0)
         end_time = datetime.datetime(2014, 4, 25, 13, 5)
@@ -94,12 +93,16 @@ class TiebreakerTests(unittest.TestCase):
             ),
         }
 
-        eq_(schedule.matches[-1], tiebreaker_match)
+        self.assertEqual(tiebreaker_match, schedule.matches[-1])
 
         last_period = schedule.match_periods[-1]
         last_period_matches = last_period.matches
 
-        assert last_period_matches == [tiebreaker_match], "Wrong matches in last period"
+        self.assertEqual(
+            [tiebreaker_match],
+            last_period_matches,
+            "Wrong matches in last period",
+        )
 
         last_period_matches.pop()  # simplify the next comparison
 
@@ -108,7 +111,7 @@ class TiebreakerTests(unittest.TestCase):
             'Tiebreaker', [], MatchType.tiebreaker,
         )
 
-        assert last_period == expected_period, "Wrong last period"
+        self.assertEqual(expected_period, last_period, "Wrong last period")
 
     def test_no_tiebreaker_if_winner(self):
         schedule = make_schedule()
@@ -120,7 +123,7 @@ class TiebreakerTests(unittest.TestCase):
         })
 
         schedule.add_tiebreaker(scores, datetime.datetime(2014, 4, 25, 13, 0))
-        eq_(schedule.n_matches(), 1)
+        self.assertEqual(1, schedule.n_matches())
 
         with self.assertRaises(AttributeError):
             schedule.tiebreaker
@@ -134,7 +137,7 @@ class TiebreakerTests(unittest.TestCase):
         scores.knockout.ranked_points = {}
 
         schedule.add_tiebreaker(scores, datetime.datetime(2014, 4, 25, 13, 0))
-        eq_(schedule.n_matches(), 1)
+        self.assertEqual(1, schedule.n_matches())
 
         with self.assertRaises(AttributeError):
             schedule.tiebreaker
@@ -145,8 +148,8 @@ class TiebreakerTests(unittest.TestCase):
         expected = schedule.matches[0]['A']
         final_info = schedule.final_match
 
-        assert expected.display_name == 'Match 0', "Sanity check"
-        assert expected == final_info
+        self.assertEqual('Match 0', expected.display_name, "Sanity check")
+        self.assertEqual(final_info, expected)
 
     def test_final_match_with_tiebreaker(self):
         schedule = make_schedule()
@@ -161,5 +164,5 @@ class TiebreakerTests(unittest.TestCase):
         expected = schedule.matches[1]['A']
         final_info = schedule.final_match
 
-        assert expected.display_name == 'Tiebreaker (#1)', "Sanity check"
-        assert expected == final_info
+        self.assertEqual('Tiebreaker (#1)', expected.display_name, "Sanity check")
+        self.assertEqual(final_info, expected)
