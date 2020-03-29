@@ -1,3 +1,4 @@
+import unittest
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from unittest import mock
@@ -117,7 +118,8 @@ def get_scheduler(
         positions['III'] = 9
         positions['JJJ'] = 10
 
-    assert sorted(positions.keys()) == TLAs, "Must use common TLAs"
+    if sorted(positions.keys()) != TLAs:
+        raise ValueError("Must use common TLAs")
 
     if teams is None:
         teams = {x: Team(x, x, False, None) for x in positions.keys()}
@@ -167,251 +169,241 @@ def build_5_matches(places):
     ]
 
 
-def assertMatches(expected_matches, **kwargs):
-    scheduler = get_scheduler(**kwargs)
-    scheduler.add_knockouts()
+class StaticKnockoutSchedulerTests(unittest.TestCase):
+    def assertMatches(self, expected_matches, **kwargs):
+        scheduler = get_scheduler(**kwargs)
+        scheduler.add_knockouts()
 
-    period = scheduler.period
+        period = scheduler.period
 
-    for i, e in enumerate(expected_matches):
-        a = period.matches[i]
+        for i, e in enumerate(expected_matches):
+            a = period.matches[i]
 
-        assert e == a, "Match {0} in the knockouts".format(i)
+            self.assertEqual(e, a, "Match {0} in the knockouts".format(i))
 
+    def test_four_teams_before(self):
+        # Add an unscored league match so that we don't appear to have played them all
+        league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False)}]
 
-def test_four_teams_before():
-    # Add an unscored league match so that we don't appear to have played them all
-    league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False)}]
+        expected = [
+            {'A': Match(1, "Qualifier 1 (#1)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True)},
+            {'A': Match(2, "Quarter 2 (#2)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True)},
+            {'A': Match(3, "Semi 1 (#3)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True)},
+            {'A': Match(4, "Semi 2 (#4)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True)},
+            {'A': Match(5, "Final (#5)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5), MatchType.knockout, use_resolved_ranking=False)},
+        ]
 
-    expected = [
-        {'A': Match(1, "Qualifier 1 (#1)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(2, "Quarter 2 (#2)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(3, "Semi 1 (#3)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(4, "Semi 2 (#4)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(5, "Final (#5)", 'A', [UNKNOWABLE_TEAM] * 4, datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5), MatchType.knockout, use_resolved_ranking=False)},
-    ]
+        self.assertMatches(
+            expected,
+            matches_config=get_four_team_config(),
+            matches=league_matches,
+        )
 
-    assertMatches(
-        expected,
-        matches_config=get_four_team_config(),
-        matches=league_matches,
-    )
+    def test_four_teams_start(self):
+        expected_matches = build_5_matches([
+            ['CCC', 'EEE', 'HHH', 'JJJ'],
+            ['DDD', 'FFF', 'GGG', 'III'],
+            ['BBB'] + [UNKNOWABLE_TEAM] * 3,
+            ['AAA'] + [UNKNOWABLE_TEAM] * 3,
+            [UNKNOWABLE_TEAM] * 4,
+        ])
 
+        self.assertMatches(
+            expected_matches,
+            matches_config=get_four_team_config(),
+        )
 
-def test_four_teams_start():
-    expected_matches = build_5_matches([
-        ['CCC', 'EEE', 'HHH', 'JJJ'],
-        ['DDD', 'FFF', 'GGG', 'III'],
-        ['BBB'] + [UNKNOWABLE_TEAM] * 3,
-        ['AAA'] + [UNKNOWABLE_TEAM] * 3,
-        [UNKNOWABLE_TEAM] * 4,
-    ])
+    def test_four_teams_start_only_progressing_winner_from_quarters(self):
+        config = get_four_team_config()
 
-    assertMatches(
-        expected_matches,
-        matches_config=get_four_team_config(),
-    )
+        semis = config['matches'][1]
+        semis[0]['teams'][-1] = None
+        semis[1]['teams'][-1] = None
 
+        expected_matches = build_5_matches([
+            ['CCC', 'EEE', 'HHH', 'JJJ'],
+            ['DDD', 'FFF', 'GGG', 'III'],
+            ['BBB', UNKNOWABLE_TEAM, UNKNOWABLE_TEAM, None],
+            ['AAA', UNKNOWABLE_TEAM, UNKNOWABLE_TEAM, None],
+            [UNKNOWABLE_TEAM] * 4,
+        ])
 
-def test_four_teams_start_only_progressing_winner_from_quarters():
-    config = get_four_team_config()
+        self.assertMatches(
+            expected_matches,
+            matches_config=config,
+        )
 
-    semis = config['matches'][1]
-    semis[0]['teams'][-1] = None
-    semis[1]['teams'][-1] = None
+    def test_four_teams_with_dropout_part_way_through(self):
+        LAST_QUARTER_FINAL_MATCH_NUM = 1
 
-    expected_matches = build_5_matches([
-        ['CCC', 'EEE', 'HHH', 'JJJ'],
-        ['DDD', 'FFF', 'GGG', 'III'],
-        ['BBB', UNKNOWABLE_TEAM, UNKNOWABLE_TEAM, None],
-        ['AAA', UNKNOWABLE_TEAM, UNKNOWABLE_TEAM, None],
-        [UNKNOWABLE_TEAM] * 4,
-    ])
+        teams = {x: Team(x, x, False, None) for x in TLAs}
+        teams['BBB'] = Team('BBB', 'BBB', False, dropped_out_after=LAST_QUARTER_FINAL_MATCH_NUM)
 
-    assertMatches(
-        expected_matches,
-        matches_config=config,
-    )
+        expected_matches = build_5_matches([
+            ['CCC', 'EEE', 'HHH', 'JJJ'],
+            ['DDD', 'FFF', 'GGG', 'III'],
+            ['BBB'] + [UNKNOWABLE_TEAM] * 3,
+            ['AAA'] + [UNKNOWABLE_TEAM] * 3,
+            [UNKNOWABLE_TEAM] * 4,
+        ])
 
+        self.assertMatches(
+            expected_matches,
+            matches_config=get_four_team_config(),
+            teams=teams,
+        )
 
-def test_four_teams_with_dropout_part_way_through():
-    LAST_QUARTER_FINAL_MATCH_NUM = 1
+    def test_four_teams_with_dropout_before_start(self):
+        teams = {x: Team(x, x, False, None) for x in TLAs}
+        teams['BBB'] = Team('BBB', 'BBB', False, dropped_out_after=-1)
 
-    teams = {x: Team(x, x, False, None) for x in TLAs}
-    teams['BBB'] = Team('BBB', 'BBB', False, dropped_out_after=LAST_QUARTER_FINAL_MATCH_NUM)
+        config = get_four_team_config()
+        qualifier_teams = config['matches'][0][0]['teams']
 
-    expected_matches = build_5_matches([
-        ['CCC', 'EEE', 'HHH', 'JJJ'],
-        ['DDD', 'FFF', 'GGG', 'III'],
-        ['BBB'] + [UNKNOWABLE_TEAM] * 3,
-        ['AAA'] + [UNKNOWABLE_TEAM] * 3,
-        [UNKNOWABLE_TEAM] * 4,
-    ])
+        self.assertEqual('S10', qualifier_teams[-1], "Setup self-check failed!")
+        qualifier_teams[-1] = None
 
-    assertMatches(
-        expected_matches,
-        matches_config=get_four_team_config(),
-        teams=teams,
-    )
+        expected_matches = build_5_matches([
+            ['DDD', 'FFF', 'III', None],
+            ['EEE', 'GGG', 'HHH', 'JJJ'],
+            ['CCC'] + [UNKNOWABLE_TEAM] * 3,
+            ['AAA'] + [UNKNOWABLE_TEAM] * 3,
+            [UNKNOWABLE_TEAM] * 4,
+        ])
 
+        self.assertMatches(
+            expected_matches,
+            matches_config=config,
+            teams=teams,
+        )
 
-def test_four_teams_with_dropout_before_start():
-    teams = {x: Team(x, x, False, None) for x in TLAs}
-    teams['BBB'] = Team('BBB', 'BBB', False, dropped_out_after=-1)
+    def test_four_teams_partial_1(self):
+        expected_matches = build_5_matches([
+            ['CCC', 'EEE', 'HHH', 'JJJ'],
+            ['DDD', 'FFF', 'GGG', 'III'],
+            ['BBB', 'JJJ', 'EEE', UNKNOWABLE_TEAM],
+            ['AAA', 'HHH', UNKNOWABLE_TEAM, UNKNOWABLE_TEAM],
+            [UNKNOWABLE_TEAM] * 4,
+        ])
 
-    config = get_four_team_config()
-    qualifier_teams = config['matches'][0][0]['teams']
+        self.assertMatches(
+            expected_matches,
+            matches_config=get_four_team_config(),
+            knockout_positions={
+                # QF 1
+                ('A', 0): OrderedDict([
+                    ('JJJ', 1),
+                    ('HHH', 2),
+                    ('EEE', 3),
+                    ('CCC', 4),
+                ]),
+            },
+        )
 
-    assert qualifier_teams[-1] == 'S10', "Setup self-check failed!"
-    qualifier_teams[-1] = None
+    def test_four_teams_partial_2(self):
+        expected_matches = build_5_matches([
+            ['CCC', 'EEE', 'HHH', 'JJJ'],
+            ['DDD', 'FFF', 'GGG', 'III'],
+            ['BBB', 'JJJ', 'EEE', 'GGG'],
+            ['AAA', 'HHH', 'III', 'FFF'],
+            [UNKNOWABLE_TEAM] * 4,
+        ])
 
-    expected_matches = build_5_matches([
-        ['DDD', 'FFF', 'III', None],
-        ['EEE', 'GGG', 'HHH', 'JJJ'],
-        ['CCC'] + [UNKNOWABLE_TEAM] * 3,
-        ['AAA'] + [UNKNOWABLE_TEAM] * 3,
-        [UNKNOWABLE_TEAM] * 4,
-    ])
+        self.assertMatches(
+            expected_matches,
+            matches_config=get_four_team_config(),
+            knockout_positions={
+                # QF 1
+                ('A', 0): OrderedDict([
+                    ('JJJ', 1),
+                    ('HHH', 2),
+                    ('EEE', 3),
+                    ('CCC', 4),
+                ]),
+                # QF 2
+                ('A', 1): OrderedDict([
+                    ('III', 1),
+                    ('GGG', 2),
+                    ('FFF', 3),
+                    ('DDD', 4),
+                ]),
+            },
+        )
 
-    assertMatches(
-        expected_matches,
-        matches_config=config,
-        teams=teams,
-    )
+    def test_two_teams_before(self):
+        league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False)}]
 
+        expected = [
+            {'A': Match(1, "Qualifier 1 (#1)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True)},
+            {'A': Match(2, "Quarter 2 (#2)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True)},
+            {'A': Match(3, "Semi 1 (#3)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True)},
+            {'A': Match(4, "Semi 2 (#4)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True)},
+            {'A': Match(5, "Final (#5)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5), MatchType.knockout, use_resolved_ranking=False)},
+        ]
 
-def test_four_teams_partial_1():
-    expected_matches = build_5_matches([
-        ['CCC', 'EEE', 'HHH', 'JJJ'],
-        ['DDD', 'FFF', 'GGG', 'III'],
-        ['BBB', 'JJJ', 'EEE', UNKNOWABLE_TEAM],
-        ['AAA', 'HHH', UNKNOWABLE_TEAM, UNKNOWABLE_TEAM],
-        [UNKNOWABLE_TEAM] * 4,
-    ])
+        self.assertMatches(
+            expected,
+            matches_config=get_two_team_config(),
+            matches=league_matches,
+        )
 
-    assertMatches(
-        expected_matches,
-        matches_config=get_four_team_config(),
-        knockout_positions={
-            # QF 1
-            ('A', 0): OrderedDict([
-                ('JJJ', 1),
-                ('HHH', 2),
-                ('EEE', 3),
-                ('CCC', 4),
-            ]),
-        },
-    )
+    def test_two_teams_start(self):
+        expected_matches = build_5_matches([
+            ['CCC', 'EEE'],
+            ['DDD', 'FFF'],
+            ['AAA', UNKNOWABLE_TEAM],
+            ['BBB', UNKNOWABLE_TEAM],
+            [UNKNOWABLE_TEAM] * 2,
+        ])
 
+        self.assertMatches(
+            expected_matches,
+            matches_config=get_two_team_config(),
+        )
 
-def test_four_teams_partial_2():
-    expected_matches = build_5_matches([
-        ['CCC', 'EEE', 'HHH', 'JJJ'],
-        ['DDD', 'FFF', 'GGG', 'III'],
-        ['BBB', 'JJJ', 'EEE', 'GGG'],
-        ['AAA', 'HHH', 'III', 'FFF'],
-        [UNKNOWABLE_TEAM] * 4,
-    ])
+    def test_two_teams_partial_1(self):
+        expected_matches = build_5_matches([
+            ['CCC', 'EEE'],
+            ['DDD', 'FFF'],
+            ['AAA', 'EEE'],
+            ['BBB', UNKNOWABLE_TEAM],
+            [UNKNOWABLE_TEAM] * 2,
+        ])
 
-    assertMatches(
-        expected_matches,
-        matches_config=get_four_team_config(),
-        knockout_positions={
-            # QF 1
-            ('A', 0): OrderedDict([
-                ('JJJ', 1),
-                ('HHH', 2),
-                ('EEE', 3),
-                ('CCC', 4),
-            ]),
-            # QF 2
-            ('A', 1): OrderedDict([
-                ('III', 1),
-                ('GGG', 2),
-                ('FFF', 3),
-                ('DDD', 4),
-            ]),
-        },
-    )
+        self.assertMatches(
+            expected_matches,
+            matches_config=get_two_team_config(),
+            knockout_positions={
+                # QF 1
+                ('A', 0): OrderedDict([
+                    ('EEE', 1),
+                    ('CCC', 2),
+                ]),
+            },
+        )
 
+    def test_two_teams_partial_2(self):
+        expected_matches = build_5_matches([
+            ['CCC', 'EEE'],
+            ['DDD', 'FFF'],
+            ['AAA', 'EEE'],
+            ['BBB', 'DDD'],
+            [UNKNOWABLE_TEAM] * 2,
+        ])
 
-def test_two_teams_before():
-    league_matches = [{'A': Match(0, "Match 0", 'A', [], datetime(2014, 4, 27, 12, 30), datetime(2014, 4, 27, 12, 35), MatchType.league, use_resolved_ranking=False)}]
-
-    expected = [
-        {'A': Match(1, "Qualifier 1 (#1)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 30), datetime(2014, 4, 27, 14, 35), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(2, "Quarter 2 (#2)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 35), datetime(2014, 4, 27, 14, 40), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(3, "Semi 1 (#3)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 45), datetime(2014, 4, 27, 14, 50), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(4, "Semi 2 (#4)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 14, 50), datetime(2014, 4, 27, 14, 55), MatchType.knockout, use_resolved_ranking=True)},
-        {'A': Match(5, "Final (#5)", 'A', [UNKNOWABLE_TEAM] * 2, datetime(2014, 4, 27, 15, 0), datetime(2014, 4, 27, 15, 5), MatchType.knockout, use_resolved_ranking=False)},
-    ]
-
-    assertMatches(
-        expected,
-        matches_config=get_two_team_config(),
-        matches=league_matches,
-    )
-
-
-def test_two_teams_start():
-    expected_matches = build_5_matches([
-        ['CCC', 'EEE'],
-        ['DDD', 'FFF'],
-        ['AAA', UNKNOWABLE_TEAM],
-        ['BBB', UNKNOWABLE_TEAM],
-        [UNKNOWABLE_TEAM] * 2,
-    ])
-
-    assertMatches(
-        expected_matches,
-        matches_config=get_two_team_config(),
-    )
-
-
-def test_two_teams_partial_1():
-    expected_matches = build_5_matches([
-        ['CCC', 'EEE'],
-        ['DDD', 'FFF'],
-        ['AAA', 'EEE'],
-        ['BBB', UNKNOWABLE_TEAM],
-        [UNKNOWABLE_TEAM] * 2,
-    ])
-
-    assertMatches(
-        expected_matches,
-        matches_config=get_two_team_config(),
-        knockout_positions={
-            # QF 1
-            ('A', 0): OrderedDict([
-                ('EEE', 1),
-                ('CCC', 2),
-            ]),
-        },
-    )
-
-
-def test_two_teams_partial_2():
-    expected_matches = build_5_matches([
-        ['CCC', 'EEE'],
-        ['DDD', 'FFF'],
-        ['AAA', 'EEE'],
-        ['BBB', 'DDD'],
-        [UNKNOWABLE_TEAM] * 2,
-    ])
-
-    assertMatches(
-        expected_matches,
-        matches_config=get_two_team_config(),
-        knockout_positions={
-            # QF 1
-            ('A', 0): OrderedDict([
-                ('EEE', 1),
-                ('CCC', 2),
-            ]),
-            # QF 2
-            ('A', 1): OrderedDict([
-                ('DDD', 1),
-                ('FFF', 2),
-            ]),
-        },
-    )
+        self.assertMatches(
+            expected_matches,
+            matches_config=get_two_team_config(),
+            knockout_positions={
+                # QF 1
+                ('A', 0): OrderedDict([
+                    ('EEE', 1),
+                    ('CCC', 2),
+                ]),
+                # QF 2
+                ('A', 1): OrderedDict([
+                    ('DDD', 1),
+                    ('FFF', 2),
+                ]),
+            },
+        )

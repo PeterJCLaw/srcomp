@@ -1,2 +1,2 @@
 #!/bin/sh
-exec python setup.py nosetests $@
+exec python setup.py test $@

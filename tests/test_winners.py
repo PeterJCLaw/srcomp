@@ -1,10 +1,10 @@
+import unittest
 from collections import OrderedDict
 from datetime import datetime
 from unittest import mock
 
 from dateutil.tz import tzutc
 from league_ranker import calc_positions, calc_ranked_points
-from nose.tools import eq_
 
 from sr.comp.match_period import Match, MatchType
 from sr.comp.scores import TeamScore
@@ -83,128 +83,126 @@ def build_tiebreaker_scores():
     return scores
 
 
-def test_first_tiebreaker():
-    scores = build_tiebreaker_scores()
-    eq_(compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.first), ['BBB'])
+class WinnersTests(unittest.TestCase):
+    def test_first_tiebreaker(self):
+        scores = build_tiebreaker_scores()
+        self.assertEqual(
+            ['BBB'],
+            compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.first),
+        )
 
+    def test_second_tiebreaker(self):
+        scores = build_tiebreaker_scores()
+        self.assertEqual(
+            ['AAA'],
+            compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.second),
+        )
 
-def test_second_tiebreaker():
-    scores = build_tiebreaker_scores()
-    eq_(compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.second), ['AAA'])
+    def test_third_tiebreaker(self):
+        # Needs to look in the scores for the final
+        scores = build_tiebreaker_scores()
+        self.assertEqual(
+            ['DDD'],
+            compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.third),
+        )
 
+    def test_first(self):
+        self.assertEqual(
+            ['BBB'],
+            compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.first),
+        )
 
-def test_third_tiebreaker():
-    # Needs to look in the scores for the final
-    scores = build_tiebreaker_scores()
-    eq_(compute_awards(scores, TIEBREAKER_INFO, TEAMS).get(Award.third), ['DDD'])
+    def test_second(self):
+        self.assertEqual(
+            ['DDD'],
+            compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.second),
+        )
 
+    def test_third(self):
+        self.assertEqual(
+            ['AAA'],
+            compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.third),
+        )
 
-def test_first():
-    eq_(
-        compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.first),
-        ['BBB'],
-    )
-
-
-def test_second():
-    eq_(
-        compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.second),
-        ['DDD'],
-    )
-
-
-def test_third():
-    eq_(
-        compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.third),
-        ['AAA'],
-    )
-
-
-def test_tied():
-    eq_(
-        compute_awards(
+    def test_tied(self):
+        awards = compute_awards(
             MockScores(
                 knockout={'AAA': 1, 'BBB': 1, 'CCC': 1, 'DDD': 1},
                 knockout_dsq=(),
             ),
             FINAL_INFO,
             TEAMS,
-        ).get(Award.first),
-        ['AAA', 'BBB', 'CCC', 'DDD'],
-    )
+        )
+        self.assertEqual(
+            ['AAA', 'BBB', 'CCC', 'DDD'],
+            awards.get(Award.first),
+        )
 
-
-def test_tied_partial():
-    eq_(
-        compute_awards(
+    def test_tied_partial(self):
+        awards = compute_awards(
             MockScores(
                 knockout={'AAA': 2, 'BBB': 1, 'CCC': 1, 'DDD': 1},
                 knockout_dsq=(),
             ), FINAL_INFO, TEAMS,
-        ).get(Award.first),
-        ['AAA'],
-    )
-
-
-def test_rookie():
-    eq_(
-        compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.rookie),
-        ['AAA'],
-    )
-
-
-def test_tied_rookie():
-    scores = MockScores(league={'AAA': 0, 'BBB': 0, 'CCC': 0, 'DDD': 0})
-    eq_(
-        compute_awards(scores, FINAL_INFO, TEAMS).get(Award.rookie),
-        ['AAA', 'CCC'],
-    )
-
-
-def test_override():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.return_value = {'third': 'DDD'}
-        eq_(
-            compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.third),
-            ['DDD'],
         )
-        yaml_load.assert_called_with('.')
-
-
-def test_manual():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.return_value = {'web': 'BBB'}
-        eq_(
-            compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
-            ['BBB'],
-        )
-        yaml_load.assert_called_with('.')
-
-
-def test_manual_no_award():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.return_value = {'web': []}
-        eq_(
-            compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
-            [],
-        )
-        yaml_load.assert_called_with('.')
-
-
-def test_manual_tie():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.return_value = {'web': ['BBB', 'CCC']}
-        eq_(
-            compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
-            ['BBB', 'CCC'],
-        )
-        yaml_load.assert_called_with('.')
-
-
-def test_no_overrides_file():
-    with mock.patch('os.path.exists') as test_file:
-        test_file.return_value = False
-        eq_(
-            compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.third),
+        self.assertEqual(
             ['AAA'],
+            awards.get(Award.first),
         )
+
+    def test_rookie(self):
+        self.assertEqual(
+            ['AAA'],
+            compute_awards(MockScores(), FINAL_INFO, TEAMS).get(Award.rookie),
+        )
+
+    def test_tied_rookie(self):
+        scores = MockScores(league={'AAA': 0, 'BBB': 0, 'CCC': 0, 'DDD': 0})
+        self.assertEqual(
+            ['AAA', 'CCC'],
+            compute_awards(scores, FINAL_INFO, TEAMS).get(Award.rookie),
+        )
+
+    def test_override(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.return_value = {'third': 'DDD'}
+            self.assertEqual(
+                ['DDD'],
+                compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.third),
+            )
+            yaml_load.assert_called_with('.')
+
+    def test_manual(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.return_value = {'web': 'BBB'}
+            self.assertEqual(
+                ['BBB'],
+                compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
+            )
+            yaml_load.assert_called_with('.')
+
+    def test_manual_no_award(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.return_value = {'web': []}
+            self.assertEqual(
+                [],
+                compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
+            )
+            yaml_load.assert_called_with('.')
+
+    def test_manual_tie(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.return_value = {'web': ['BBB', 'CCC']}
+            self.assertEqual(
+                ['BBB', 'CCC'],
+                compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
+            )
+            yaml_load.assert_called_with('.')
+
+    def test_no_overrides_file(self):
+        with mock.patch('os.path.exists') as test_file:
+            test_file.return_value = False
+            self.assertEqual(
+                ['AAA'],
+                compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.third),
+            )

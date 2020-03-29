@@ -1,3 +1,4 @@
+import unittest
 from copy import deepcopy
 from unittest import mock
 
@@ -48,188 +49,199 @@ def mock_loader(name):
     elif name == 'SHPD':
         return mock_shepherding_loader()
     else:
-        assert False, "Unexpected file name passed '{0}'".format(name)
+        raise ValueError("Unexpected file name passed '{0}'".format(name))
 
 
-def test_invalid_region():
-    def my_mock_loader(name):
-        res = mock_loader(name)
-        if name == 'SHPD':
-            res['shepherds'][0]['regions'].append('invalid-region')
-        return res
+class VenueTests(unittest.TestCase):
+    def test_invalid_region(self):
+        def my_mock_loader(name):
+            res = mock_loader(name)
+            if name == 'SHPD':
+                res['shepherds'][0]['regions'].append('invalid-region')
+            return res
 
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = my_mock_loader
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = my_mock_loader
 
-        try:
-            Venue(TEAMS, 'LYT', 'SHPD')
-        except InvalidRegionException as ire:
-            assert ire.region == 'invalid-region'
-            assert ire.area == 'Yellow'
-        else:
-            assert False, "Should have errored about the invalid region"
+            with self.assertRaises(
+                InvalidRegionException,
+                msg="Should have errored about the invalid region",
+            ) as cm:
+                Venue(TEAMS, 'LYT', 'SHPD')
 
+            ire = cm.exception
+            self.assertEqual('invalid-region', ire.region)
+            self.assertEqual('Yellow', ire.area)
 
-def test_extra_teams():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = mock_loader
+    def test_extra_teams(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = mock_loader
 
-        try:
-            Venue(['ABC', 'DEF', 'GHI'], 'LYT', 'SHPD')
-        except LayoutTeamsException as lte:
-            assert lte.extras == set(['JKL', 'MNO', 'PQR'])
-            assert lte.duplicates == []
-            assert lte.missing == set()
-        else:
-            assert False, "Should have errored about the extra teams"
+            with self.assertRaises(
+                LayoutTeamsException,
+                msg="Should have errored about the extra teams",
+            ) as cm:
+                Venue(['ABC', 'DEF', 'GHI'], 'LYT', 'SHPD')
 
+            lte = cm.exception
+            self.assertEqual(set(['JKL', 'MNO', 'PQR']), lte.extras)
+            self.assertEqual([], lte.duplicates)
+            self.assertEqual(set(), lte.missing)
 
-def test_duplicate_teams():
-    def my_mock_loader(name):
-        res = mock_loader(name)
-        if name == 'LYT':
-            res['teams'][1]['teams'].append('ABC')
-        return res
+    def test_duplicate_teams(self):
+        def my_mock_loader(name):
+            res = mock_loader(name)
+            if name == 'LYT':
+                res['teams'][1]['teams'].append('ABC')
+            return res
 
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = my_mock_loader
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = my_mock_loader
 
-        try:
-            Venue(TEAMS, 'LYT', 'SHPD')
-        except LayoutTeamsException as lte:
-            assert lte.duplicates == ['ABC']
-            assert lte.extras == set()
-            assert lte.missing == set()
-        else:
-            assert False, "Should have errored about the extra teams"
+            with self.assertRaises(
+                LayoutTeamsException,
+                msg="Should have errored about the extra teams",
+            ) as cm:
+                Venue(TEAMS, 'LYT', 'SHPD')
 
+            lte = cm.exception
+            self.assertEqual(['ABC'], lte.duplicates)
+            self.assertEqual(set(), lte.extras)
+            self.assertEqual(set(), lte.missing)
 
-def test_missing_teams():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = mock_loader
+    def test_missing_teams(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = mock_loader
 
-        try:
-            Venue(TEAMS + ['Missing'], 'LYT', 'SHPD')
-        except LayoutTeamsException as lte:
-            assert lte.missing == set(['Missing'])
-            assert lte.duplicates == []
-            assert lte.extras == set()
-        else:
-            assert False, "Should have errored about the missing team"
+            with self.assertRaises(
+                LayoutTeamsException,
+                msg="Should have errored about the missing team",
+            ) as cm:
+                Venue(TEAMS + ['Missing'], 'LYT', 'SHPD')
 
+            lte = cm.exception
+            self.assertEqual(set(['Missing']), lte.missing)
+            self.assertEqual([], lte.duplicates)
+            self.assertEqual(set(), lte.extras)
 
-def test_missing_and_extra_teams():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = mock_loader
+    def test_missing_and_extra_teams(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = mock_loader
 
-        try:
-            Venue(['ABC', 'DEF', 'GHI', 'Missing'], 'LYT', 'SHPD')
-        except LayoutTeamsException as lte:
-            assert lte.extras == set(['JKL', 'MNO', 'PQR'])
-            assert lte.missing == set(['Missing'])
-            assert lte.duplicates == []
-        else:
-            assert False, "Should have errored about the extra and missing teams"
+            with self.assertRaises(
+                LayoutTeamsException,
+                msg="Should have errored about the extra and missing teams",
+            ) as cm:
+                Venue(['ABC', 'DEF', 'GHI', 'Missing'], 'LYT', 'SHPD')
 
+            lte = cm.exception
+            self.assertEqual(set(['JKL', 'MNO', 'PQR']), lte.extras)
+            self.assertEqual(set(['Missing']), lte.missing)
+            self.assertEqual([], lte.duplicates)
 
-def test_right_shepherding_areas():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = mock_loader
+    def test_right_shepherding_areas(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = mock_loader
 
-        venue = Venue(TEAMS, 'LYT', 'SHPD')
-        venue.check_staging_times(TIMES)
+            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            venue.check_staging_times(TIMES)
 
+    def test_extra_shepherding_areas(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = mock_loader
 
-def test_extra_shepherding_areas():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = mock_loader
+            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            times = deepcopy(TIMES)
+            times['signal_shepherds']['Blue'] = None
 
-        venue = Venue(TEAMS, 'LYT', 'SHPD')
-        times = deepcopy(TIMES)
-        times['signal_shepherds']['Blue'] = None
+            with self.assertRaises(
+                ShepherdingAreasException,
+                msg="Should have errored about the extra shepherding area",
+            ) as cm:
+                venue.check_staging_times(times)
 
-        try:
-            venue.check_staging_times(times)
-        except ShepherdingAreasException as lte:
-            assert lte.extras == set(['Blue'])
-            assert lte.duplicates == []
-            assert lte.missing == set()
-        else:
-            assert False, "Should have errored about the extra shepherding area"
+            lte = cm.exception
+            self.assertEqual(set(['Blue']), lte.extras)
+            self.assertEqual([], lte.duplicates)
+            self.assertEqual(set(), lte.missing)
 
+    def test_missing_shepherding_areas(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = mock_loader
 
-def test_missing_shepherding_areas():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = mock_loader
+            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            times = deepcopy(TIMES)
+            del times['signal_shepherds']['Pink']
 
-        venue = Venue(TEAMS, 'LYT', 'SHPD')
-        times = deepcopy(TIMES)
-        del times['signal_shepherds']['Pink']
+            with self.assertRaises(
+                ShepherdingAreasException,
+                msg="Should have errored about the missing shepherding area",
+            ) as cm:
+                venue.check_staging_times(times)
 
-        try:
-            venue.check_staging_times(times)
-        except ShepherdingAreasException as lte:
-            assert lte.missing == set(['Pink'])
-            assert lte.extras == set()
-            assert lte.duplicates == []
-        else:
-            assert False, "Should have errored about the missing shepherding area"
+            lte = cm.exception
+            self.assertEqual(set(['Pink']), lte.missing)
+            self.assertEqual(set(), lte.extras)
+            self.assertEqual([], lte.duplicates)
 
+    def test_missing_and_extra_shepherding_areas(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = mock_loader
 
-def test_missing_and_extra_shepherding_areas():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = mock_loader
+            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            times = deepcopy(TIMES)
+            times['signal_shepherds']['Blue'] = None
+            del times['signal_shepherds']['Pink']
 
-        venue = Venue(TEAMS, 'LYT', 'SHPD')
-        times = deepcopy(TIMES)
-        times['signal_shepherds']['Blue'] = None
-        del times['signal_shepherds']['Pink']
+            with self.assertRaises(
+                ShepherdingAreasException,
+                msg="Should have errored about the extra and missing shepherding areas",
+            ) as cm:
+                venue.check_staging_times(times)
 
-        try:
-            venue.check_staging_times(times)
-        except ShepherdingAreasException as lte:
-            assert lte.missing == set(['Pink'])
-            assert lte.extras == set(['Blue'])
-            assert lte.duplicates == []
-        else:
-            assert False, "Should have errored about the extra and missing shepherding areas"
+            lte = cm.exception
+            self.assertEqual(set(['Pink']), lte.missing)
+            self.assertEqual(set(['Blue']), lte.extras)
+            self.assertEqual([], lte.duplicates)
 
+    def test_locations(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = mock_loader
 
-def test_locations():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = mock_loader
+            venue = Venue(TEAMS, 'LYT', 'SHPD')
 
-        venue = Venue(TEAMS, 'LYT', 'SHPD')
-
-        expected = {
-            'a-group': {
-                'name': 'a-group',
-                'display_name': "A group",
-                'teams': ['ABC', 'DEF', 'GHI'],
-                'shepherds': {
-                    'name': 'Yellow',
-                    'colour': 'colour-yellow',
+            expected = {
+                'a-group': {
+                    'name': 'a-group',
+                    'display_name': "A group",
+                    'teams': ['ABC', 'DEF', 'GHI'],
+                    'shepherds': {
+                        'name': 'Yellow',
+                        'colour': 'colour-yellow',
+                    },
                 },
-            },
-            'b-group': {
-                'name': 'b-group',
-                'display_name': "B group",
-                'teams': ['JKL', 'MNO', 'PQR'],
-                'shepherds': {
-                    'name': 'Pink',
-                    'colour': 'colour-pink',
+                'b-group': {
+                    'name': 'b-group',
+                    'display_name': "B group",
+                    'teams': ['JKL', 'MNO', 'PQR'],
+                    'shepherds': {
+                        'name': 'Pink',
+                        'colour': 'colour-pink',
+                    },
                 },
-            },
-        }
+            }
 
-        locations = venue.locations
-        assert locations == expected
+            locations = venue.locations
+            self.assertEqual(expected, locations)
 
+    def test_get_team_location(self):
+        with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
+            yaml_load.side_effect = mock_loader
 
-def test_get_team_location():
-    with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
-        yaml_load.side_effect = mock_loader
-
-        venue = Venue(TEAMS, 'LYT', 'SHPD')
-        loc = venue.get_team_location('DEF')
-        assert loc == 'a-group', "Wrong location for team 'DEF'"
+            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            loc = venue.get_team_location('DEF')
+            self.assertEqual(
+                'a-group',
+                loc,
+                "Wrong location for team 'DEF'",
+            )

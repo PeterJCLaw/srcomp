@@ -1,5 +1,6 @@
 import os.path
 import subprocess
+import unittest
 
 from sr.comp.comp import SRComp
 from sr.comp.match_period import Match, MatchType
@@ -29,134 +30,117 @@ def build_match(
     )
 
 
-def test_load():
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-    comp = state.load()
-    assert isinstance(comp, SRComp)
+class RawCompstateTests(unittest.TestCase):
+    def test_load(self):
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        comp = state.load()
+        self.assertIsInstance(comp, SRComp)
 
-
-def test_get_score_path():
-    m = build_match(0, 'A', type_=MatchType.league)
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-    path = state.get_score_path(m)
-    assert os.path.exists(path), "Path expected to exist within dummy state"
-
-
-def test_load_score():
-    m = build_match(0, 'A', type_=MatchType.league)
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-    score = state.load_score(m)
-
-    assert score['arena_id'] == 'A', score
-    assert score['match_number'] == 0, score
-
-    teams = sorted(score['teams'].keys())
-    expected = ['CLY', 'TTN']
-    assert expected == teams, score
-
-
-def test_load_shepherds():
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-    shepherds = state.load_shepherds()
-
-    expected = [
-        {
-            'name': 'Blue',
-            'colour': '#A9A9F5',
-            'regions': ['a-group'],
-            'teams': ['BAY', 'BDF', 'BGS', 'BPV', 'BRK', 'BRN', 'BWS',
-                      'CCR', 'CGS', 'CLF', 'CLY', 'CPR', 'CRB', 'DSF',
-                      'EMM', 'GRD', 'GRS', 'GYG', 'HRS', 'HSO', 'HYP',
-                      'HZW', 'ICE', 'JMS', 'KDE', 'KES', 'KHS', 'LFG'],
-        },
-        {
-            'name': 'Green',
-            'colour': 'green',
-            'regions': ['b-group'],
-            'teams': ['LSS', 'MAI', 'MAI2', 'MEA', 'MFG', 'NHS', 'PAG',
-                      'PAS', 'PSC', 'QEH', 'QMC', 'QMS', 'RED', 'RGS',
-                      'RUN', 'RWD', 'SCC', 'SEN', 'SGS', 'STA', 'SWI',
-                      'TBG', 'TTN', 'TWG', 'WYC'],
-        },
-    ]
-
-    assert expected == shepherds, "Wrong shepherds data loaded"
-
-
-def test_shepherding():
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-    assert state.shepherding
-
-
-def test_layout():
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-    assert state.layout
-
-
-def test_contains_HEAD():
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-
-    has_HEAD = state.has_commit('HEAD')
-    assert has_HEAD, "Should have HEAD commit!"
-
-
-def test_git_return_output():
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-
-    output = state.git(['show'], return_output=True)
-
-    assert output.startswith('commit '), output
-
-
-def test_git_no_return_output():
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-
-    output = state.git(['rev-parse', 'HEAD'])
-
-    assert output == 0, "Should succeed and return exit code"
-
-
-def test_git_return_output_when_error():
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-
-    try:
-        output = state.git(['this-is-not-a-valid-command'], return_output=True)
-    except subprocess.CalledProcessError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have errored about bad command (returned '{0}').".format(
-                output,
-            ),
+    def test_get_score_path(self):
+        m = build_match(0, 'A', type_=MatchType.league)
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        path = state.get_score_path(m)
+        self.assertTrue(
+            os.path.exists(path),
+            "Path expected to exist within dummy state",
         )
 
+    def test_load_score(self):
+        m = build_match(0, 'A', type_=MatchType.league)
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        score = state.load_score(m)
 
-def test_git_when_error():
-    state = RawCompstate(DUMMY_PATH, local_only=True)
+        self.assertEqual('A', score['arena_id'], score)
+        self.assertEqual(0, score['match_number'], score)
 
-    try:
-        output = state.git(['this-is-not-a-valid-command'])
-    except subprocess.CalledProcessError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have errored about bad command (returned '{0}').".format(
-                output,
-            ),
-        )
+        teams = sorted(score['teams'].keys())
+        expected = ['CLY', 'TTN']
+        self.assertEqual(expected, teams, score)
 
+    def test_load_shepherds(self):
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        shepherds = state.load_shepherds()
 
-def test_git_converts_error():
-    state = RawCompstate(DUMMY_PATH, local_only=True)
-    error_msg = "Our message that something went wrong"
+        expected = [
+            {
+                'name': 'Blue',
+                'colour': '#A9A9F5',
+                'regions': ['a-group'],
+                'teams': ['BAY', 'BDF', 'BGS', 'BPV', 'BRK', 'BRN', 'BWS',
+                          'CCR', 'CGS', 'CLF', 'CLY', 'CPR', 'CRB', 'DSF',
+                          'EMM', 'GRD', 'GRS', 'GYG', 'HRS', 'HSO', 'HYP',
+                          'HZW', 'ICE', 'JMS', 'KDE', 'KES', 'KHS', 'LFG'],
+            },
+            {
+                'name': 'Green',
+                'colour': 'green',
+                'regions': ['b-group'],
+                'teams': ['LSS', 'MAI', 'MAI2', 'MEA', 'MFG', 'NHS', 'PAG',
+                          'PAS', 'PSC', 'QEH', 'QMC', 'QMS', 'RED', 'RGS',
+                          'RUN', 'RWD', 'SCC', 'SEN', 'SGS', 'STA', 'SWI',
+                          'TBG', 'TTN', 'TWG', 'WYC'],
+            },
+        ]
 
-    try:
-        output = state.git(['this-is-not-a-valid-command'], err_msg=error_msg)
-    except RuntimeError as re:
-        assert error_msg in str(re)
-    else:
-        raise AssertionError(
-            "Should have errored about bad command (returned '{0}').".format(
-                output,
-            ),
-        )
+        self.assertEqual(expected, shepherds, "Wrong shepherds data loaded")
+
+    def test_shepherding(self):
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        self.assertTrue(state.shepherding)
+
+    def test_layout(self):
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        self.assertTrue(state.layout)
+
+    def test_contains_HEAD(self):
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+
+        has_HEAD = state.has_commit('HEAD')
+        self.assertTrue(has_HEAD, "Should have HEAD commit!")
+
+    def test_git_return_output(self):
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+
+        output = state.git(['show'], return_output=True)
+
+        self.assertTrue(output.startswith('commit '), output)
+
+    def test_git_no_return_output(self):
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+
+        output = state.git(['rev-parse', 'HEAD'])
+
+        self.assertEqual(0, output, "Should succeed and return exit code")
+
+    def test_git_return_output_when_error(self):
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+
+        with self.assertRaises(
+            subprocess.CalledProcessError,
+            msg="Should have errored about bad command (returned '{0}').",
+        ):
+            output = state.git(['this-is-not-a-valid-command'], return_output=True)
+            print(output)
+
+    def test_git_when_error(self):
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+
+        with self.assertRaises(
+            subprocess.CalledProcessError,
+            msg="Should have errored about bad command (returned '{0}').",
+        ):
+            output = state.git(['this-is-not-a-valid-command'])
+            print(output)
+
+    def test_git_converts_error(self):
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        error_msg = "Our message that something went wrong"
+
+        with self.assertRaises(
+            RuntimeError,
+            msg="Should have errored about bad command (returned '{0}').",
+        ) as cm:
+            output = state.git(['this-is-not-a-valid-command'], err_msg=error_msg)
+            print(output)
+
+        self.assertIn(error_msg, str(cm.exception))

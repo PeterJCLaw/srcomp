@@ -1,36 +1,34 @@
 import datetime
 import os
-
-from nose.plugins.skip import SkipTest
+import unittest
 
 from sr.comp.comp import SRComp
 
 DUMMY_PATH = os.path.dirname(os.path.abspath(__file__)) + '/dummy'
 
-# Only instantiate SRComp once: it is a slow process!
-instance = None
 
+class CompTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.srcomp_instance = SRComp(DUMMY_PATH)
 
-def test_load():
-    "Test that loading the dummy state works"
-    global instance
-    instance = SRComp(DUMMY_PATH)
-    assert instance.root
-    assert instance.state
-    assert instance.teams
-    assert instance.schedule
-    assert instance.scores
-    assert instance.arenas
-    assert instance.corners
-    assert isinstance(instance.awards, dict)
+    def test_load(self):
+        "Test that loading the dummy state works"
+        self.assertIsNotNone(self.srcomp_instance.root)
+        self.assertIsNotNone(self.srcomp_instance.state)
+        self.assertIsNotNone(self.srcomp_instance.teams)
+        self.assertIsNotNone(self.srcomp_instance.schedule)
+        self.assertIsNotNone(self.srcomp_instance.scores)
+        self.assertIsNotNone(self.srcomp_instance.arenas)
+        self.assertIsNotNone(self.srcomp_instance.corners)
+        self.assertIsInstance(self.srcomp_instance.awards, dict)
 
+    def test_timezone(self):
+        # Test that one can get the timezone from the dummy state
 
-def test_timezone():
-    # Test that one can get the timezone from the dummy state
-    global instance
-    if instance is None:
-        raise SkipTest("Timezone test skipped due to srcomp load failure.")
-    assert (
-        instance.timezone.utcoffset(datetime.datetime(2014, 4, 26)) ==
-        datetime.timedelta(seconds=3600)
-    )
+        self.assertEqual(
+            datetime.timedelta(seconds=3600),
+            self.srcomp_instance.timezone.utcoffset(
+                datetime.datetime(2014, 4, 26),
+            ),
+        )
