@@ -206,8 +206,8 @@ def test_league_ranker_game_tie():
     assert expected_order == order
 
 
-## TODO: how do we resolve full ties?
-## TODO: build something to alert us that we have a full tie.
+# TODO: how do we resolve full ties?
+# TODO: build something to alert us that we have a full tie.
 
 
 def test_league_ranker_full_tie():
