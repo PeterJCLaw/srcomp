@@ -49,8 +49,7 @@ class SRComp:
         """The current commit of the Compstate repository."""
 
         self.teams = teams.load_teams(os.path.join(root, 'teams.yaml'))
-        """A :class:`collections.OrderedDict` mapping TLAs to
-        :class:`sr.comp.teams.Team` objects."""
+        """A mapping of TLAs to :class:`sr.comp.teams.Team` objects."""
 
         self.arenas = arenas.load_arenas(os.path.join(root, 'arenas.yaml'))
         """A :class:`collections.OrderedDict` mapping arena names to
