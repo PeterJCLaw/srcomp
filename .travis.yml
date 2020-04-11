@@ -17,3 +17,5 @@ script:
   - script/linting/pylint
   - pip install -r script/linting/requirements.txt
   - script/linting/lint
+  - pip install -r script/typing/requirements.txt
+  - script/typing/check
