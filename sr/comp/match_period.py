@@ -3,6 +3,11 @@
 from collections import namedtuple
 from enum import Enum, unique
 
+Delay = namedtuple('Delay', [
+    'delay',
+    'time',
+])
+
 
 @unique
 class MatchType(Enum):
