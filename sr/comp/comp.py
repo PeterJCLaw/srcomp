@@ -8,11 +8,11 @@ from subprocess import check_output
 from typing import cast
 
 from . import arenas, matches, scores, teams, venue
-from .types import Scorer
+from .types import ScorerType
 from .winners import compute_awards
 
 
-def load_scorer(root: str) -> Scorer:
+def load_scorer(root: str) -> ScorerType:
     """
     Load the scorer module from Compstate repo.
 
@@ -31,7 +31,7 @@ def load_scorer(root: str) -> Scorer:
     sys.path = saved_path
 
     scorer = imported_library.Scorer  # type: ignore  # mypy wants a 'Scorer' attribute
-    return cast(Scorer, scorer)
+    return cast(ScorerType, scorer)
 
 
 class SRComp:
