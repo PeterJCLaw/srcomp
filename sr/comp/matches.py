@@ -342,7 +342,7 @@ class MatchSchedule:
                 period.matches.append(match_slot)
                 self.matches.append(match_slot)
 
-                match_n += 1  # type: ignore
+                match_n = MatchNumber(match_n + 1)
 
                 extra_spacing = self._spacing.get(match_n)
                 if extra_spacing:
