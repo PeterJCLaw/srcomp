@@ -16,8 +16,6 @@ YAMLData = Any
 
 # Proton protocol types
 
-# TODO: is `int` the right base here? Do we even know/care what the actual
-# Scorer outputs?
 GamePoints = NewType('GamePoints', int)
 
 
