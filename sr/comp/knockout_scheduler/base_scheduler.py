@@ -1,9 +1,10 @@
 """Base for knockout scheduling."""
 
 from ..match_period import MatchPeriod, MatchType
+from ..teams import TLA
 
 # Use '???' as the "we don't know yet" marker
-UNKNOWABLE_TEAM = '???'
+UNKNOWABLE_TEAM = TLA('???')
 
 
 class BaseKnockoutScheduler:

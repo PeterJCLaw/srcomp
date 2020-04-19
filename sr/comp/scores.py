@@ -4,16 +4,18 @@ import glob
 import os
 from collections import OrderedDict
 from functools import total_ordering
+from typing import Any, cast, Dict, Iterable, Iterator, Mapping, Tuple
 
 import league_ranker as ranker
 
 from . import yaml_loader
+from .types import GamePoints, MatchId, ScorerType, TLA, ValidatingScorer
 
 
 class InvalidTeam(Exception):
     """An exception that occurs when a score contains an invalid team."""
 
-    def __init__(self, tla, context):
+    def __init__(self, tla: TLA, context: str) -> None:
         message = "Team {0} (found in {1}) does not exist.".format(tla, context)
         super().__init__(message)
         self.tla = tla
@@ -25,7 +27,7 @@ class DuplicateScoresheet(Exception):
     entered.
     """
 
-    def __init__(self, match_id):
+    def __init__(self, match_id: MatchId) -> None:
         message = "Scoresheet for {0} has already been added.".format(match_id)
         super().__init__(message)
         self.match_id = match_id
@@ -40,16 +42,16 @@ class TeamScore:
     :param int game: The game points.
     """
 
-    def __init__(self, league=0, game=0):
+    def __init__(self, league: int = 0, game: int = 0):
         self.league_points = league
         self.game_points = game
 
     @property
-    def _ordering_key(self):
+    def _ordering_key(self) -> Tuple[int, int]:
         # Sort lexicographically by league points, then game points
         return self.league_points, self.game_points
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         # pylint: disable=protected-access
         return (
             isinstance(other, type(self)) and
@@ -57,10 +59,11 @@ class TeamScore:
         )
 
     # total_ordering doesn't provide this!
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return not (self == other)
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> bool:
+        # TODO: should we return NotImplemented here instead?
         if not isinstance(other, type(self)):
             # TeamScores are greater than other things (that have no score)
             return False
@@ -68,14 +71,14 @@ class TeamScore:
         # pylint: disable=protected-access
         return self._ordering_key < other._ordering_key
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'TeamScore({0}, {1})'.format(
             self.league_points,
             self.game_points,
         )
 
 
-def results_finder(root):
+def results_finder(root: str) -> Iterator[str]:
     """An iterator that finds score sheet files."""
 
     for dname in glob.glob(os.path.join(root, "*")):
@@ -86,7 +89,7 @@ def results_finder(root):
             yield resfile
 
 
-def get_validated_scores(scorer_cls, input_data):
+def get_validated_scores(scorer_cls: ScorerType, input_data: Any) -> Mapping[TLA, GamePoints]:
     """
     Helper function which mimics the behaviour from libproton.
 
@@ -105,12 +108,14 @@ def get_validated_scores(scorer_cls, input_data):
     # that we don't accidentally hide any AttributeErrors (or similar)
     # which come from inside the method.
     if hasattr(scorer, 'validate'):
+        # TODO: move to using runtime_checkable once we're Python 3.8+ only.
+        scorer = cast(ValidatingScorer, scorer)
         scorer.validate(extra_data)
 
     return scores
 
 
-def degroup(grouped_positions):
+def degroup(grouped_positions: Mapping[int, Iterable[TLA]]) -> Dict[TLA, int]:
     """
     Given a mapping of positions to collections ot teams at that position,
     returns an :class:`OrderedDict` of teams to their positions.

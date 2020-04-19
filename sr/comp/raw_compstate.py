@@ -2,10 +2,30 @@
 
 import os
 import subprocess
+from typing import Any, cast, Iterable, List, Optional, overload, Union
+from typing_extensions import Literal, TypedDict
 
 import yaml
 
 from .comp import SRComp
+from .types import (
+    Colour,
+    DeploymentsData,
+    LayoutData,
+    RegionName,
+    ShepherdingData,
+    ShepherdName,
+    TLA,
+)
+
+Commitish = str
+
+ShepherdInfo = TypedDict('ShepherdInfo', {
+    'name': ShepherdName,
+    'colour': Colour,
+    'regions': List[RegionName],
+    'teams': List[TLA],
+})
 
 
 class RawCompstate:
@@ -18,22 +38,22 @@ class RawCompstate:
                             pushing functionality.
     """
 
-    def __init__(self, path, local_only):
+    def __init__(self, path: str, local_only: bool):
         self._path = path
         self._local_only = local_only
 
     # Load and save related functionality
 
-    def load(self):
+    def load(self) -> SRComp:
         """Load the state as an ``SRComp`` instance."""
         return SRComp(self._path)
 
-    def load_shepherds(self):
+    def load_shepherds(self) -> List[ShepherdInfo]:
         """Load the shepherds' state."""
 
         layout = self.layout['teams']
         layout_map = {r['name']: r for r in layout}
-        shepherds = self.shepherding['shepherds']
+        shepherds = cast(List[ShepherdInfo], self.shepherding['shepherds'])
 
         for s in shepherds:
             regions = s['regions']
@@ -72,44 +92,80 @@ class RawCompstate:
             yaml.safe_dump(score, fd, default_flow_style=False)
 
     @property
-    def deployments(self):
+    def deployments(self) -> List[str]:
         deployments_name = 'deployments.yaml'
         deployments_path = os.path.join(self._path, deployments_name)
 
         with open(deployments_path, 'r') as dp:
-            raw_deployments = yaml.load(dp)
+            raw_deployments = cast(DeploymentsData, yaml.load(dp))
 
         hosts = raw_deployments['deployments']
         return hosts
 
     @property
-    def shepherding(self):
+    def shepherding(self) -> ShepherdingData:
         """Provides access to the raw shepherding data.
            Most consumers actually want to use ``load_shepherds`` instead."""
         path = os.path.join(self._path, 'shepherding.yaml')
 
         with open(path) as shepherding_file:
-            return yaml.load(shepherding_file)
+            return cast(ShepherdingData, yaml.load(shepherding_file))
 
     @property
-    def layout(self):
+    def layout(self) -> LayoutData:
         path = os.path.join(self._path, 'layout.yaml')
 
         with open(path) as layout_file:
-            return yaml.load(layout_file)
+            return cast(LayoutData, yaml.load(layout_file))
 
     # Git repo related functionality
 
-    def git(self, command_pieces, err_msg=None, return_output=False):
+    @overload
+    def git(
+        self,
+        command_pieces: Iterable[str],
+        err_msg: str = '',
+        *,
+        return_output: Literal[True]
+    ) -> str:
+        ...
+
+    @overload  # noqa:F811 # intentional redefinition
+    def git(
+        self,
+        command_pieces: Iterable[str],
+        err_msg: str = '',
+        return_output: Literal[False] = False,
+    ) -> int:
+        ...
+
+    @overload  # noqa:F811 # intentional redefinition
+    def git(
+        self,
+        command_pieces: Iterable[str],
+        err_msg: str = '',
+        return_output: bool = False,
+    ) -> Union[str, int]:
+        ...
+
+    def git(  # noqa:F811 # intentional redefinition
+        self,
+        command_pieces: Iterable[str],
+        err_msg: str = '',
+        return_output: bool = False,
+    ) -> Union[str, int]:
         command = ['git'] + list(command_pieces)
 
         if return_output:
-            stderr = subprocess.STDOUT
+            stderr = subprocess.STDOUT  # type: Optional[int]
 
-            def func(*args, **kwargs):
-                return subprocess.check_output(*args, **kwargs).decode("utf-8")
+            def func(*args: Any, **kwargs: Any) -> str:
+                return cast(
+                    str,
+                    subprocess.check_output(*args, **kwargs).decode("utf-8"),
+                )
         else:
-            func = subprocess.check_call
+            func = subprocess.check_call  # type: ignore
             stderr = None
 
         try:
@@ -126,7 +182,7 @@ class RawCompstate:
             raise
 
     @property
-    def has_changes(self):
+    def has_changes(self) -> bool:
         """
         Whether or not there are any changes to files in the state,
         including untracked files.
@@ -134,19 +190,19 @@ class RawCompstate:
         output = self.git(['status', '--porcelain'], return_output=True)
         return len(output) != 0
 
-    def show_changes(self):
+    def show_changes(self) -> None:
         self.git(['status'])
 
-    def show_remotes(self):
+    def show_remotes(self) -> None:
         self.git(['remote', '-v'])
 
-    def push(self, where, revspec, err_msg=None, force=False):
+    def push(self, where: str, revspec: str, err_msg: str = '', force: bool = False) -> None:
         args = ['push', where, revspec]
         if force:
             args.insert(1, '--force')
         self.git(args, err_msg)
 
-    def rev_parse(self, revision):
+    def rev_parse(self, revision: Commitish) -> str:
         output = self.git(
             ['rev-parse', '--verify', revision],
             return_output=True,
@@ -154,7 +210,7 @@ class RawCompstate:
         )
         return output.strip()
 
-    def has_commit(self, commit):
+    def has_commit(self, commit: Commitish) -> bool:
         """Whether or not the given commit is known to this repository."""
         try:
             self.rev_parse(commit + "^{commit}")
@@ -162,7 +218,7 @@ class RawCompstate:
         except RuntimeError:
             return False
 
-    def _is_parent(self, parent, child):
+    def _is_parent(self, parent: Commitish, child: Commitish) -> bool:
         try:
             revspec = '{0}..{1}'.format(parent, child)
             revs = self.git(
@@ -177,21 +233,21 @@ class RawCompstate:
             # One or both revisions are unknown
             return False
 
-    def has_ancestor(self, commit):
+    def has_ancestor(self, commit: Commitish) -> bool:
         return self._is_parent(commit, 'HEAD')
 
-    def has_descendant(self, commit):
+    def has_descendant(self, commit: Commitish) -> bool:
         return self._is_parent('HEAD', commit)
 
-    def reset_hard(self):
+    def reset_hard(self) -> None:
         self.git(['reset', '--hard', 'HEAD'], err_msg="Git reset failed.")
 
-    def reset_and_fast_forward(self):
+    def reset_and_fast_forward(self) -> None:
         self.reset_hard()
 
         self.pull_fast_forward()
 
-    def pull_fast_forward(self):
+    def pull_fast_forward(self) -> None:
         if self._local_only:
             return
 
@@ -200,7 +256,7 @@ class RawCompstate:
             err_msg="Git pull failed, deal with the merge manually.",
         )
 
-    def stage(self, file_path):
+    def stage(self, file_path: str) -> None:
         """
         Stage the given file.
 
@@ -210,19 +266,19 @@ class RawCompstate:
         """
         self.git(['add', file_path])
 
-    def fetch(self, where='origin', quiet=False):
+    def fetch(self, where: str = 'origin', quiet: bool = False) -> None:
         self.git(['fetch', where], return_output=quiet)
 
-    def checkout(self, what):
+    def checkout(self, what: str) -> None:
         self.git(['checkout', what])
 
-    def commit(self, commit_msg, allow_empty=False):
+    def commit(self, commit_msg: str, allow_empty: bool = False) -> None:
         args = ['commit', '-m', commit_msg]
         if allow_empty:
             args += ['--allow-empty']
         self.git(args, return_output=True, err_msg="Git commit failed.")
 
-    def commit_and_push(self, commit_msg, allow_empty=False):
+    def commit_and_push(self, commit_msg: str, allow_empty: bool = False) -> None:
         self.commit(commit_msg, allow_empty)
 
         if self._local_only:

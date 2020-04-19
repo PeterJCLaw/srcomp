@@ -1,13 +1,14 @@
 import os
 import unittest
-from collections import namedtuple
 from datetime import datetime, timedelta
 from io import StringIO
+from typing import List, NamedTuple
 from unittest import mock
 
 from sr.comp.comp import SRComp
 from sr.comp.knockout_scheduler import UNKNOWABLE_TEAM
 from sr.comp.match_period import MatchType
+from sr.comp.types import TLA
 from sr.comp.validation import (
     find_missing_scores,
     find_teams_without_league_matches,
@@ -18,10 +19,21 @@ from sr.comp.validation import (
     validate_schedule_timings,
 )
 
-Match = namedtuple('Match', ['teams'])
-Match2 = namedtuple('Match2', ['num', 'start_time'])
-Match3 = namedtuple('Match3', ['num', 'type'])
-Match4 = namedtuple('Match4', ['teams', 'type'])
+Match = NamedTuple('Match', [
+    ('teams', List[TLA]),
+])
+Match2 = NamedTuple('Match2', [
+    ('num', int),
+    ('start_time', datetime),
+])
+Match3 = NamedTuple('Match3', [
+    ('num', int),
+    ('type', MatchType),
+])
+Match4 = NamedTuple('Match4', [
+    ('teams', List[TLA]),
+    ('type', MatchType),
+])
 
 
 class DummyTests(unittest.TestCase):

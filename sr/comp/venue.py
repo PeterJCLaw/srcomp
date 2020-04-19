@@ -2,8 +2,33 @@
 
 from collections import Counter
 from itertools import chain
+from typing import (
+    Any,
+    cast,
+    Dict,
+    Generic,
+    Iterable,
+    List,
+    Mapping,
+    Tuple,
+    TypeVar,
+)
 
 from . import yaml_loader
+from .types import (
+    LayoutData,
+    Region,
+    RegionData,
+    RegionName,
+    ShepherdData,
+    ShepherdingArea,
+    ShepherdingData,
+    ShepherdName,
+    TLA,
+)
+
+T = TypeVar('T')
+T_str = TypeVar('T_str', bound=str)
 
 
 class InvalidRegionException(Exception):
@@ -11,7 +36,7 @@ class InvalidRegionException(Exception):
     An exception that occurs when there are invalid regions mentioned in
     the shepherding data.
     """
-    def __init__(self, region, area):
+    def __init__(self, region: RegionName, area: str) -> None:
         tpl = "Invalid region '{0}' found in shepherding area '{1}'"
         super().__init__(tpl.format(region, area))
 
@@ -19,11 +44,17 @@ class InvalidRegionException(Exception):
         self.area = area
 
 
-class MismatchException(Exception):
+class MismatchException(Exception, Generic[T_str]):
     """
     An exception that occurs when there are duplicate, extra or missing items.
     """
-    def __init__(self, tpl, duplicates, extras, missing):
+    def __init__(
+        self,
+        tpl: str,
+        duplicates: Iterable[T_str],
+        extras: Iterable[T_str],
+        missing: Iterable[T_str],
+    ) -> None:
         details = []
 
         for label, teams in (
@@ -44,22 +75,33 @@ class MismatchException(Exception):
         self.missing = missing
 
 
-class LayoutTeamsException(MismatchException):
+class LayoutTeamsException(MismatchException[TLA]):
     """
     An exception that occurs when there are duplicate, extra or missing
     teams in a layout.
     """
-    def __init__(self, duplicate_teams, extra_teams, missing_teams):
+    def __init__(
+        self,
+        duplicate_teams: Iterable[TLA],
+        extra_teams: Iterable[TLA],
+        missing_teams: Iterable[TLA],
+    ):
         tpl = "Duplicate, extra or missing teams in the layout! ({0})"
         super().__init__(tpl, duplicate_teams, extra_teams, missing_teams)
 
 
-class ShepherdingAreasException(MismatchException):
+class ShepherdingAreasException(MismatchException[str]):
     """
     An exception that occurs when there are duplicate, extra or missing
     shepherding areas in the staging times.
     """
-    def __init__(self, where, duplicate, extra, missing):
+    def __init__(
+        self,
+        where: str,
+        duplicate: Iterable[str],
+        extra: Iterable[str],
+        missing: Iterable[str],
+    ):
         tpl = "Duplicate, extra or missing shepherding areas {0}! ({{0}})".format(where)
         super().__init__(tpl, duplicate, extra, missing)
 
@@ -68,7 +110,10 @@ class Venue:
     """A class providing information about the layout within the venue."""
 
     @staticmethod
-    def _check_staging_times(shepherding_areas, staging_times):
+    def _check_staging_times(
+        shepherding_areas: Iterable[ShepherdName],
+        staging_times: Mapping[str, Mapping[ShepherdName, Any]],
+    ) -> None:
         """
         Check that the given staging times contain signals for the right
         set of shepherding areas.
@@ -98,11 +143,11 @@ class Venue:
             )
 
     @staticmethod
-    def _get_duplicates(items):
+    def _get_duplicates(items: Iterable[T]) -> List[T]:
         return [item for item, count in Counter(items).items() if count > 1]
 
     @classmethod
-    def check_teams(cls, teams, teams_layout):
+    def check_teams(cls, teams: Iterable[TLA], teams_layout: List[RegionData]) -> None:
         """
         Check that the given layout of teams contains the same set of
         teams as the reference.
@@ -128,7 +173,10 @@ class Venue:
             raise LayoutTeamsException(duplicate_teams, extra_teams, missing_teams)
 
     @staticmethod
-    def _match_regions_and_shepherds(shepherds, teams_layout):
+    def _match_regions_and_shepherds(
+        shepherds: Iterable[ShepherdData],
+        teams_layout: List[RegionData],
+    ) -> Iterable[Tuple[RegionData, ShepherdData]]:
         regions_by_name = {r['name']: r for r in teams_layout}
 
         for shepherd in shepherds:
@@ -140,12 +188,17 @@ class Venue:
                 yield region, shepherd
 
     @staticmethod
-    def _build_locations(regions_and_shepherds):
-        def add_shepherd(region, shepherd):
-            region['shepherds'] = {
+    def _build_locations(
+        regions_and_shepherds: Iterable[Tuple[RegionData, ShepherdData]],
+    ) -> Mapping[RegionName, Region]:
+
+        def add_shepherd(region_data: RegionData, shepherd: ShepherdData) -> Region:
+            # TODO: would be good to remove this cast
+            region = cast(Region, region_data)
+            region['shepherds'] = ShepherdingArea({
                 'name': shepherd['name'],
                 'colour': shepherd['colour'],
-            }
+            })
             return region
 
         return {
@@ -153,13 +206,18 @@ class Venue:
             for region, shepherd in regions_and_shepherds
         }
 
-    def __init__(self, teams, layout_file, shepherding_file):
+    def __init__(
+        self,
+        teams: Iterable[TLA],
+        layout_file: str,
+        shepherding_file: str,
+    ):
 
-        layout_data = yaml_loader.load(layout_file)
+        layout_data = yaml_loader.load(layout_file)  # type: LayoutData
         teams_layout = layout_data['teams']
         self.check_teams(teams, teams_layout)
 
-        shepherding_data = yaml_loader.load(shepherding_file)
+        shepherding_data = yaml_loader.load(shepherding_file)  # type: ShepherdingData
         shepherds = shepherding_data['shepherds']
 
         self._shepherding_areas = [a['name'] for a in shepherds]
@@ -185,16 +243,19 @@ class Venue:
         shepherding region which contains that location.
         """
 
-        self._team_locations = {}
+        self._team_locations = {}  # type: Dict[TLA, Region]
 
         for location in self.locations.values():
             for team in location['teams']:
                 self._team_locations[team] = location
 
-    def check_staging_times(self, staging_times):
+    def check_staging_times(
+        self,
+        staging_times: Mapping[str, Mapping[ShepherdName, Any]],
+    ) -> None:
         self._check_staging_times(self._shepherding_areas, staging_times)
 
-    def get_team_location(self, team):
+    def get_team_location(self, team: TLA) -> RegionName:
         """
         Get the name of the location allocated to the given team within
         the venue.

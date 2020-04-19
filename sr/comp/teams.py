@@ -1,19 +1,20 @@
 """Team metadata library."""
 
-from collections import namedtuple
+from typing import Dict, NamedTuple, Optional
 
 from . import yaml_loader
+from .types import MatchNumber, TLA
 
-_Team = namedtuple('Team', [
-    'tla',
-    'name',
-    'rookie',
-    'dropped_out_after',
+_Team = NamedTuple('Team', [
+    ('tla', TLA),
+    ('name', str),
+    ('rookie', bool),
+    ('dropped_out_after', Optional[MatchNumber]),
 ])
 
 
 class Team(_Team):
-    def is_still_around(self, match_number):
+    def is_still_around(self, match_number: MatchNumber) -> bool:
         """
         Check if this team is still around at a certain match.
 
@@ -27,7 +28,7 @@ class Team(_Team):
             return match_number <= self.dropped_out_after
 
 
-def load_teams(filename):
+def load_teams(filename: str) -> Dict[TLA, Team]:
     """
     Load teams from a YAML file.
 

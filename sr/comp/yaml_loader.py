@@ -5,9 +5,13 @@ This includes parsing of dates and times properly, and also ensures the C YAML
 loader is used which is necessary for optimum performance.
 """
 
+from typing import Type
+
 import dateutil.parser
 import dateutil.tz
 import yaml
+
+from .types import YAMLData
 
 try:
     from yaml import CLoader as YAML_Loader
@@ -25,14 +29,14 @@ def time_constructor(_, node):
     return dateutil.parser.parse(node.value)
 
 
-def add_time_constructor(loader):
+def add_time_constructor(loader: Type[YAML_Loader]) -> None:
     loader.add_constructor('tag:yaml.org,2002:timestamp', time_constructor)
 
 
 add_time_constructor(YAML_Loader)
 
 
-def load(file_path):
+def load(file_path: str) -> YAMLData:
     """
     Load a YAML fie and return the results.
 

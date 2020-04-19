@@ -1,11 +1,14 @@
 """Classes that are useful for dealing with match periods."""
 
-from collections import namedtuple
+import datetime
 from enum import Enum, unique
+from typing import List, Mapping, NamedTuple, NewType, Optional
 
-Delay = namedtuple('Delay', [
-    'delay',
-    'time',
+from .types import ArenaName, MatchNumber, TLA
+
+Delay = NamedTuple('Delay', [
+    ('delay', datetime.timedelta),
+    ('time', datetime.datetime),
 ])
 
 
@@ -16,30 +19,33 @@ class MatchType(Enum):
     tiebreaker = 'tiebreaker'
 
 
-Match = namedtuple('Match', [
-    'num',
-    'display_name',
-    'arena',
-    'teams',
-    'start_time',
-    'end_time',
-    'type',
-    'use_resolved_ranking',
+Match = NamedTuple('Match', [
+    ('num', MatchNumber),
+    ('display_name', str),
+    ('arena', ArenaName),
+    ('teams', List[Optional[TLA]]),
+    ('start_time', datetime.datetime),
+    ('end_time', datetime.datetime),
+    ('type', MatchType),
+    ('use_resolved_ranking', bool),
 ])
 
 
-class MatchPeriod(namedtuple('MatchPeriod', [
-    'start_time',
-    'end_time',
-    'max_end_time',
-    'description',
-    'matches',
-    'type',
+MatchSlot = NewType('MatchSlot', Mapping[ArenaName, Match])
+
+
+class MatchPeriod(NamedTuple('MatchPeriod', [
+    ('start_time', datetime.datetime),
+    ('end_time', datetime.datetime),
+    ('max_end_time', datetime.datetime),
+    ('description', str),
+    ('matches', List[MatchSlot]),
+    ('type', MatchType),
 ])):
 
     __slots__ = ()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "{} ({}–{})".format(
             self.description,
             self.start_time.strftime('%H:%M'),

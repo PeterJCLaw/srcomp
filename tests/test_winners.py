@@ -6,16 +6,18 @@ from unittest import mock
 from dateutil.tz import tzutc
 from league_ranker import calc_positions, calc_ranked_points
 
+from sr.comp.arenas import ArenaName
 from sr.comp.match_period import Match, MatchType
 from sr.comp.scores import TeamScore
 from sr.comp.teams import Team
+from sr.comp.types import MatchNumber, TLA
 from sr.comp.winners import Award, compute_awards
 
 FINAL_INFO = Match(
-    num=1,
+    num=MatchNumber(1),
     display_name="Match 1",
-    arena='A',
-    teams=['AAA', 'BBB', 'CCC', 'DDD'],
+    arena=ArenaName('A'),
+    teams=[TLA('AAA'), TLA('BBB'), TLA('CCC'), TLA('DDD')],
     start_time=datetime(2014, 4, 26, 16, 30, tzinfo=tzutc()),
     end_time=datetime(2014, 4, 26, 16, 35, tzinfo=tzutc()),
     type=MatchType.knockout,
@@ -23,10 +25,10 @@ FINAL_INFO = Match(
 )
 
 TIEBREAKER_INFO = Match(
-    num=2,
+    num=MatchNumber(2),
     display_name="Tiebreaker (#2)",
-    arena='A',
-    teams=['AAA', 'BBB'],
+    arena=ArenaName('A'),
+    teams=[TLA('AAA'), TLA('BBB')],
     start_time=datetime(2014, 4, 26, 16, 30, tzinfo=tzutc()),
     end_time=datetime(2014, 4, 26, 16, 35, tzinfo=tzutc()),
     type=MatchType.tiebreaker,
@@ -34,10 +36,10 @@ TIEBREAKER_INFO = Match(
 )
 
 TEAMS = {
-    'AAA': Team(tla='AAA', name="AAA Squad", rookie=True, dropped_out_after=None),
-    'BBB': Team(tla='BBB', name="BBBees", rookie=False, dropped_out_after=None),
-    'CCC': Team(tla='CCC', name="Team CCC", rookie=True, dropped_out_after=None),
-    'DDD': Team(tla='DDD', name="DDD Robotics", rookie=False, dropped_out_after=None),
+    TLA('AAA'): Team(tla=TLA('AAA'), name="AAA Squad", rookie=True, dropped_out_after=None),
+    TLA('BBB'): Team(tla=TLA('BBB'), name="BBBees", rookie=False, dropped_out_after=None),
+    TLA('CCC'): Team(tla=TLA('CCC'), name="Team CCC", rookie=True, dropped_out_after=None),
+    TLA('DDD'): Team(tla=TLA('DDD'), name="DDD Robots", rookie=False, dropped_out_after=None),
 }
 
 
