@@ -127,6 +127,32 @@ class Venue:
         if duplicate_teams or extra_teams or missing_teams:
             raise LayoutTeamsException(duplicate_teams, extra_teams, missing_teams)
 
+    @staticmethod
+    def _match_regions_and_shepherds(shepherds, teams_layout):
+        regions_by_name = {r['name']: r for r in teams_layout}
+
+        for shepherd in shepherds:
+            for region_name in shepherd.get('regions', []):
+                region = regions_by_name.get(region_name)
+                if not region:
+                    raise InvalidRegionException(region_name, shepherd['name'])
+
+                yield region, shepherd
+
+    @staticmethod
+    def _build_locations(regions_and_shepherds):
+        def add_shepherd(region, shepherd):
+            region['shepherds'] = {
+                'name': shepherd['name'],
+                'colour': shepherd['colour'],
+            }
+            return region
+
+        return {
+            region['name']: add_shepherd(region, shepherd)
+            for region, shepherd in regions_and_shepherds
+        }
+
     def __init__(self, teams, layout_file, shepherding_file):
 
         layout_data = yaml_loader.load(layout_file)
@@ -150,7 +176,9 @@ class Venue:
                 [],
             )
 
-        self.locations = {r['name']: r for r in teams_layout}
+        self.locations = self._build_locations(
+            self._match_regions_and_shepherds(shepherds, teams_layout),
+        )
         """
         A :class:`dict` of location names (from the layout file) to location
         information, including which teams are in that location and the
@@ -159,20 +187,9 @@ class Venue:
 
         self._team_locations = {}
 
-        for location in teams_layout:
+        for location in self.locations.values():
             for team in location['teams']:
                 self._team_locations[team] = location
-
-        for area in shepherds:
-            for region in area.get('regions', []):
-                location = self.locations.get(region)
-                if not location:
-                    raise InvalidRegionException(region, area['name'])
-
-                location['shepherds'] = {
-                    'name': area['name'],
-                    'colour': area['colour'],
-                }
 
     def check_staging_times(self, staging_times):
         self._check_staging_times(self._shepherding_areas, staging_times)
