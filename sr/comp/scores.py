@@ -5,7 +5,6 @@ import os
 from collections import OrderedDict
 from functools import total_ordering
 from typing import (
-    Any,
     cast,
     Dict,
     Iterable,
@@ -26,6 +25,7 @@ from .types import (
     GamePoints,
     MatchId,
     MatchNumber,
+    ScoreData,
     ScorerType,
     TLA,
     ValidatingScorer,
@@ -126,7 +126,10 @@ def results_finder(root: str) -> Iterator[str]:
             yield resfile
 
 
-def get_validated_scores(scorer_cls: ScorerType, input_data: Any) -> Mapping[TLA, GamePoints]:
+def get_validated_scores(
+    scorer_cls: ScorerType,
+    input_data: ScoreData,
+) -> Mapping[TLA, GamePoints]:
     """
     Helper function which mimics the behaviour from libproton.
 
@@ -237,7 +240,7 @@ class BaseScores:
                 self.teams[tla].add_game_points(score)
 
     def _load_resfile(self, fname: str) -> None:
-        y = yaml_loader.load(fname)
+        y = cast(ScoreData, yaml_loader.load(fname))
 
         match_id = (y['arena_id'], y['match_number'])
         if match_id in self.game_points:

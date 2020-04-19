@@ -1,5 +1,15 @@
 import datetime
-from typing import Any, Dict, List, Mapping, NewType, Tuple, Type, Union
+from typing import (
+    Any,
+    Dict,
+    List,
+    Mapping,
+    NewType,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 from typing_extensions import Protocol, TypedDict
 
 TLA = NewType('TLA', str)
@@ -18,10 +28,32 @@ YAMLData = Any
 
 GamePoints = NewType('GamePoints', int)
 
+ScoreArenaZonesData = NewType('ScoreArenaZonesData', object)
+ScoreOtherData = NewType('ScoreOtherData', object)
+
+ScoreTeamData = TypedDict('ScoreTeamData', {
+    'disqualified': bool,
+    'present': bool,
+    # Plus other keys which are used to actually convey the score data, but
+    # which we must not rely on and should not care about. There isn't a way to
+    # represent that easily in Python's type system though.
+})
+
+ScoreData = TypedDict('ScoreData', {
+    'arena_id': ArenaName,
+    'match_number': MatchNumber,
+    'teams': Dict[TLA, ScoreTeamData],
+    'arena_zones': Optional[ScoreArenaZonesData],
+    'other': Optional[ScoreOtherData],
+})
+
 
 class SimpleScorer(Protocol):
-    # TODO: remove these `Any`s?
-    def __init__(self, teams_data: Any, arena_data: Any):
+    def __init__(
+        self,
+        teams_data: Dict[TLA, ScoreTeamData],
+        arena_data: Optional[ScoreArenaZonesData],
+    ) -> None:
         ...
 
     def calculate_scores(self) -> Mapping[TLA, GamePoints]:
@@ -29,7 +61,7 @@ class SimpleScorer(Protocol):
 
 
 class ValidatingScorer(SimpleScorer, Protocol):
-    def validate(self, extra_data: Any) -> None:
+    def validate(self, extra_data: Optional[ScoreOtherData]) -> None:
         ...
 
 
