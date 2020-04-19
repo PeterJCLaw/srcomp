@@ -99,3 +99,6 @@ DelayData = TypedDict('DelayData', {
     'delay': int,
     'time': datetime.datetime,
 })
+
+
+AwardsData = NewType('AwardsData', Dict[str, Union[TLA, List[TLA]]])
