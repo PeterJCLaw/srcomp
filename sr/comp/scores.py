@@ -19,6 +19,7 @@ from typing import (
 )
 
 import league_ranker as ranker
+from league_ranker import RankedPosition
 
 from . import yaml_loader
 from .types import (
@@ -198,7 +199,7 @@ class BaseScores:
         TLAs to the number of game points they scored.
         """
 
-        self.game_positions = {}  # type: Dict[MatchId, Mapping[ranker.RankedPosition, Set[TLA]]]
+        self.game_positions = {}  # type: Dict[MatchId, Mapping[RankedPosition, Set[TLA]]]
         """
         Game position data for each match. Keys are tuples of the form
         ``(arena_id, match_num)``, values are :class:`dict` s mapping
@@ -334,7 +335,7 @@ class KnockoutScores(BaseScores):
     def calculate_ranking(
         match_points: Mapping[TLA, ranker.LeaguePoints],
         league_positions: LeaguePositions,
-    ) -> Dict[TLA, ranker.RankedPosition]:
+    ) -> Dict[TLA, RankedPosition]:
         """
         Get a ranking of the given match's teams.
 
