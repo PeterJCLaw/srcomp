@@ -1,7 +1,19 @@
 import unittest
 from copy import deepcopy
+from typing import overload, Union
+from typing_extensions import Literal
 from unittest import mock
 
+from sr.comp.types import (
+    Colour,
+    LayoutData,
+    RegionData,
+    RegionName,
+    ShepherdData,
+    ShepherdingData,
+    ShepherdName,
+    TLA,
+)
 from sr.comp.venue import (
     InvalidRegionException,
     LayoutTeamsException,
@@ -9,41 +21,58 @@ from sr.comp.venue import (
     Venue,
 )
 
-TEAMS = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQR']
-TIMES = {'signal_shepherds': {'Yellow': None, 'Pink': None}}
+TEAMS = [TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('JKL'), TLA('MNO'), TLA('PQR')]
+TIMES = {'signal_shepherds': {
+    ShepherdName('Yellow'): None,
+    ShepherdName('Pink'): None,
+}}
 
 
-def mock_layout_loader():
-    return {'teams': [
-        {
-            'name': 'a-group',
+def mock_layout_loader() -> LayoutData:
+    return LayoutData({'teams': [
+        RegionData({
+            'name': RegionName('a-group'),
             'display_name': "A group",
-            'teams': ['ABC', 'DEF', 'GHI'],
-        },
-        {
-            'name': 'b-group',
+            'description': '',
+            'teams': [TLA('ABC'), TLA('DEF'), TLA('GHI')],
+        }),
+        RegionData({
+            'name': RegionName('b-group'),
             'display_name': "B group",
-            'teams': ['JKL', 'MNO', 'PQR'],
-        },
-    ]}
+            'description': '',
+            'teams': [TLA('JKL'), TLA('MNO'), TLA('PQR')],
+        }),
+    ]})
 
 
-def mock_shepherding_loader():
-    return {'shepherds': [
-        {
-            'name': 'Yellow',
-            'colour': 'colour-yellow',
-            'regions': ['a-group'],
-        },
-        {
-            'name': 'Pink',
-            'colour': 'colour-pink',
-            'regions': ['b-group'],
-        },
-    ]}
+def mock_shepherding_loader() -> ShepherdingData:
+    return ShepherdingData({'shepherds': [
+        ShepherdData({
+            'name': ShepherdName('Yellow'),
+            'colour': Colour('colour-yellow'),
+            'regions': [RegionName('a-group')],
+        }),
+        ShepherdData({
+            'name': ShepherdName('Pink'),
+            'colour': Colour('colour-pink'),
+            'regions': [RegionName('b-group')],
+        }),
+    ]})
 
 
-def mock_loader(name):
+@overload
+def mock_loader(name: Literal['LYT']) -> LayoutData:
+    ...
+
+
+@overload  # noqa:F811 # intentional redefinition
+def mock_loader(name: Literal['SHPD']) -> ShepherdingData:
+    ...
+
+
+def mock_loader(  # noqa:F811 # intentional redefinition
+    name: Literal['LYT', 'SHPD'],
+) -> Union[LayoutData, ShepherdingData]:
     if name == 'LYT':
         return mock_layout_loader()
     elif name == 'SHPD':
@@ -53,12 +82,13 @@ def mock_loader(name):
 
 
 class VenueTests(unittest.TestCase):
-    def test_invalid_region(self):
-        def my_mock_loader(name):
-            res = mock_loader(name)
+    def test_invalid_region(self) -> None:
+        def my_mock_loader(name: Literal['LYT', 'SHPD']) -> Union[LayoutData, ShepherdingData]:
             if name == 'SHPD':
-                res['shepherds'][0]['regions'].append('invalid-region')
-            return res
+                res = mock_loader(name)
+                res['shepherds'][0]['regions'].append(RegionName('invalid-region'))
+                return res
+            return mock_loader(name)
 
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = my_mock_loader
@@ -73,7 +103,7 @@ class VenueTests(unittest.TestCase):
             self.assertEqual('invalid-region', ire.region)
             self.assertEqual('Yellow', ire.area)
 
-    def test_extra_teams(self):
+    def test_extra_teams(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
@@ -81,19 +111,20 @@ class VenueTests(unittest.TestCase):
                 LayoutTeamsException,
                 msg="Should have errored about the extra teams",
             ) as cm:
-                Venue(['ABC', 'DEF', 'GHI'], 'LYT', 'SHPD')
+                Venue([TLA('ABC'), TLA('DEF'), TLA('GHI')], 'LYT', 'SHPD')
 
             lte = cm.exception
             self.assertEqual(set(['JKL', 'MNO', 'PQR']), lte.extras)
             self.assertEqual([], lte.duplicates)
             self.assertEqual(set(), lte.missing)
 
-    def test_duplicate_teams(self):
-        def my_mock_loader(name):
-            res = mock_loader(name)
+    def test_duplicate_teams(self) -> None:
+        def my_mock_loader(name: Literal['LYT', 'SHPD']) -> Union[LayoutData, ShepherdingData]:
             if name == 'LYT':
-                res['teams'][1]['teams'].append('ABC')
-            return res
+                res = mock_loader(name)
+                res['teams'][1]['teams'].append(TLA('ABC'))
+                return res
+            return mock_loader(name)
 
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = my_mock_loader
@@ -109,7 +140,7 @@ class VenueTests(unittest.TestCase):
             self.assertEqual(set(), lte.extras)
             self.assertEqual(set(), lte.missing)
 
-    def test_missing_teams(self):
+    def test_missing_teams(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
@@ -117,14 +148,14 @@ class VenueTests(unittest.TestCase):
                 LayoutTeamsException,
                 msg="Should have errored about the missing team",
             ) as cm:
-                Venue(TEAMS + ['Missing'], 'LYT', 'SHPD')
+                Venue(TEAMS + [TLA('Missing')], 'LYT', 'SHPD')
 
             lte = cm.exception
             self.assertEqual(set(['Missing']), lte.missing)
             self.assertEqual([], lte.duplicates)
             self.assertEqual(set(), lte.extras)
 
-    def test_missing_and_extra_teams(self):
+    def test_missing_and_extra_teams(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
@@ -132,27 +163,27 @@ class VenueTests(unittest.TestCase):
                 LayoutTeamsException,
                 msg="Should have errored about the extra and missing teams",
             ) as cm:
-                Venue(['ABC', 'DEF', 'GHI', 'Missing'], 'LYT', 'SHPD')
+                Venue([TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('Missing')], 'LYT', 'SHPD')
 
             lte = cm.exception
             self.assertEqual(set(['JKL', 'MNO', 'PQR']), lte.extras)
             self.assertEqual(set(['Missing']), lte.missing)
             self.assertEqual([], lte.duplicates)
 
-    def test_right_shepherding_areas(self):
+    def test_right_shepherding_areas(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
             venue = Venue(TEAMS, 'LYT', 'SHPD')
             venue.check_staging_times(TIMES)
 
-    def test_extra_shepherding_areas(self):
+    def test_extra_shepherding_areas(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
             venue = Venue(TEAMS, 'LYT', 'SHPD')
             times = deepcopy(TIMES)
-            times['signal_shepherds']['Blue'] = None
+            times['signal_shepherds'][ShepherdName('Blue')] = None
 
             with self.assertRaises(
                 ShepherdingAreasException,
@@ -165,13 +196,13 @@ class VenueTests(unittest.TestCase):
             self.assertEqual([], lte.duplicates)
             self.assertEqual(set(), lte.missing)
 
-    def test_missing_shepherding_areas(self):
+    def test_missing_shepherding_areas(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
             venue = Venue(TEAMS, 'LYT', 'SHPD')
             times = deepcopy(TIMES)
-            del times['signal_shepherds']['Pink']
+            del times['signal_shepherds'][ShepherdName('Pink')]
 
             with self.assertRaises(
                 ShepherdingAreasException,
@@ -184,14 +215,14 @@ class VenueTests(unittest.TestCase):
             self.assertEqual(set(), lte.extras)
             self.assertEqual([], lte.duplicates)
 
-    def test_missing_and_extra_shepherding_areas(self):
+    def test_missing_and_extra_shepherding_areas(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
             venue = Venue(TEAMS, 'LYT', 'SHPD')
             times = deepcopy(TIMES)
-            times['signal_shepherds']['Blue'] = None
-            del times['signal_shepherds']['Pink']
+            times['signal_shepherds'][ShepherdName('Blue')] = None
+            del times['signal_shepherds'][ShepherdName('Pink')]
 
             with self.assertRaises(
                 ShepherdingAreasException,
@@ -204,7 +235,7 @@ class VenueTests(unittest.TestCase):
             self.assertEqual(set(['Blue']), lte.extras)
             self.assertEqual([], lte.duplicates)
 
-    def test_locations(self):
+    def test_locations(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
@@ -214,6 +245,7 @@ class VenueTests(unittest.TestCase):
                 'a-group': {
                     'name': 'a-group',
                     'display_name': "A group",
+                    'description': "",
                     'teams': ['ABC', 'DEF', 'GHI'],
                     'shepherds': {
                         'name': 'Yellow',
@@ -223,6 +255,7 @@ class VenueTests(unittest.TestCase):
                 'b-group': {
                     'name': 'b-group',
                     'display_name': "B group",
+                    'description': "",
                     'teams': ['JKL', 'MNO', 'PQR'],
                     'shepherds': {
                         'name': 'Pink',
@@ -234,12 +267,12 @@ class VenueTests(unittest.TestCase):
             locations = venue.locations
             self.assertEqual(expected, locations)
 
-    def test_get_team_location(self):
+    def test_get_team_location(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
             venue = Venue(TEAMS, 'LYT', 'SHPD')
-            loc = venue.get_team_location('DEF')
+            loc = venue.get_team_location(TLA('DEF'))
             self.assertEqual(
                 'a-group',
                 loc,
