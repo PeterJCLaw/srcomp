@@ -12,7 +12,7 @@ import yaml
 try:
     from yaml import CLoader as YAML_Loader
 except ImportError:
-    from yaml import Loader as YAML_Loader
+    from yaml import Loader as YAML_Loader  # type: ignore
     from warnings import warn
     warn(
         "Using pure-python PyYAML (without libyaml). "
