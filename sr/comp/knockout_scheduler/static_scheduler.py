@@ -2,8 +2,22 @@
 A static knockout schedule.
 """
 
-from ..match_period import Match, MatchType
+import datetime
+from typing import Any, List, NewType, Optional
+from typing_extensions import TypedDict
+
+from ..match_period import Match, MatchSlot, MatchType
+from ..types import ArenaName, MatchNumber, TLA
 from .base_scheduler import BaseKnockoutScheduler, UNKNOWABLE_TEAM
+
+StaticMatchTeamReference = NewType('StaticMatchTeamReference', str)
+
+StaticMatchInfo = TypedDict('StaticMatchInfo', {
+    'arena': ArenaName,
+    'start_time': datetime.datetime,
+    'teams': List[StaticMatchTeamReference],
+    'display_name': Optional[str],
+})
 
 
 class StaticScheduler(BaseKnockoutScheduler):
@@ -22,14 +36,16 @@ class StaticScheduler(BaseKnockoutScheduler):
         manual changes to the schedule to remove the seeds which cannot be filled
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
         # Collect a list of the teams eligible for the knockouts, in seeded order.
         last_league_match_num = self.schedule.n_matches()
-        self._knockout_seeds = self._get_non_dropped_out_teams(last_league_match_num)
+        self._knockout_seeds = self._get_non_dropped_out_teams(
+            MatchNumber(last_league_match_num),
+        )
 
-    def get_team(self, team_ref):
+    def get_team(self, team_ref: Optional[StaticMatchTeamReference]) -> Optional[TLA]:
         if not self._played_all_league_matches():
             return UNKNOWABLE_TEAM
 
@@ -69,13 +85,18 @@ class StaticScheduler(BaseKnockoutScheduler):
                 "Reference '{}' to invalid ranking!".format(team_ref),
             )
 
-    def _add_match(self, match_info, rounds_remaining, round_num):
+    def _add_match(
+        self,
+        match_info: StaticMatchInfo,
+        rounds_remaining: int,
+        round_num: int,
+    ) -> None:
         new_matches = {}
 
         arena = match_info['arena']
         start_time = match_info['start_time']
         end_time = start_time + self.schedule.match_duration
-        num = len(self.schedule.matches)
+        num = MatchNumber(len(self.schedule.matches))
 
         teams = []
         for team_ref in match_info['teams']:
@@ -111,10 +132,10 @@ class StaticScheduler(BaseKnockoutScheduler):
 
         new_matches[match_info['arena']] = match
 
-        self.schedule.matches.append(new_matches)
-        self.period.matches.append(new_matches)
+        self.schedule.matches.append(MatchSlot(new_matches))
+        self.period.matches.append(MatchSlot(new_matches))
 
-    def add_knockouts(self):
+    def add_knockouts(self) -> None:
         knockout_conf = self.config['static_knockout']['matches']
 
         for round_num, round_info in sorted(knockout_conf.items()):

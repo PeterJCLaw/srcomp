@@ -2,11 +2,27 @@
 
 import math
 from datetime import timedelta
+from typing import (
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Sized,
+    TYPE_CHECKING,
+)
 
-from ..match_period import Match, MatchType
+from ..match_period import Match, MatchSlot, MatchType
 from ..match_period_clock import MatchPeriodClock
+from ..scores import Scores
+from ..teams import Team
+from ..types import ArenaName, MatchNumber, TLA, YAMLData
 from . import seeding, stable_random
 from .base_scheduler import BaseKnockoutScheduler, UNKNOWABLE_TEAM
+
+if TYPE_CHECKING:
+    # Circular
+    from ..matches import MatchSchedule
 
 
 class KnockoutScheduler(BaseKnockoutScheduler):
@@ -30,7 +46,15 @@ class KnockoutScheduler(BaseKnockoutScheduler):
     Constant value due to the way the automatic seeding works.
     """
 
-    def __init__(self, schedule, scores, arenas, num_teams_per_arena, teams, config):
+    def __init__(
+        self,
+        schedule: 'MatchSchedule',
+        scores: Scores,
+        arenas: Sequence[ArenaName],
+        num_teams_per_arena: int,
+        teams: Mapping[TLA, Team],
+        config: YAMLData,
+    ) -> None:
         if num_teams_per_arena != self.num_teams_per_arena:
             raise ValueError(
                 "The automatic knockout scheduler can only be used for {0} teams"
@@ -46,7 +70,12 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
         self.clock = MatchPeriodClock(self.period, self.schedule.delays)
 
-    def _add_round_of_matches(self, matches, arenas, rounds_remaining):
+    def _add_round_of_matches(
+        self,
+        matches: List[List[TLA]],
+        arenas: Iterable[ArenaName],
+        rounds_remaining: int,
+    ) -> None:
         """
         Add a whole round of matches.
 
@@ -64,7 +93,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
             new_matches = {}
             for arena in arenas:
-                teams = matches.pop(0)
+                teams = matches.pop(0)  # type: List[Optional[TLA]]
 
                 if len(teams) < self.num_teams_per_arena:
                     # Fill empty zones with None
@@ -73,7 +102,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
                 # Randomise the zones
                 self.R.shuffle(teams)
 
-                num = len(self.schedule.matches)
+                num = MatchNumber(len(self.schedule.matches))
                 display_name = self.get_match_display_name(
                     rounds_remaining,
                     round_num,
@@ -99,12 +128,12 @@ class KnockoutScheduler(BaseKnockoutScheduler):
                     break
 
             self.clock.advance_time(self.schedule.match_duration)
-            self.schedule.matches.append(new_matches)
-            self.period.matches.append(new_matches)
+            self.schedule.matches.append(MatchSlot(new_matches))
+            self.period.matches.append(MatchSlot(new_matches))
 
             round_num += 1
 
-    def get_winners(self, game):
+    def get_winners(self, game: Match) -> List[TLA]:
         """
         Find the parent match's winners.
 
@@ -114,7 +143,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
         ranking = self.get_ranking(game)
         return ranking[:2]
 
-    def _add_round(self, arenas, rounds_remaining):
+    def _add_round(self, arenas: Iterable[ArenaName], rounds_remaining: int) -> None:
         prev_round = self.knockout_rounds[-1]
         matches = []
 
@@ -127,9 +156,9 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
         self._add_round_of_matches(matches, arenas, rounds_remaining)
 
-    def _add_first_round(self, conf_arity=None):
+    def _add_first_round(self, conf_arity: Optional[int] = None) -> None:
         next_match_num = len(self.schedule.matches)
-        teams = self._get_non_dropped_out_teams(next_match_num)
+        teams = self._get_non_dropped_out_teams(MatchNumber(next_match_num))
         if not self._played_all_league_matches():
             teams = [UNKNOWABLE_TEAM] * len(teams)
 
@@ -152,10 +181,10 @@ class KnockoutScheduler(BaseKnockoutScheduler):
         self._add_round_of_matches(matches, self.arenas, rounds_remaining)
 
     @staticmethod
-    def get_rounds_remaining(prev_matches):
+    def get_rounds_remaining(prev_matches: Sized) -> int:
         return int(math.log(len(prev_matches), 2))
 
-    def add_knockouts(self):
+    def add_knockouts(self) -> None:
         knockout_conf = self.config['knockout']
         round_spacing = timedelta(seconds=knockout_conf['round_spacing'])
 
