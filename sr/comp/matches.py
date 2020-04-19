@@ -18,6 +18,7 @@ from typing import (
 from typing_extensions import TypedDict
 
 from dateutil.tz import gettz
+from league_ranker import RankedPosition
 
 from . import yaml_loader
 from .arenas import Arena
@@ -467,7 +468,7 @@ class MatchSchedule:
             finals_positions = scores.knockout.game_positions[finals_key]
         except KeyError:
             return
-        winners = finals_positions.get(1)
+        winners = finals_positions.get(RankedPosition(1))
         if not winners:
             raise AssertionError("The only winning move is not to play.")
         if len(winners) > 1:  # Act surprised!

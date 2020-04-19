@@ -4,12 +4,36 @@ import glob
 import os
 from collections import OrderedDict
 from functools import total_ordering
-from typing import Any, cast, Dict, Iterable, Iterator, Mapping, Tuple
+from typing import (
+    Any,
+    cast,
+    Dict,
+    Iterable,
+    Iterator,
+    Mapping,
+    NewType,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+)
 
 import league_ranker as ranker
 
 from . import yaml_loader
-from .types import GamePoints, MatchId, ScorerType, TLA, ValidatingScorer
+from .types import (
+    GamePoints,
+    MatchId,
+    MatchNumber,
+    ScorerType,
+    TLA,
+    ValidatingScorer,
+)
+
+T = TypeVar('T')
+
+LeaguePosition = NewType('LeaguePosition', int)
+LeaguePositions = Mapping[TLA, LeaguePosition]
 
 
 class InvalidTeam(Exception):
@@ -42,7 +66,11 @@ class TeamScore:
     :param int game: The game points.
     """
 
-    def __init__(self, league: int = 0, game: int = 0):
+    def __init__(
+        self,
+        league: ranker.LeaguePoints = ranker.LeaguePoints(0),
+        game: GamePoints = GamePoints(0),
+    ):
         self.league_points = league
         self.game_points = game
 
@@ -50,6 +78,14 @@ class TeamScore:
     def _ordering_key(self) -> Tuple[int, int]:
         # Sort lexicographically by league points, then game points
         return self.league_points, self.game_points
+
+    def add_game_points(self, score: GamePoints) -> GamePoints:
+        self.game_points = GamePoints(self.game_points + score)
+        return self.game_points
+
+    def add_league_points(self, points: ranker.LeaguePoints) -> ranker.LeaguePoints:
+        self.league_points = ranker.LeaguePoints(self.league_points + points)
+        return self.league_points
 
     def __eq__(self, other: object) -> bool:
         # pylint: disable=protected-access
@@ -115,7 +151,7 @@ def get_validated_scores(scorer_cls: ScorerType, input_data: Any) -> Mapping[TLA
     return scores
 
 
-def degroup(grouped_positions: Mapping[int, Iterable[TLA]]) -> Dict[TLA, int]:
+def degroup(grouped_positions: Mapping[T, Iterable[TLA]]) -> Dict[TLA, T]:
     """
     Given a mapping of positions to collections ot teams at that position,
     returns an :class:`OrderedDict` of teams to their positions.
@@ -145,18 +181,24 @@ class BaseScores:
     :param int num_teams_per_arena: The usual number of teams per arena.
     """
 
-    def __init__(self, resultdir, teams, scorer, num_teams_per_arena):
+    def __init__(
+        self,
+        resultdir: str,
+        teams: Iterable[TLA],
+        scorer: ScorerType,
+        num_teams_per_arena: int,
+    ) -> None:
         self._scorer = scorer
         self._num_corners = num_teams_per_arena
 
-        self.game_points = {}
+        self.game_points = {}  # type: Dict[MatchId, Mapping[TLA, GamePoints]]
         """
         Game points data for each match. Keys are tuples of the form
         ``(arena_id, match_num)``, values are :class:`dict` s mapping
         TLAs to the number of game points they scored.
         """
 
-        self.game_positions = {}
+        self.game_positions = {}  # type: Dict[MatchId, Mapping[ranker.RankedPosition, Set[TLA]]]
         """
         Game position data for each match. Keys are tuples of the form
         ``(arena_id, match_num)``, values are :class:`dict` s mapping
@@ -164,7 +206,7 @@ class BaseScores:
         which have that position. Based solely on teams' game points.
         """
 
-        self.ranked_points = {}
+        self.ranked_points = {}  # type: Dict[MatchId, Dict[TLA, ranker.LeaguePoints]]
         """
         Normalised (aka 'league') points earned in each match. Keys are
         tuples of the form ``(arena_id, match_num)``, values are
@@ -191,9 +233,9 @@ class BaseScores:
             for tla, score in match.items():
                 if tla not in self.teams:
                     raise InvalidTeam(tla, "score for match {0}{1}".format(*match_id))
-                self.teams[tla].game_points += score
+                self.teams[tla].add_game_points(score)
 
-    def _load_resfile(self, fname):
+    def _load_resfile(self, fname: str) -> None:
         y = yaml_loader.load(fname)
 
         match_id = (y['arena_id'], y['match_number'])
@@ -220,7 +262,7 @@ class BaseScores:
             ranker.calc_ranked_points(positions, dsq, self._num_corners)
 
     @property
-    def last_scored_match(self):
+    def last_scored_match(self) -> Optional[MatchNumber]:
         """The most match with the highest id for which we have score data."""
         if len(self.ranked_points) == 0:
             return None
@@ -232,7 +274,7 @@ class LeagueScores(BaseScores):
     """A class which holds league scores."""
 
     @staticmethod
-    def rank_league(team_scores):
+    def rank_league(team_scores: Mapping[TLA, TeamScore]) -> LeaguePositions:
         """
         Given a mapping of TLA to TeamScore, returns a mapping of TLA to league
         position which both allows for ties and enables their resolution
@@ -259,11 +301,17 @@ class LeagueScores(BaseScores):
         for i, (tla, score) in enumerate(ranking, start=1):
             if score != last_score:
                 pos = i
-            positions[tla] = pos
+            positions[tla] = LeaguePosition(pos)
             last_score = score
         return positions
 
-    def __init__(self, resultdir, teams, scorer, num_teams_per_arena):
+    def __init__(
+        self,
+        resultdir: str,
+        teams: Iterable[TLA],
+        scorer: ScorerType,
+        num_teams_per_arena: int,
+    ):
         super().__init__(resultdir, teams, scorer, num_teams_per_arena)
 
         # Sum the league scores for each team
@@ -271,7 +319,7 @@ class LeagueScores(BaseScores):
             for tla, score in match.items():
                 if tla not in self.teams:
                     raise InvalidTeam(tla, "ranked score for match {0}{1}".format(*match_id))
-                self.teams[tla].league_points += score
+                self.teams[tla].add_league_points(score)
 
         self.positions = self.rank_league(self.teams)
         """
@@ -283,7 +331,10 @@ class KnockoutScores(BaseScores):
     """A class which holds knockout scores."""
 
     @staticmethod
-    def calculate_ranking(match_points, league_positions):
+    def calculate_ranking(
+        match_points: Mapping[TLA, ranker.LeaguePoints],
+        league_positions: LeaguePositions,
+    ) -> Dict[TLA, ranker.RankedPosition]:
         """
         Get a ranking of the given match's teams.
 
@@ -291,7 +342,7 @@ class KnockoutScores(BaseScores):
         :param league_positions: A map of TLAs to league positions.
         """
 
-        def key(tla, points):
+        def key(tla: TLA, points: ranker.LeaguePoints) -> Tuple[ranker.LeaguePoints, int]:
             # Lexicographically sort by game result, then by league position
             # League positions are sorted in the opposite direction
             return points, -league_positions.get(tla, 0)
@@ -308,7 +359,14 @@ class KnockoutScores(BaseScores):
 
         return ranking
 
-    def __init__(self, resultdir, teams, scorer, num_teams_per_arena, league_positions):
+    def __init__(
+        self,
+        resultdir: str,
+        teams: Iterable[TLA],
+        scorer: ScorerType,
+        num_teams_per_arena: int,
+        league_positions: LeaguePositions,
+    ):
         super().__init__(resultdir, teams, scorer, num_teams_per_arena)
 
         self.resolved_positions = {}
@@ -335,7 +393,13 @@ class Scores:
     A simple class which stores references to the league and knockout scores.
     """
 
-    def __init__(self, root, teams, scorer, num_teams_per_arena):
+    def __init__(
+        self,
+        root: str,
+        teams: Iterable[TLA],
+        scorer: ScorerType,
+        num_teams_per_arena: int,
+    ) -> None:
         self.root = root
 
         self.league = LeagueScores(

@@ -13,11 +13,13 @@ import os.path
 from enum import Enum, unique
 from typing import Dict, List, Mapping, Optional
 
+from league_ranker import RankedPosition
+
 from . import yaml_loader
 from .match_period import Match, MatchType
 from .scores import InvalidTeam, Scores
 from .teams import Team
-from .types import AwardsData, TLA
+from .types import AwardsData, MatchNumber, TLA
 
 
 @unique
@@ -56,19 +58,19 @@ def _compute_main_awards(scores: Scores, final_match_info: Match) -> Winners:
         return {}
     awards = {}
     for award, key in (
-        (Award.first, 1),
-        (Award.second, 2),
-        (Award.third, 3),
+        (Award.first, RankedPosition(1)),
+        (Award.second, RankedPosition(2)),
+        (Award.third, RankedPosition(3)),
     ):
         candidates = positions.get(key, ())
         awards[award] = sorted(candidates)
 
     if not awards[Award.third] and len(final_match_info.teams) == 2:
         # Look in the previous match to find the third place
-        final_key = (final_match_info.arena, final_match_info.num - 1)
+        final_key = (final_match_info.arena, MatchNumber(final_match_info.num - 1))
         positions = scores.knockout.game_positions[final_key]
 
-        candidates = positions.get(3, ())
+        candidates = positions.get(RankedPosition(3), ())
         awards[Award.third] = sorted(candidates)
 
     return awards
