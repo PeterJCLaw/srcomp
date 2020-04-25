@@ -143,7 +143,7 @@ def validate_schedule_timings(
         timing_map[time].append(game.num)
 
     errors = []
-    last_time = None
+    last_time = None  # type: Optional[datetime.datetime]
     for time, match_numbers in sorted(timing_map.items()):
         if len(match_numbers) != 1:
             errors.append("Multiple matches scheduled for {0}: {1}.".format(
