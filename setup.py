@@ -5,7 +5,7 @@ with open('README.rst') as f:
 
 setup(
     name='sr.comp',
-    version='1.2.0',
+    version='1.3.0',
     packages=find_packages(exclude=('tests',)),
     package_data={'sr.comp': ['py.typed']},
     namespace_packages=['sr', 'sr.comp'],
