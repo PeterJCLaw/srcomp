@@ -121,19 +121,16 @@ def validate_schedule_timings(scheduled_matches, match_duration):
     last_time = None
     for time, match_numbers in sorted(timing_map.items()):
         if len(match_numbers) != 1:
-            ids = join_and(match_numbers)
             errors.append("Multiple matches scheduled for {0}: {1}.".format(
                 time,
-                ids,
+                join_and(match_numbers),
             ))
 
         if last_time is not None and time - last_time < match_duration:
-            prev_ids = join_and(timing_map[last_time])
-            ids = join_and(match_numbers)
             errors.append("Matches {0} start at {1} before matches {2} have finished.".format(
-                ids,
+                join_and(match_numbers),
                 time,
-                prev_ids,
+                join_and(timing_map[last_time]),
             ))
 
         last_time = time
@@ -172,14 +169,16 @@ def validate_match(match, possible_teams):
 
     duplicates = set(all_teams) - META_TEAMS
     if len(duplicates):
-        duplicates = join_and(duplicates)
-        errors.append("Teams {0} appear more than once.".format(duplicates))
+        errors.append("Teams {0} appear more than once.".format(
+            join_and(duplicates),
+        ))
 
     extras = teams - set(possible_teams)
 
     if len(extras):
-        extras = join_and(extras)
-        errors.append("Teams {0} do not exist.".format(extras))
+        errors.append("Teams {0} do not exist.".format(
+            join_and(extras),
+        ))
 
     return errors
 
@@ -251,16 +250,14 @@ def validate_match_score(match_type, match_score, scheduled_match):
 
     errors = []
     if len(missing):
-        missing = join_and(missing)
         errors.append("Teams {0} missing from this {1} match.".format(
-            missing,
+            join_and(missing),
             match_type.name,
         ))
 
     if len(extra):
-        extra = join_and(extra)
         errors.append("Teams {0} not scheduled in this {1} match.".format(
-            extra,
+            join_and(extra),
             match_type.name,
         ))
 
@@ -330,9 +327,8 @@ def validate_team_matches(matches, possible_teams):
         possible_teams,
     )
     if teams_without_matches:
-        teams_str = join_and(sorted(teams_without_matches))
         print("The following teams have no league matches: {0}".format(
-            teams_str,
+            join_and(sorted(teams_without_matches)),
         ))
 
     return len(teams_without_matches)
