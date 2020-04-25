@@ -98,9 +98,10 @@ class StaticScheduler(BaseKnockoutScheduler):
         end_time = start_time + self.schedule.match_duration
         num = MatchNumber(len(self.schedule.matches))
 
-        teams = []
-        for team_ref in match_info['teams']:
-            teams.append(self.get_team(team_ref))
+        teams = [
+            self.get_team(team_ref)
+            for team_ref in match_info['teams']
+        ]
 
         if len(teams) < self.num_teams_per_arena:
             # Fill empty zones with None
