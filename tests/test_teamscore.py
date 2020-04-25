@@ -1,3 +1,5 @@
+import itertools
+import operator
 import unittest
 from typing import Any
 
@@ -87,29 +89,20 @@ class TeamScoreRichComparisonTests(unittest.TestCase):
 
         ts = TeamScore(game=GamePoints(5), league=LeaguePoints(4))
 
-        with self.assertRaisesRegex(TypeError, r'unorderable types'):
-            None < ts  # type: ignore[operator]  # intentionally invalid
+        comparisons = [
+            operator.lt,
+            operator.le,
+            operator.gt,
+            operator.ge,
+        ]
 
-        with self.assertRaisesRegex(TypeError, r'unorderable types'):
-            None <= ts  # type: ignore[operator]  # intentionally invalid
-
-        with self.assertRaisesRegex(TypeError, r'unorderable types'):
-            ts > None  # type: ignore[operator]  # intentionally invalid
-
-        with self.assertRaisesRegex(TypeError, r'unorderable types'):
-            ts >= None  # type: ignore[operator]  # intentionally invalid
-
-        with self.assertRaisesRegex(TypeError, r'unorderable types'):
-            None > ts  # type: ignore[operator]  # intentionally invalid
-
-        with self.assertRaisesRegex(TypeError, r'unorderable types'):
-            None >= ts  # type: ignore[operator]  # intentionally invalid
-
-        with self.assertRaisesRegex(TypeError, r'unorderable types'):
-            ts < None  # type: ignore[operator]  # intentionally invalid
-
-        with self.assertRaisesRegex(TypeError, r'unorderable types'):
-            ts <= None  # type: ignore[operator]  # intentionally invalid
+        for op, (a, b) in itertools.product(
+            comparisons,
+            itertools.permutations((ts, None)),
+        ):
+            with self.subTest("{} {} {}".format(a, op.__name__, b)):
+                with self.assertRaisesRegex(TypeError, r'unorderable types'):
+                    op(a, b)
 
     def test_empty(self) -> None:
         ts = TeamScore(game=GamePoints(5), league=LeaguePoints(4))
