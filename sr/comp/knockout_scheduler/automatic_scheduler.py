@@ -93,7 +93,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
             new_matches = {}
             for arena in arenas:
-                teams = matches.pop(0)  # type: List[Optional[TLA]]
+                teams = list(matches.pop(0))  # type: List[Optional[TLA]]
 
                 if len(teams) < self.num_teams_per_arena:
                     # Fill empty zones with None
