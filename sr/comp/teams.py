@@ -1,5 +1,6 @@
 """Team metadata library."""
 
+from pathlib import Path
 from typing import Dict, NamedTuple, Optional
 
 from . import yaml_loader
@@ -28,11 +29,11 @@ class Team(_Team):
             return match_number <= self.dropped_out_after
 
 
-def load_teams(filename: str) -> Dict[TLA, Team]:
+def load_teams(filename: Path) -> Dict[TLA, Team]:
     """
     Load teams from a YAML file.
 
-    :param str filename: The filename of the YAML file to load.
+    :param Path filename: The filename of the YAML file to load.
     :return: A dictionary mapping TLAs to :class:`Team` objects.
     """
 

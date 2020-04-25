@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from typing import Optional
 from unittest import mock
 
@@ -24,7 +25,7 @@ class ScoresTests(unittest.TestCase):
             ks.return_value = mock.Mock(last_scored_match=knockout_lsm)
             ts.return_value = mock.Mock(last_scored_match=tiebreaker_lsm)
 
-            scores = Scores('', (), mock.Mock(), 0)
+            scores = Scores(Path(), (), mock.Mock(), 0)
 
             self.assertEqual(expected, scores.last_scored_match)
 

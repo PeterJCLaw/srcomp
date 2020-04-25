@@ -1,6 +1,7 @@
 import datetime
 import unittest
-from typing import Iterable, overload, Union
+from pathlib import Path
+from typing import cast, Iterable, overload, Union
 from typing_extensions import Literal
 from unittest import mock
 
@@ -91,6 +92,11 @@ def mock_loader(
 
 
 class VenueTests(unittest.TestCase):
+    def build_venue(self, teams: Iterable[TLA]) -> Venue:
+        # Cast the layout and shepherding files ids as we need the literals to
+        # make the mock_loader(s) work.
+        return Venue(teams, cast(Path, 'LYT'), cast(Path, 'SHPD'))
+
     def test_invalid_region(self) -> None:
         def my_mock_loader(name: Literal['LYT', 'SHPD']) -> Union[LayoutData, ShepherdingData]:
             if name == 'SHPD':
@@ -106,7 +112,7 @@ class VenueTests(unittest.TestCase):
                 InvalidRegionException,
                 msg="Should have errored about the invalid region",
             ) as cm:
-                Venue(TEAMS, 'LYT', 'SHPD')
+                self.build_venue(TEAMS)
 
             ire = cm.exception
             self.assertEqual('invalid-region', ire.region)
@@ -120,7 +126,7 @@ class VenueTests(unittest.TestCase):
                 LayoutTeamsException,
                 msg="Should have errored about the extra teams",
             ) as cm:
-                Venue([TLA('ABC'), TLA('DEF'), TLA('GHI')], 'LYT', 'SHPD')
+                self.build_venue([TLA('ABC'), TLA('DEF'), TLA('GHI')])
 
             lte = cm.exception
             self.assertEqual(set(['JKL', 'MNO', 'PQR']), lte.extras)
@@ -142,7 +148,7 @@ class VenueTests(unittest.TestCase):
                 LayoutTeamsException,
                 msg="Should have errored about the extra teams",
             ) as cm:
-                Venue(TEAMS, 'LYT', 'SHPD')
+                self.build_venue(TEAMS)
 
             lte = cm.exception
             self.assertEqual(['ABC'], lte.duplicates)
@@ -157,7 +163,7 @@ class VenueTests(unittest.TestCase):
                 LayoutTeamsException,
                 msg="Should have errored about the missing team",
             ) as cm:
-                Venue(TEAMS + [TLA('Missing')], 'LYT', 'SHPD')
+                self.build_venue(TEAMS + [TLA('Missing')])
 
             lte = cm.exception
             self.assertEqual(set(['Missing']), lte.missing)
@@ -172,7 +178,7 @@ class VenueTests(unittest.TestCase):
                 LayoutTeamsException,
                 msg="Should have errored about the extra and missing teams",
             ) as cm:
-                Venue([TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('Missing')], 'LYT', 'SHPD')
+                self.build_venue([TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('Missing')])
 
             lte = cm.exception
             self.assertEqual(set(['JKL', 'MNO', 'PQR']), lte.extras)
@@ -183,14 +189,14 @@ class VenueTests(unittest.TestCase):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
-            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            venue = self.build_venue(TEAMS)
             venue.check_staging_times(build_staging_offsets())
 
     def test_extra_shepherding_areas(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
-            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            venue = self.build_venue(TEAMS)
             times = build_staging_offsets(('Yellow', 'Pink', 'Blue'))
 
             with self.assertRaises(
@@ -208,7 +214,7 @@ class VenueTests(unittest.TestCase):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
-            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            venue = self.build_venue(TEAMS)
             times = build_staging_offsets(('Yellow',))
 
             with self.assertRaises(
@@ -226,7 +232,7 @@ class VenueTests(unittest.TestCase):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
-            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            venue = self.build_venue(TEAMS)
             times = build_staging_offsets(('Yellow', 'Blue'))
 
             with self.assertRaises(
@@ -244,7 +250,7 @@ class VenueTests(unittest.TestCase):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
-            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            venue = self.build_venue(TEAMS)
 
             expected = {
                 'a-group': {
@@ -276,7 +282,7 @@ class VenueTests(unittest.TestCase):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
-            venue = Venue(TEAMS, 'LYT', 'SHPD')
+            venue = self.build_venue(TEAMS)
             loc = venue.get_team_location(TLA('DEF'))
             self.assertEqual(
                 'a-group',

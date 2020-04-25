@@ -2,8 +2,8 @@
 
 # pylint: disable=no-self-use, missing-kwoa  # pylint doesn't like overloads
 
-import os
 import subprocess
+from pathlib import Path
 from typing import Any, cast, Iterable, List, Optional, overload, Union
 from typing_extensions import Literal, TypedDict
 
@@ -37,13 +37,13 @@ class RawCompstate:
     Helper class to interact with a Compstate as raw files in a Git repository
     on disk.
 
-    :param str path: The path to the Compstate repository.
+    :param Path path: The path to the Compstate repository.
     :param bool local_only: If true, this disabled the pulling, commiting and
                             pushing functionality.
     """
 
     def __init__(self, path: str, local_only: bool):
-        self._path = path
+        self._path = Path(path)
         self._local_only = local_only
 
     # Load and save related functionality
@@ -71,39 +71,37 @@ class RawCompstate:
 
         return shepherds
 
-    def get_score_path(self, match: Match) -> str:
-        """Get the absolute path to the score file for the given match."""
+    def _get_score_path(self, match: Match) -> Path:
+        """Get the path to the score file for the given match."""
         filename = "{0:0>3}.yaml".format(match.num)
-        # The typeshed annotates `Enum.value` as `Any`, so `match.type.value`
-        # here is an `Any` that then gets passed all the way through.
-        relpath = os.path.join(match.type.value, match.arena, filename)  # type: str
-        score_path = os.path.realpath(os.path.join(self._path, relpath))
-        return score_path
+        path = self._path / match.type.value / match.arena / filename  # type: Path
+        return path
+
+    def get_score_path(self, match: Match) -> str:
+        """Get the path to the score file for the given match."""
+        return str(self._get_score_path(match))
 
     def load_score(self, match: Match) -> ScoreData:
         """Load raw score data for the given match."""
-        path = self.get_score_path(match)
+        path = self._get_score_path(match)
         # Scores are basic data only
-        with open(path) as fd:
+        with path.open() as fd:
             return cast(ScoreData, yaml.safe_load(fd))
 
     def save_score(self, match: Match, score: ScoreData) -> None:
         """Save raw score data for the given match."""
-        path = self.get_score_path(match)
+        path = self._get_score_path(match)
 
-        dirname = os.path.dirname(path)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
+        path.parent.mkdir(parents=True)
 
-        with open(path, "w") as fd:
+        with path.open(mode='w') as fd:
             yaml.safe_dump(score, fd, default_flow_style=False)
 
     @property
     def deployments(self) -> List[str]:
-        deployments_name = 'deployments.yaml'
-        deployments_path = os.path.join(self._path, deployments_name)
+        deployments_path = self._path / 'deployments.yaml'
 
-        with open(deployments_path, 'r') as dp:
+        with deployments_path.open() as dp:
             raw_deployments = cast(DeploymentsData, yaml.load(dp))
 
         hosts = raw_deployments['deployments']
@@ -113,16 +111,16 @@ class RawCompstate:
     def shepherding(self) -> ShepherdingData:
         """Provides access to the raw shepherding data.
            Most consumers actually want to use ``load_shepherds`` instead."""
-        path = os.path.join(self._path, 'shepherding.yaml')
+        path = self._path / 'shepherding.yaml'
 
-        with open(path) as shepherding_file:
+        with path.open() as shepherding_file:
             return cast(ShepherdingData, yaml.load(shepherding_file))
 
     @property
     def layout(self) -> LayoutData:
-        path = os.path.join(self._path, 'layout.yaml')
+        path = self._path / 'layout.yaml'
 
-        with open(path) as layout_file:
+        with path.open() as layout_file:
             return cast(LayoutData, yaml.load(layout_file))
 
     # Git repo related functionality
@@ -176,7 +174,7 @@ class RawCompstate:
             stderr = None
 
         try:
-            return func(command, cwd=self._path, stderr=stderr)
+            return func(command, cwd=str(self._path), stderr=stderr)
         except subprocess.CalledProcessError as e:
             if err_msg:
                 if e.output:
@@ -267,7 +265,7 @@ class RawCompstate:
         """
         Stage the given file.
 
-        :param str file_path: A path to the file to stage. This should
+        :param Path file_path: A path to the file to stage. This should
                               either be an absolute path, or one relative
                               to the compstate.
         """

@@ -9,8 +9,8 @@ The awards calculated are:
  * Rookie award (rookie team with highest league position).
 """
 
-import os.path
 from enum import Enum, unique
+from pathlib import Path
 from typing import Dict, List, Mapping, Optional
 
 from league_ranker import RankedPosition
@@ -98,9 +98,9 @@ def _compute_rookie_award(scores: Scores, teams: Mapping[TLA, Team]) -> Winners:
     }
 
 
-def _compute_explicit_awards(path: str, teams: Mapping[TLA, Team]) -> Winners:
+def _compute_explicit_awards(path: Path, teams: Mapping[TLA, Team]) -> Winners:
     """Compute awards explicitly provided in the compstate repo."""
-    if not os.path.exists(path):
+    if not path.exists():
         return {}
 
     explicit_awards = yaml_loader.load(path)  # type: AwardsData
@@ -114,7 +114,7 @@ def _compute_explicit_awards(path: str, teams: Mapping[TLA, Team]) -> Winners:
     for award_teams in awards.values():
         for tla in award_teams:
             if tla not in teams:
-                raise InvalidTeam(tla, path)
+                raise InvalidTeam(tla, str(path))
 
     return awards
 
@@ -123,7 +123,7 @@ def compute_awards(
     scores: Scores,
     final_match: Match,
     teams: Mapping[TLA, Team],
-    path: Optional[str] = None,
+    path: Optional[Path] = None,
 ) -> Winners:
     """
     Compute the awards handed out from configuration.
