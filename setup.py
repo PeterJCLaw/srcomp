@@ -7,6 +7,7 @@ setup(
     name='sr.comp',
     version='1.2.0',
     packages=find_packages(exclude=('tests',)),
+    package_data={'sr.comp': ['py.typed']},
     namespace_packages=['sr', 'sr.comp'],
     description="Student Robotics Competition Software",
     long_description=long_description,
