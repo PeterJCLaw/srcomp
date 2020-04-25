@@ -76,9 +76,9 @@ class RawCompstate:
         filename = "{0:0>3}.yaml".format(match.num)
         # The typeshed annotates `Enum.value` as `Any`, so `match.type.value`
         # here is an `Any` that then gets passed all the way through.
-        relpath = os.path.join(match.type.value, match.arena, filename)
+        relpath = os.path.join(match.type.value, match.arena, filename)  # type: str
         score_path = os.path.realpath(os.path.join(self._path, relpath))
-        return cast(str, score_path)
+        return score_path
 
     def load_score(self, match: Match) -> ScoreData:
         """Load raw score data for the given match."""
