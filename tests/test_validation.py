@@ -360,7 +360,6 @@ class FindMissingScoresTests(unittest.TestCase):
 
 class ValidateScheduleTimingsTests(unittest.TestCase):
     def test_ok(self):
-
         matches = [
             {'A': Match2(1, datetime(2014, 4, 1, 12, 0, 0))},
             {'A': Match2(2, datetime(2014, 4, 1, 13, 0, 0))},
@@ -371,7 +370,6 @@ class ValidateScheduleTimingsTests(unittest.TestCase):
         self.assertEqual([], errors)
 
     def test_same_time(self):
-
         time = datetime(2014, 4, 3, 12, 0, 0)
         time = datetime(2014, 4, 3, 12, 0, 0)
         match_duration = timedelta(minutes=5)
@@ -391,7 +389,6 @@ class ValidateScheduleTimingsTests(unittest.TestCase):
         self.assertIn("9", error)
 
     def test_overlap(self):
-
         time_8 = datetime(2014, 4, 3, 12, 0, 0)
         time_9 = datetime(2014, 4, 3, 12, 0, 1)
         match_duration = timedelta(minutes=5)
@@ -410,7 +407,6 @@ class ValidateScheduleTimingsTests(unittest.TestCase):
         self.assertIn(str(time_9), error)
 
     def test_overlap_2(self):
-
         time_7 = datetime(2014, 4, 3, 12, 0, 0)
         time_8 = datetime(2014, 4, 3, 12, 0, 3)
         time_9 = datetime(2014, 4, 3, 12, 0, 6)
