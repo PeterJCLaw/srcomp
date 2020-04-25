@@ -99,11 +99,9 @@ class TeamScore:
     def __ne__(self, other: object) -> bool:
         return not (self == other)
 
-    def __lt__(self, other: object) -> bool:
-        # TODO: should we return NotImplemented here instead?
-        if not isinstance(other, type(self)):
-            # TeamScores are greater than other things (that have no score)
-            return False
+    def __lt__(self, other: 'TeamScore') -> bool:
+        if not isinstance(other, TeamScore):
+            return NotImplemented  # type: ignore[unreachable]
 
         # pylint: disable=protected-access
         return self._ordering_key < other._ordering_key

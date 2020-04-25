@@ -79,8 +79,33 @@ class TeamScoreRichComparisonTests(unittest.TestCase):
             self.assertRichComparisons(2, 1)
 
     def test_none(self):
+        # pylint: disable=pointless-statement
+
         ts = TeamScore(game=5, league=4)
-        self.assertRichComparisons(None, ts)
+
+        with self.assertRaisesRegex(TypeError, r'unorderable types'):
+            None < ts
+
+        with self.assertRaisesRegex(TypeError, r'unorderable types'):
+            None <= ts
+
+        with self.assertRaisesRegex(TypeError, r'unorderable types'):
+            ts > None
+
+        with self.assertRaisesRegex(TypeError, r'unorderable types'):
+            ts >= None
+
+        with self.assertRaisesRegex(TypeError, r'unorderable types'):
+            None > ts
+
+        with self.assertRaisesRegex(TypeError, r'unorderable types'):
+            None >= ts
+
+        with self.assertRaisesRegex(TypeError, r'unorderable types'):
+            ts < None
+
+        with self.assertRaisesRegex(TypeError, r'unorderable types'):
+            ts <= None
 
     def test_empty(self):
         ts = TeamScore(game=5, league=4)
