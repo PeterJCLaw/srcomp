@@ -1,6 +1,7 @@
 import datetime
 import os
 import unittest
+from typing_extensions import ClassVar
 
 from sr.comp.comp import SRComp
 
@@ -8,11 +9,13 @@ DUMMY_PATH = os.path.dirname(os.path.abspath(__file__)) + '/dummy'
 
 
 class CompTests(unittest.TestCase):
+    srcomp_instance = NotImplemented  # type: ClassVar[SRComp]
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         cls.srcomp_instance = SRComp(DUMMY_PATH)
 
-    def test_load(self):
+    def test_load(self) -> None:
         "Test that loading the dummy state works"
         self.assertIsNotNone(self.srcomp_instance.root)
         self.assertIsNotNone(self.srcomp_instance.state)
@@ -23,7 +26,7 @@ class CompTests(unittest.TestCase):
         self.assertIsNotNone(self.srcomp_instance.corners)
         self.assertIsInstance(self.srcomp_instance.awards, dict)
 
-    def test_timezone(self):
+    def test_timezone(self) -> None:
         # Test that one can get the timezone from the dummy state
 
         self.assertEqual(
