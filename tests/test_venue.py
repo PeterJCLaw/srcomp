@@ -74,12 +74,12 @@ def mock_loader(name: Literal['LYT']) -> LayoutData:
     ...
 
 
-@overload  # noqa:F811 # intentional redefinition
+@overload
 def mock_loader(name: Literal['SHPD']) -> ShepherdingData:
     ...
 
 
-def mock_loader(  # noqa:F811 # intentional redefinition
+def mock_loader(
     name: Literal['LYT', 'SHPD'],
 ) -> Union[LayoutData, ShepherdingData]:
     if name == 'LYT':

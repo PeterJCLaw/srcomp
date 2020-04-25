@@ -137,7 +137,7 @@ class RawCompstate:
     ) -> str:
         ...
 
-    @overload  # noqa:F811 # intentional redefinition
+    @overload
     def git(
         self,
         command_pieces: Iterable[str],
@@ -146,7 +146,7 @@ class RawCompstate:
     ) -> int:
         ...
 
-    @overload  # noqa:F811 # intentional redefinition
+    @overload
     def git(
         self,
         command_pieces: Iterable[str],
@@ -155,7 +155,7 @@ class RawCompstate:
     ) -> Union[str, int]:
         ...
 
-    def git(  # noqa:F811 # intentional redefinition
+    def git(
         self,
         command_pieces: Iterable[str],
         err_msg: str = '',
