@@ -3,6 +3,7 @@
 import datetime
 from datetime import timedelta
 from typing import (
+    Any,
     cast,
     Dict,
     Iterable,
@@ -40,6 +41,14 @@ from .types import (
 )
 
 TSchedule = TypeVar('TSchedule', bound='MatchSchedule')
+
+StagingOffsets = TypedDict('StagingOffsets', {
+    'opens': datetime.timedelta,
+    'closes': datetime.timedelta,
+    'duration': datetime.timedelta,
+    'signal_shepherds': Mapping[ShepherdName, datetime.timedelta],
+    'signal_teams': datetime.timedelta,
+})
 
 StagingTimes = TypedDict('StagingTimes', {
     'opens': datetime.datetime,
@@ -207,7 +216,7 @@ class MatchSchedule:
         self.match_duration = total  # type: datetime.timedelta
 
     def _load_staging_times(self, yamldata: YAMLData) -> None:
-        def to_timedeltas(item):
+        def to_timedeltas(item: Any) -> Any:
             if isinstance(item, dict):
                 return {
                     key: to_timedeltas(value)
@@ -216,7 +225,7 @@ class MatchSchedule:
             else:
                 return datetime.timedelta(seconds=item)
 
-        durations = to_timedeltas(yamldata)
+        durations = cast(StagingOffsets, to_timedeltas(yamldata))
 
         opens = durations['opens']
         closes = durations['closes']

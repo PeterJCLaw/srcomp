@@ -1,9 +1,10 @@
 import datetime
 import unittest
-from typing import Iterable, Mapping, overload, Union
+from typing import Iterable, overload, Union
 from typing_extensions import Literal
 from unittest import mock
 
+from sr.comp.matches import StagingOffsets
 from sr.comp.types import (
     Colour,
     LayoutData,
@@ -24,12 +25,16 @@ from sr.comp.venue import (
 TEAMS = [TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('JKL'), TLA('MNO'), TLA('PQR')]
 
 
-def build_staging_offsets(shepherds: Iterable[str] = ('Yellow', 'Pink')) -> Mapping[str, Mapping[str, None]]:
-    return {
+def build_staging_offsets(shepherds: Iterable[str] = ('Yellow', 'Pink')) -> StagingOffsets:
+    return StagingOffsets({
         'signal_shepherds': {
-            ShepherdName(x): None for x in shepherds
-        }
-    }
+            ShepherdName(x): datetime.timedelta() for x in shepherds
+        },
+        'opens': datetime.timedelta(),
+        'closes': datetime.timedelta(),
+        'duration': datetime.timedelta(),
+        'signal_teams': datetime.timedelta(),
+    })
 
 
 def mock_layout_loader() -> LayoutData:

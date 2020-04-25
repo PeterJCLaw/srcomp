@@ -5,6 +5,7 @@ from itertools import chain
 from typing import cast, Dict, Generic, Iterable, List, Mapping, Tuple, TypeVar
 
 from . import yaml_loader
+from .matches import StagingOffsets
 from .types import (
     LayoutData,
     Region,
@@ -102,7 +103,7 @@ class Venue:
     @staticmethod
     def _check_staging_times(
         shepherding_areas: Iterable[ShepherdName],
-        staging_times: Mapping[str, Mapping[ShepherdName, object]],
+        staging_times: StagingOffsets,
     ) -> None:
         """
         Check that the given staging times contain signals for the right
@@ -239,10 +240,7 @@ class Venue:
             for team in location['teams']:
                 self._team_locations[team] = location
 
-    def check_staging_times(
-        self,
-        staging_times: Mapping[str, Mapping[ShepherdName, object]],
-    ) -> None:
+    def check_staging_times(self, staging_times: StagingOffsets) -> None:
         self._check_staging_times(self._shepherding_areas, staging_times)
 
     def get_team_location(self, team: TLA) -> RegionName:
