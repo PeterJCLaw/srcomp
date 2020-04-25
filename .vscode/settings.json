@@ -10,5 +10,6 @@
         "**/dist": true,
         "**/.eggs": true,
         "**/__pycache__": true
-    }
+    },
+    "python.pythonPath": "/home/peter/.virtualenvs/srcomp3/bin/python3"
 }
