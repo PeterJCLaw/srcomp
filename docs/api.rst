@@ -42,6 +42,14 @@ Knockout Schedulers
     :undoc-members:
     :show-inheritance:
 
+Stable Random
+^^^^^^^^^^^^^
+
+.. automodule:: sr.comp.knockout_scheduler.stable_random
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Match Period
 ------------
 
@@ -78,14 +86,6 @@ Scores
 ------
 
 .. automodule:: sr.comp.scores
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-Stable Random
--------------
-
-.. automodule:: sr.comp.stable_random
     :members:
     :undoc-members:
     :show-inheritance:
