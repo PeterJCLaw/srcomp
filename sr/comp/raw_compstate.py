@@ -75,7 +75,7 @@ class RawCompstate:
         # The typeshed annotates `Enum.value` as `Any`, so `match.type.value`
         # here is an `Any` that then gets passed all the way through.
         relpath = os.path.join(match.type.value, match.arena, filename)
-        return os.path.realpath(os.path.join(self._path, relpath))  # type: ignore[no-any-return]
+        return os.path.realpath(os.path.join(self._path, relpath))  # type: ignore[no-any-return]  # noqa:E501
 
     def load_score(self, match: Match) -> ScoreData:
         """Load raw score data for the given match."""
