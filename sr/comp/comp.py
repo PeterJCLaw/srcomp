@@ -30,7 +30,7 @@ def load_scorer(root: str) -> ScorerType:
 
     sys.path = saved_path
 
-    scorer = imported_library.Scorer  # type: ignore  # mypy wants a 'Scorer' attribute
+    scorer = imported_library.Scorer  # type: ignore[attr-defined]
     return cast(ScorerType, scorer)
 
 

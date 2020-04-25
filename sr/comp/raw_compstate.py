@@ -165,7 +165,7 @@ class RawCompstate:
                     subprocess.check_output(*args, **kwargs).decode("utf-8"),
                 )
         else:
-            func = subprocess.check_call  # type: ignore
+            func = subprocess.check_call  # type: ignore[assignment]
             stderr = None
 
         try:

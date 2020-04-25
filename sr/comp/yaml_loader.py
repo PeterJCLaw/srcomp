@@ -17,7 +17,7 @@ from .types import YAMLData
 try:
     from yaml import CLoader as YAML_Loader
 except ImportError:
-    from yaml import Loader as YAML_Loader  # type: ignore
+    from yaml import Loader as YAML_Loader  # type: ignore[misc]
     from warnings import warn
     warn(
         "Using pure-python PyYAML (without libyaml). "
