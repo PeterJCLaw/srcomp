@@ -18,7 +18,7 @@ from typing import (
 )
 from typing_extensions import TypedDict
 
-from dateutil.tz import gettz
+import dateutil.tz
 from league_ranker import RankedPosition
 
 from . import yaml_loader
@@ -93,6 +93,13 @@ def parse_ranges(ranges: str) -> Set[int]:
             a = int(part)
             result.append(a)
     return set(result)
+
+
+def get_timezone(name: str) -> datetime.tzinfo:
+    tzinfo = dateutil.tz.gettz(name)
+    if tzinfo is None:
+        raise ValueError("Failed to load timezone info for {!r}".format(name))
+    return tzinfo
 
 
 class MatchSchedule:
@@ -197,7 +204,7 @@ class MatchSchedule:
 
         self._build_matchlist(league)
 
-        self.timezone = gettz(y.get('timezone', 'UTC'))
+        self.timezone = get_timezone(y.get('timezone', 'UTC'))
 
         self.n_league_matches = self.n_matches()
 
