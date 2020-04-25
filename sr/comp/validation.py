@@ -1,11 +1,29 @@
 """Compstate validation routines."""
 
+import datetime
 import sys
 from collections import defaultdict
-from typing import Iterable
+from typing import (
+    Container,
+    Iterable,
+    List,
+    Mapping,
+    NewType,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+)
 
+from .comp import SRComp
 from .knockout_scheduler import UNKNOWABLE_TEAM
-from .match_period import MatchType
+from .match_period import Match, MatchSlot, MatchType
+from .matches import MatchSchedule
+from .scores import BaseScores
+from .types import ArenaName, MatchId, MatchNumber, TLA
+
+Errors = List[str]
+ErrorType = NewType('ErrorType', str)
 
 NO_TEAM = None
 META_TEAMS = set([NO_TEAM, UNKNOWABLE_TEAM])
@@ -24,7 +42,7 @@ def join_and(items: Iterable[object]) -> str:
     return " and ".join((", ".join(rest), last))
 
 
-def report_errors(type_, id_, errors):
+def report_errors(type_: ErrorType, id_: object, errors: Errors) -> None:
     """
     Print out errors nicely formatted.
 
@@ -44,7 +62,7 @@ def report_errors(type_, id_, errors):
         print("    {0}".format(error), file=sys.stderr)
 
 
-def validate(comp):
+def validate(comp: SRComp) -> int:
     """
     Validate a Compstate repo.
 
@@ -65,7 +83,11 @@ def validate(comp):
     return count
 
 
-def validate_schedule(schedule, possible_teams, possible_arenas):
+def validate_schedule(
+    schedule: MatchSchedule,
+    possible_teams: Iterable[TLA],
+    possible_arenas: Container[ArenaName],
+) -> int:
     """Check that the schedule contains enough time for all the matches,
     and that the matches themselves are valid."""
     count = 0
@@ -74,10 +96,10 @@ def validate_schedule(schedule, possible_teams, possible_arenas):
     for num, match in enumerate(schedule.matches):
         errors = validate_match(match, possible_teams)
         count += len(errors)
-        report_errors('Match', num, errors)
+        report_errors(ErrorType('Match'), num, errors)
 
     warnings = validate_schedule_count(schedule)
-    report_errors('Schedule', '', warnings)
+    report_errors(ErrorType('Schedule'), '', warnings)
 
     errors = validate_schedule_timings(schedule.matches, schedule.match_duration)
     count += len(errors)
@@ -85,16 +107,16 @@ def validate_schedule(schedule, possible_teams, possible_arenas):
         errors.append(
             "This usually indicates that the scheduled periods overlap.",
         )
-    report_errors('Schedule', 'timing', errors)
+    report_errors(ErrorType('Schedule'), 'timing', errors)
 
     errors = validate_schedule_arenas(schedule.matches, possible_arenas)
     count += len(errors)
-    report_errors('Schedule', 'arenas', errors)
+    report_errors(ErrorType('Schedule'), 'arenas', errors)
 
     return count
 
 
-def validate_schedule_count(schedule):
+def validate_schedule_count(schedule: MatchSchedule) -> Errors:
     planned = schedule.n_planned_league_matches
     actual = schedule.n_league_matches
     errors = []
@@ -110,7 +132,10 @@ def validate_schedule_count(schedule):
     return errors
 
 
-def validate_schedule_timings(scheduled_matches, match_duration):
+def validate_schedule_timings(
+    scheduled_matches: Iterable[MatchSlot],
+    match_duration: datetime.timedelta,
+) -> Errors:
     timing_map = defaultdict(list)
     for match in scheduled_matches:
         game = list(match.values())[0]
@@ -138,7 +163,10 @@ def validate_schedule_timings(scheduled_matches, match_duration):
     return errors
 
 
-def validate_schedule_arenas(matches, possible_arenas):
+def validate_schedule_arenas(
+    matches: Iterable[MatchSlot],
+    possible_arenas: Container[ArenaName],
+) -> Errors:
     """Check that any arena referenced by a match actually exists."""
     errors = []
     error_format_string = "Match {game.num} ({game.type}) references arena '{arena}'."
@@ -154,11 +182,11 @@ def validate_schedule_arenas(matches, possible_arenas):
     return errors
 
 
-def validate_match(match, possible_teams):
+def validate_match(match: MatchSlot, possible_teams: Iterable[TLA]) -> Errors:
     """Check that the teams featuring in a match exist and are only
     required in one arena at a time."""
     errors = []
-    all_teams = []
+    all_teams = []  # type: List[Optional[TLA]]
 
     for a in match.values():
         all_teams += a.teams
@@ -167,7 +195,10 @@ def validate_match(match, possible_teams):
     for t in teams:
         all_teams.remove(t)
 
-    duplicates = set(all_teams) - META_TEAMS
+    # Note: mypy doesn't know that removing META_TEAMS here means that we're
+    # removing the Optional nature of the teams.
+    # See https://github.com/python/mypy/issues/8526.
+    duplicates = set(all_teams) - META_TEAMS  # type: Set[TLA]  # type: ignore[assignment]
     if len(duplicates):
         errors.append("Teams {0} appear more than once.".format(
             join_and(duplicates),
@@ -183,14 +214,22 @@ def validate_match(match, possible_teams):
     return errors
 
 
-def validate_scores(match_type, scores, schedule):
+def validate_scores(
+    match_type: MatchType,
+    scores: BaseScores,
+    schedule: Sequence[MatchSlot],
+) -> int:
     """Validate that the scores are sane."""
     count = validate_scores_inner(match_type, scores, schedule)
     warn_missing_scores(match_type, scores, schedule)
     return count
 
 
-def validate_scores_inner(match_type, scores, schedule):
+def validate_scores_inner(
+    match_type: MatchType,
+    scores: BaseScores,
+    schedule: Sequence[MatchSlot],
+) -> int:
     """Validate that scores are sane."""
     # NB: more specific validation is already done during the scoring,
     # so all we need to do is check that the right teams are being awarded
@@ -199,7 +238,7 @@ def validate_scores_inner(match_type, scores, schedule):
     count = 0
     match_type_title = match_type.name.title()
 
-    def get_scheduled_match(match_id, type_):
+    def get_scheduled_match(match_id: MatchId, type_: ErrorType) -> Optional[Match]:
         """Check that the requested match was scheduled, return it if so."""
         num = match_id[1]
         if num < 0 or num >= len(schedule):
@@ -216,7 +255,7 @@ def validate_scores_inner(match_type, scores, schedule):
 
         return match[arena]
 
-    def check(type_, match_id, match):
+    def check(type_: ErrorType, match_id: MatchId, match: Mapping[TLA, object]) -> int:
         scheduled_match = get_scheduled_match(match_id, type_)
         if scheduled_match is None:
             return 1
@@ -225,22 +264,26 @@ def validate_scores_inner(match_type, scores, schedule):
         report_errors(type_, match_id, errors)
         return len(errors)
 
-    for match_id, match in scores.game_points.items():
-        count += check('Game Score', match_id, match)
+    for match_id, game_points in scores.game_points.items():
+        count += check(ErrorType('Game Score'), match_id, game_points)
 
     if match_type == MatchType.league:
-        for match_id, match in scores.ranked_points.items():
-            count += check('League Points', match_id, match)
+        for match_id, league_points in scores.ranked_points.items():
+            count += check(ErrorType('League Points'), match_id, league_points)
 
     return count
 
 
-def validate_match_score(match_type, match_score, scheduled_match):
+def validate_match_score(
+    match_type: MatchType,
+    match_score: Mapping[TLA, object],
+    scheduled_match: Match,
+) -> Errors:
     """Check that the match awards points to the right teams, by checking
     that the teams with points were scheduled to appear in the match."""
     # only remove the empty corner marker -- we shouldn't have unknowable
     # teams in the match schedule by the time there's a score for it.
-    expected_teams = set(scheduled_match.teams) - set([NO_TEAM])
+    expected_teams = set(x for x in scheduled_match.teams if x is not NO_TEAM)
     # don't remove meta teams from the score's teams -- they shouldn't
     # be there to start with.
     actual_teams = set(match_score.keys())
@@ -264,7 +307,11 @@ def validate_match_score(match_type, match_score, scheduled_match):
     return errors
 
 
-def warn_missing_scores(match_type, scores, schedule):
+def warn_missing_scores(
+    match_type: MatchType,
+    scores: BaseScores,
+    schedule: Iterable[MatchSlot],
+) -> None:
     """Check that the scores up to the most recent are all present."""
     match_ids = scores.ranked_points.keys()
     last_match = scores.last_scored_match
@@ -281,7 +328,12 @@ def warn_missing_scores(match_type, scores, schedule):
         print(" {0:>3}    | {1}".format(m[0], arenas), file=sys.stderr)
 
 
-def find_missing_scores(match_type, match_ids, last_match, schedule):
+def find_missing_scores(
+    match_type: MatchType,
+    match_ids: Iterable[MatchId],
+    last_match: Optional[int],
+    schedule: Iterable[MatchSlot],
+) -> Sequence[Tuple[MatchNumber, Set[ArenaName]]]:
     """
     Given a collection of ``match_ids`` for which we have scores, the
     ``match_type`` currently under consideration, the number of the
@@ -301,7 +353,7 @@ def find_missing_scores(match_type, match_ids, last_match, schedule):
             # Filter to the right type of matches -- we only ever deal
             # with one type at a time
             if game.type == match_type:
-                id_ = (arena, num)
+                id_ = (arena, game.num)
                 expected.add(id_)
 
     missing_ids = expected - set(match_ids)
@@ -315,7 +367,10 @@ def find_missing_scores(match_type, match_ids, last_match, schedule):
     return missing_items
 
 
-def validate_team_matches(matches, possible_teams):
+def validate_team_matches(
+    matches: Iterable[MatchSlot],
+    possible_teams: Iterable[TLA],
+) -> int:
     """
     Check that all teams have been assigned league matches. We don't need (or
     want) to check the knockouts, since those are scheduled dynamically based
@@ -334,7 +389,10 @@ def validate_team_matches(matches, possible_teams):
     return len(teams_without_matches)
 
 
-def find_teams_without_league_matches(matches, possible_teams):
+def find_teams_without_league_matches(
+    matches: Iterable[MatchSlot],
+    possible_teams: Iterable[TLA],
+) -> Set[TLA]:
     """
     Find teams that don't have league matches.
 
