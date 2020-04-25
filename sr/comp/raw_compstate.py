@@ -78,7 +78,7 @@ class RawCompstate:
         # here is an `Any` that then gets passed all the way through.
         relpath = os.path.join(match.type.value, match.arena, filename)
         score_path = os.path.realpath(os.path.join(self._path, relpath))
-        return score_path  # type: ignore[no-any-return]  # type: ignore
+        return cast(str, score_path)
 
     def load_score(self, match: Match) -> ScoreData:
         """Load raw score data for the given match."""
