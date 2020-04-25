@@ -1,14 +1,15 @@
 import unittest
 from datetime import datetime
 
-from sr.comp.match_period import MatchPeriod
+from sr.comp.match_period import MatchPeriod, MatchType
 
 
 class MatchPeriodTests(unittest.TestCase):
-    def test_period_str(self):
+    def test_period_str(self) -> None:
         start = datetime(2014, 1, 1, 13, 12, 14)
         end = datetime(2014, 1, 1, 20, 6, 35)
-        period = MatchPeriod(start, end, None, "desc", None, None)
+        max_end = datetime(2014, 1, 1, 22, 15, 57)
+        period = MatchPeriod(start, end, max_end, "desc", [], MatchType.league)
 
         string = str(period)
 
