@@ -5,6 +5,7 @@ This includes parsing of dates and times properly, and also ensures the C YAML
 loader is used which is necessary for optimum performance.
 """
 
+import datetime
 from typing import Type
 
 import dateutil.parser
@@ -25,7 +26,7 @@ except ImportError:
     )
 
 
-def time_constructor(_, node):
+def time_constructor(_: object, node: yaml.Node) -> datetime.datetime:
     return dateutil.parser.parse(node.value)
 
 
