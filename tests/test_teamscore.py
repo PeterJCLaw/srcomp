@@ -101,7 +101,10 @@ class TeamScoreRichComparisonTests(unittest.TestCase):
             itertools.permutations((ts, None)),
         ):
             with self.subTest("{} {} {}".format(a, op.__name__, b)):
-                with self.assertRaisesRegex(TypeError, r'unorderable types'):
+                with self.assertRaisesRegex(
+                    TypeError,
+                    r'(unorderable types|not supported between instances of)',
+                ):
                     op(a, b)
 
     def test_empty(self) -> None:
