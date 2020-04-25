@@ -31,7 +31,10 @@ def time_constructor(_: object, node: yaml.Node) -> datetime.datetime:
 
 
 def add_time_constructor(loader: Type[YAML_Loader]) -> None:
-    loader.add_constructor('tag:yaml.org,2002:timestamp', time_constructor)
+    loader.add_constructor(  # type: ignore[no-untyped-call]
+        'tag:yaml.org,2002:timestamp',
+        time_constructor,
+    )
 
 
 add_time_constructor(YAML_Loader)
