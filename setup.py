@@ -16,6 +16,7 @@ setup(
         'PyYAML >=3.11, <5',
         'league-ranker <0.1',
         'python-dateutil >=2.2, <3',
+        'typing-extensions >= 3.7.4.2',
     ],
     # Note: there are known timezone issues in 3.5.0 (see https://bugs.python.org/issue23600)
     python_requires='>=3.5.1',
