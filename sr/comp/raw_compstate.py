@@ -8,11 +8,13 @@ from typing_extensions import Literal, TypedDict
 import yaml
 
 from .comp import SRComp
+from .match_period import Match
 from .types import (
     Colour,
     DeploymentsData,
     LayoutData,
     RegionName,
+    ScoreData,
     ShepherdingData,
     ShepherdName,
     TLA,
@@ -67,20 +69,22 @@ class RawCompstate:
 
         return shepherds
 
-    def get_score_path(self, match):
+    def get_score_path(self, match: Match) -> str:
         """Get the absolute path to the score file for the given match."""
         filename = "{0:0>3}.yaml".format(match.num)
+        # The typeshed annotates `Enum.value` as `Any`, so `match.type.value`
+        # here is an `Any` that then gets passed all the way through.
         relpath = os.path.join(match.type.value, match.arena, filename)
-        return os.path.realpath(os.path.join(self._path, relpath))
+        return os.path.realpath(os.path.join(self._path, relpath))  # type: ignore[no-any-return]
 
-    def load_score(self, match):
+    def load_score(self, match: Match) -> ScoreData:
         """Load raw score data for the given match."""
         path = self.get_score_path(match)
         # Scores are basic data only
         with open(path) as fd:
-            return yaml.safe_load(fd)
+            return cast(ScoreData, yaml.safe_load(fd))
 
-    def save_score(self, match, score):
+    def save_score(self, match: Match, score: ScoreData) -> None:
         """Save raw score data for the given match."""
         path = self.get_score_path(match)
 
