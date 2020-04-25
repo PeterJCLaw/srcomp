@@ -239,7 +239,7 @@ class BaseScores:
                 self.teams[tla].add_game_points(score)
 
     def _load_resfile(self, fname: str) -> None:
-        y = cast(ScoreData, yaml_loader.load(fname))
+        y = yaml_loader.load(fname)  # type: ScoreData
 
         match_id = (y['arena_id'], y['match_number'])
         if match_id in self.game_points:

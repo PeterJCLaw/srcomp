@@ -4,7 +4,6 @@ import datetime
 from datetime import timedelta
 from typing import (
     Any,
-    cast,
     Dict,
     Iterable,
     Iterator,
@@ -130,7 +129,7 @@ class MatchSchedule:
 
         y = yaml_loader.load(config_fname)
 
-        league = cast(LeagueMatches, yaml_loader.load(league_fname)['matches'])
+        league = yaml_loader.load(league_fname)['matches']  # type: LeagueMatches
 
         schedule = cls(y, league, teams, num_teams_per_arena)
 
@@ -232,7 +231,7 @@ class MatchSchedule:
             else:
                 return datetime.timedelta(seconds=item)
 
-        durations = cast(StagingOffsets, to_timedeltas(yamldata))
+        durations = to_timedeltas(yamldata)  # type: StagingOffsets
 
         opens = durations['opens']
         closes = durations['closes']
