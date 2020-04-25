@@ -1,6 +1,6 @@
+import datetime
 import unittest
-from copy import deepcopy
-from typing import overload, Union
+from typing import Iterable, Mapping, overload, Union
 from typing_extensions import Literal
 from unittest import mock
 
@@ -22,10 +22,14 @@ from sr.comp.venue import (
 )
 
 TEAMS = [TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('JKL'), TLA('MNO'), TLA('PQR')]
-TIMES = {'signal_shepherds': {
-    ShepherdName('Yellow'): None,
-    ShepherdName('Pink'): None,
-}}
+
+
+def build_staging_offsets(shepherds: Iterable[str] = ('Yellow', 'Pink')) -> Mapping[str, Mapping[str, None]]:
+    return {
+        'signal_shepherds': {
+            ShepherdName(x): None for x in shepherds
+        }
+    }
 
 
 def mock_layout_loader() -> LayoutData:
@@ -175,15 +179,14 @@ class VenueTests(unittest.TestCase):
             yaml_load.side_effect = mock_loader
 
             venue = Venue(TEAMS, 'LYT', 'SHPD')
-            venue.check_staging_times(TIMES)
+            venue.check_staging_times(build_staging_offsets())
 
     def test_extra_shepherding_areas(self) -> None:
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = mock_loader
 
             venue = Venue(TEAMS, 'LYT', 'SHPD')
-            times = deepcopy(TIMES)
-            times['signal_shepherds'][ShepherdName('Blue')] = None
+            times = build_staging_offsets(('Yellow', 'Pink', 'Blue'))
 
             with self.assertRaises(
                 ShepherdingAreasException,
@@ -201,8 +204,7 @@ class VenueTests(unittest.TestCase):
             yaml_load.side_effect = mock_loader
 
             venue = Venue(TEAMS, 'LYT', 'SHPD')
-            times = deepcopy(TIMES)
-            del times['signal_shepherds'][ShepherdName('Pink')]
+            times = build_staging_offsets(('Yellow',))
 
             with self.assertRaises(
                 ShepherdingAreasException,
@@ -220,9 +222,7 @@ class VenueTests(unittest.TestCase):
             yaml_load.side_effect = mock_loader
 
             venue = Venue(TEAMS, 'LYT', 'SHPD')
-            times = deepcopy(TIMES)
-            times['signal_shepherds'][ShepherdName('Blue')] = None
-            del times['signal_shepherds'][ShepherdName('Pink')]
+            times = build_staging_offsets(('Yellow', 'Blue'))
 
             with self.assertRaises(
                 ShepherdingAreasException,
