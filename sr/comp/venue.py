@@ -2,17 +2,7 @@
 
 from collections import Counter
 from itertools import chain
-from typing import (
-    Any,
-    cast,
-    Dict,
-    Generic,
-    Iterable,
-    List,
-    Mapping,
-    Tuple,
-    TypeVar,
-)
+from typing import cast, Dict, Generic, Iterable, List, Mapping, Tuple, TypeVar
 
 from . import yaml_loader
 from .types import (
@@ -112,7 +102,7 @@ class Venue:
     @staticmethod
     def _check_staging_times(
         shepherding_areas: Iterable[ShepherdName],
-        staging_times: Mapping[str, Mapping[ShepherdName, Any]],
+        staging_times: Mapping[str, Mapping[ShepherdName, object]],
     ) -> None:
         """
         Check that the given staging times contain signals for the right
@@ -251,7 +241,7 @@ class Venue:
 
     def check_staging_times(
         self,
-        staging_times: Mapping[str, Mapping[ShepherdName, Any]],
+        staging_times: Mapping[str, Mapping[ShepherdName, object]],
     ) -> None:
         self._check_staging_times(self._shepherding_areas, staging_times)
 
