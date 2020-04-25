@@ -1,3 +1,5 @@
+# pylint: disable=no-member
+
 import datetime
 import os
 import unittest
