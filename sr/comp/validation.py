@@ -2,12 +2,26 @@
 
 import sys
 from collections import defaultdict
+from typing import Iterable
 
 from .knockout_scheduler import UNKNOWABLE_TEAM
 from .match_period import MatchType
 
 NO_TEAM = None
 META_TEAMS = set([NO_TEAM, UNKNOWABLE_TEAM])
+
+
+def join_and(items: Iterable[object]) -> str:
+    strings = [str(x) for x in items]
+    if not strings:
+        return ""
+
+    if len(strings) == 1:
+        return strings[0]
+
+    *rest, last = strings
+
+    return " and ".join((", ".join(rest), last))
 
 
 def report_errors(type_, id_, errors):
@@ -107,15 +121,15 @@ def validate_schedule_timings(scheduled_matches, match_duration):
     last_time = None
     for time, match_numbers in sorted(timing_map.items()):
         if len(match_numbers) != 1:
-            ids = ", ".join(str(num) for num in match_numbers)
+            ids = join_and(match_numbers)
             errors.append("Multiple matches scheduled for {0}: {1}.".format(
                 time,
                 ids,
             ))
 
         if last_time is not None and time - last_time < match_duration:
-            prev_ids = ", ".join(str(num) for num in timing_map[last_time])
-            ids = ", ".join(str(num) for num in match_numbers)
+            prev_ids = join_and(timing_map[last_time])
+            ids = join_and(match_numbers)
             errors.append("Matches {0} start at {1} before matches {2} have finished.".format(
                 ids,
                 time,
@@ -158,13 +172,13 @@ def validate_match(match, possible_teams):
 
     duplicates = set(all_teams) - META_TEAMS
     if len(duplicates):
-        duplicates = ", ".join(duplicates)
+        duplicates = join_and(duplicates)
         errors.append("Teams {0} appear more than once.".format(duplicates))
 
     extras = teams - set(possible_teams)
 
     if len(extras):
-        extras = ", ".join(extras)
+        extras = join_and(extras)
         errors.append("Teams {0} do not exist.".format(extras))
 
     return errors
@@ -237,14 +251,14 @@ def validate_match_score(match_type, match_score, scheduled_match):
 
     errors = []
     if len(missing):
-        missing = ", ".join(missing)
+        missing = join_and(missing)
         errors.append("Teams {0} missing from this {1} match.".format(
             missing,
             match_type.name,
         ))
 
     if len(extra):
-        extra = ", ".join(extra)
+        extra = join_and(extra)
         errors.append("Teams {0} not scheduled in this {1} match.".format(
             extra,
             match_type.name,
@@ -266,7 +280,7 @@ def warn_missing_scores(match_type, scores, schedule):
     print(msg, file=sys.stderr)
     print("Match   | Arena ", file=sys.stderr)
     for m in missing:
-        arenas = ", ".join(sorted(m[1]))
+        arenas = join_and(sorted(m[1]))
         print(" {0:>3}    | {1}".format(m[0], arenas), file=sys.stderr)
 
 
@@ -316,7 +330,7 @@ def validate_team_matches(matches, possible_teams):
         possible_teams,
     )
     if teams_without_matches:
-        teams_str = ", ".join(sorted(teams_without_matches))
+        teams_str = join_and(sorted(teams_without_matches))
         print("The following teams have no league matches: {0}".format(
             teams_str,
         ))
