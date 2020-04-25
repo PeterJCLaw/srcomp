@@ -2,17 +2,71 @@
 
 import datetime
 from datetime import timedelta
+from typing import (
+    Any,
+    cast,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Set,
+    Type,
+    TypeVar,
+)
+from typing_extensions import TypedDict
 
-from dateutil.tz import gettz
+import dateutil.tz
+from league_ranker import RankedPosition
 
 from . import yaml_loader
+from .arenas import Arena
 from .knockout_scheduler import KnockoutScheduler, StaticScheduler
-from .match_period import Delay, Match, MatchPeriod, MatchType
+from .knockout_scheduler.base_scheduler import BaseKnockoutScheduler
+from .match_period import Delay, Match, MatchPeriod, MatchSlot, MatchType
 from .match_period_clock import MatchPeriodClock
+from .scores import Scores
+from .teams import Team
+from .types import (
+    ArenaName,
+    DelayData,
+    ExtraSpacingData,
+    LeagueMatches,
+    MatchNumber,
+    ShepherdName,
+    TLA,
+    YAMLData,
+)
+
+TSchedule = TypeVar('TSchedule', bound='MatchSchedule')
+
+StagingOffsets = TypedDict('StagingOffsets', {
+    'opens': datetime.timedelta,
+    'closes': datetime.timedelta,
+    'duration': datetime.timedelta,
+    'signal_shepherds': Mapping[ShepherdName, datetime.timedelta],
+    'signal_teams': datetime.timedelta,
+})
+
+StagingTimes = TypedDict('StagingTimes', {
+    'opens': datetime.datetime,
+    'closes': datetime.datetime,
+    'duration': datetime.timedelta,
+    'signal_shepherds': Mapping[ShepherdName, datetime.datetime],
+    'signal_teams': datetime.datetime,
+})
 
 
 class WrongNumberOfTeams(Exception):
-    def __init__(self, match_n, arena_name, teams, num_teams_per_arena):
+    def __init__(
+        self,
+        match_n: int,
+        arena_name: str,
+        teams: Sequence[Optional[TLA]],
+        num_teams_per_arena: int,
+    ) -> None:
         message = "Match {0}{1} has {2} teams but must have {3}".format(
             arena_name,
             match_n,
@@ -22,23 +76,30 @@ class WrongNumberOfTeams(Exception):
         super().__init__(message)
 
 
-def parse_ranges(ranges):
+def parse_ranges(ranges: str) -> Set[int]:
     """
     Parse a comma seprated list of numbers which may include ranges
     specified as hyphen-separated numbers.
 
     From https://stackoverflow.com/questions/6405208
     """
-    result = []
+    result = []  # type: List[int]
     for part in ranges.split(','):
         if '-' in part:
-            a, b = part.split('-')
-            a, b = int(a), int(b)
+            a_, b_ = part.split('-')
+            a, b = int(a_), int(b_)
             result.extend(range(a, b + 1))
         else:
             a = int(part)
             result.append(a)
     return set(result)
+
+
+def get_timezone(name: str) -> datetime.tzinfo:
+    tzinfo = dateutil.tz.gettz(name)
+    if tzinfo is None:
+        raise ValueError("Failed to load timezone info for {!r}".format(name))
+    return tzinfo
 
 
 class MatchSchedule:
@@ -47,7 +108,15 @@ class MatchSchedule:
     """
 
     @classmethod
-    def create(cls, config_fname, league_fname, scores, arenas, num_teams_per_arena, teams):
+    def create(
+        cls: Type[TSchedule],
+        config_fname: str,
+        league_fname: str,
+        scores: Scores,
+        arenas: Mapping[ArenaName, Arena],
+        num_teams_per_arena: int,
+        teams: Mapping[TLA, Team],
+    ) -> TSchedule:
         """
         Create a new match schedule around the given config data.
 
@@ -61,12 +130,12 @@ class MatchSchedule:
 
         y = yaml_loader.load(config_fname)
 
-        league = yaml_loader.load(league_fname)['matches']
+        league = cast(LeagueMatches, yaml_loader.load(league_fname)['matches'])
 
         schedule = cls(y, league, teams, num_teams_per_arena)
 
         if y['knockout'].get('static', False):
-            knockout_scheduler = StaticScheduler
+            knockout_scheduler = StaticScheduler  # type: Type[BaseKnockoutScheduler]
         else:
             knockout_scheduler = KnockoutScheduler
 
@@ -81,19 +150,25 @@ class MatchSchedule:
 
         return schedule
 
-    def __init__(self, y, league, teams, num_teams_per_arena):
+    def __init__(
+        self,
+        y: YAMLData,
+        league: LeagueMatches,
+        teams: Mapping[TLA, Team],
+        num_teams_per_arena: int,
+    ) -> None:
         self._num_corners = num_teams_per_arena
 
         self.teams = teams
         """A mapping of TLAs to :class:`.Team` instances."""
 
-        self.match_periods = []
+        self.match_periods = []  # type: List[MatchPeriod]
         """
         A list of the :class:`.MatchPeriod` s which contain the matches
         for the competition.
         """
 
-        self.knockout_rounds = []
+        self.knockout_rounds = []  # type: List[List[Match]]
         """
         A list of the knockout matches by round. Each entry in the list
         represents a round of knockout matches, such that `knockout_rounds[-1]`
@@ -118,7 +193,7 @@ class MatchSchedule:
         self._build_extra_spacing(y['league']['extra_spacing'])
         self._build_delaylist(y['delays'])
 
-        self.matches = []
+        self.matches = []  # type: List[MatchSlot]
         """
         A list of match slots in the schedule. Each match slot is a dict of
         arena to the :class:`.Match` occuring in that arena.
@@ -129,11 +204,11 @@ class MatchSchedule:
 
         self._build_matchlist(league)
 
-        self.timezone = gettz(y.get('timezone', 'UTC'))
+        self.timezone = get_timezone(y.get('timezone', 'UTC'))
 
         self.n_league_matches = self.n_matches()
 
-    def _load_match_slot_lengths(self, yamldata):
+    def _load_match_slot_lengths(self, yamldata: YAMLData) -> None:
         durations = {
             key: datetime.timedelta(0, value)
             for key, value in yamldata.items()
@@ -145,10 +220,10 @@ class MatchSchedule:
         if total != pre + post + match:
             raise ValueError("Match slot lengths are inconsistent.")
         self.match_slot_lengths = durations
-        self.match_duration = total
+        self.match_duration = total  # type: datetime.timedelta
 
-    def _load_staging_times(self, yamldata):
-        def to_timedeltas(item):
+    def _load_staging_times(self, yamldata: YAMLData) -> None:
+        def to_timedeltas(item: Any) -> Any:
             if isinstance(item, dict):
                 return {
                     key: to_timedeltas(value)
@@ -157,7 +232,7 @@ class MatchSchedule:
             else:
                 return datetime.timedelta(seconds=item)
 
-        durations = to_timedeltas(yamldata)
+        durations = cast(StagingOffsets, to_timedeltas(yamldata))
 
         opens = durations['opens']
         closes = durations['closes']
@@ -172,7 +247,7 @@ class MatchSchedule:
 
         self.staging_times = durations
 
-    def get_staging_times(self, match):
+    def get_staging_times(self, match: Match) -> StagingTimes:
         pre = self.match_slot_lengths['pre']
         match_start = match.start_time + pre
         offsets = self.staging_times
@@ -180,7 +255,7 @@ class MatchSchedule:
         signal_shepherds = {
             area: match_start - offset
             for area, offset in offsets['signal_shepherds'].items()
-        }
+        }  # type: Dict[ShepherdName, datetime.datetime]
 
         return {
             'opens': match_start - offsets['opens'],
@@ -190,8 +265,8 @@ class MatchSchedule:
             'signal_teams': match_start - offsets['signal_teams'],
         }
 
-    def _build_extra_spacing(self, yamldata):
-        spacing = {}
+    def _build_extra_spacing(self, yamldata: Optional[List[ExtraSpacingData]]) -> None:
+        spacing = {}  # type: Dict[MatchNumber, datetime.timedelta]
         if not yamldata:
             self._spacing = spacing
             return
@@ -201,12 +276,12 @@ class MatchSchedule:
             duration = timedelta(seconds=info['duration'])
             for num in match_numbers:
                 assert num not in spacing
-                spacing[num] = duration
+                spacing[MatchNumber(num)] = duration
 
         self._spacing = spacing
 
-    def _build_delaylist(self, yamldata):
-        delays = []
+    def _build_delaylist(self, yamldata: Optional[List[DelayData]]) -> None:
+        delays = []  # type: List[Delay]
         if yamldata is None:
             # No delays, hurrah
             self.delays = delays
@@ -219,7 +294,11 @@ class MatchSchedule:
         delays.sort(key=lambda x: x.time)
         self.delays = delays
 
-    def remove_drop_outs(self, teams, since_match):
+    def remove_drop_outs(
+        self,
+        teams: Iterable[Optional[TLA]],
+        since_match: MatchNumber,
+    ) -> List[Optional[TLA]]:
         """
         Take a list of TLAs and replace the teams that have dropped out with
         ``None`` values.
@@ -228,7 +307,7 @@ class MatchSchedule:
         :param int since_match: The match number to check for drop outs from.
         :return: A new list containing the approriate teams.
         """
-        new_teams = []
+        new_teams = []  # type: List[Optional[TLA]]
         for tla in teams:
             if tla is None:
                 new_teams.append(None)
@@ -239,7 +318,7 @@ class MatchSchedule:
                     new_teams.append(None)
         return new_teams
 
-    def _build_matchlist(self, yamldata):
+    def _build_matchlist(self, yamldata: Optional[LeagueMatches]) -> None:
         """
         Build the match list.
 
@@ -259,7 +338,7 @@ class MatchSchedule:
         # Effectively just the .values(), except that it's ordered by number
         raw_matches = [yamldata[m] for m in match_numbers]
 
-        match_n = 0
+        match_n = MatchNumber(0)
 
         for period in self.match_periods:
             # Fill this period with matches
@@ -280,18 +359,23 @@ class MatchSchedule:
                 period.matches.append(match_slot)
                 self.matches.append(match_slot)
 
-                match_n += 1
+                match_n = MatchNumber(match_n + 1)
 
                 extra_spacing = self._spacing.get(match_n)
                 if extra_spacing:
                     clock.advance_time(extra_spacing)
 
-    def _create_league_match_slot(self, start_time, arenas, match_n):
+    def _create_league_match_slot(
+        self,
+        start_time: datetime.datetime,
+        arenas: Mapping[ArenaName, Sequence[Optional[TLA]]],
+        match_n: MatchNumber,
+    ) -> MatchSlot:
         """
         Returns a dict of arena to :class:`.Match` for the given start time,
         arenas dict and match number.
         """
-        match_slot = {}
+        match_slot = {}  # type: Dict[ArenaName, Match]
 
         end_time = start_time + self.match_duration
         for arena_name, teams in arenas.items():
@@ -308,9 +392,9 @@ class MatchSchedule:
             )
             match_slot[arena_name] = match
 
-        return match_slot
+        return MatchSlot(match_slot)
 
-    def delay_at(self, date):
+    def delay_at(self, date: datetime.datetime) -> datetime.timedelta:
         """
         Calculates the active delay at a given ``date``. Intended for use
         only in exposing the current delay value -- scheduling should be
@@ -335,7 +419,7 @@ class MatchSchedule:
 
         return total
 
-    def matches_at(self, date):
+    def matches_at(self, date: datetime.datetime) -> Iterator[Match]:
         """
         Get all the matches that occur around a specific ``date``.
 
@@ -348,7 +432,7 @@ class MatchSchedule:
                 if match.start_time <= date < match.end_time:
                     yield match
 
-    def period_at(self, date):
+    def period_at(self, date: datetime.datetime) -> Optional[MatchPeriod]:
         """
         Get the match period that occur around a specific ``date``.
 
@@ -362,7 +446,7 @@ class MatchSchedule:
 
         return None
 
-    def n_matches(self):
+    def n_matches(self) -> int:
         """
         Get the number of matches.
 
@@ -372,7 +456,7 @@ class MatchSchedule:
         return len(self.matches)
 
     @property
-    def final_match(self):
+    def final_match(self) -> Match:
         """
         Get the :class:`.Match` for the last match of the competition.
 
@@ -384,7 +468,7 @@ class MatchSchedule:
         assert len(last_matches) == 1, last_match_slot
         return last_matches[0]
 
-    def add_tiebreaker(self, scores, time):
+    def add_tiebreaker(self, scores: Scores, time: datetime.datetime) -> None:
         """
         Add a tie breaker to the league if required. Also set a ``tiebreaker``
         attribute if necessary.
@@ -400,7 +484,7 @@ class MatchSchedule:
             finals_positions = scores.knockout.game_positions[finals_key]
         except KeyError:
             return
-        winners = finals_positions.get(1)
+        winners = finals_positions.get(RankedPosition(1))
         if not winners:
             raise AssertionError("The only winning move is not to play.")
         if len(winners) > 1:  # Act surprised!
@@ -420,7 +504,7 @@ class MatchSchedule:
             num = self.n_matches()
             arena = finals_info.arena
             match = Match(
-                num=num,
+                num=MatchNumber(num),
                 display_name="Tiebreaker (#{0})".format(num),
                 arena=arena,
                 teams=tiebreaker_teams,
@@ -429,7 +513,7 @@ class MatchSchedule:
                 end_time=end_time,
                 use_resolved_ranking=False,
             )
-            slot = {arena: match}
+            slot = MatchSlot({arena: match})
             self.matches.append(slot)
             match_period = MatchPeriod(
                 time,
@@ -445,6 +529,6 @@ class MatchSchedule:
             self.tiebreaker = match
 
     @property
-    def datetime_now(self):
+    def datetime_now(self) -> datetime.datetime:
         """Get the current date and time, with the correct timezone."""
         return datetime.datetime.now(self.timezone)

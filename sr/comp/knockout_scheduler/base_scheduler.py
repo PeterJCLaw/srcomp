@@ -1,9 +1,18 @@
 """Base for knockout scheduling."""
 
-from ..match_period import MatchPeriod, MatchType
+from typing import Iterable, List, Mapping, TYPE_CHECKING
+
+from ..match_period import Match, MatchPeriod, MatchType
+from ..scores import Scores
+from ..teams import Team
+from ..types import ArenaName, MatchNumber, TLA, YAMLData
+
+if TYPE_CHECKING:
+    # Circular
+    from ..matches import MatchSchedule
 
 # Use '???' as the "we don't know yet" marker
-UNKNOWABLE_TEAM = '???'
+UNKNOWABLE_TEAM = TLA('???')
 
 
 class BaseKnockoutScheduler:
@@ -17,7 +26,15 @@ class BaseKnockoutScheduler:
     :param config: Custom configuration for the knockout scheduler.
     """
 
-    def __init__(self, schedule, scores, arenas, num_teams_per_arena, teams, config):
+    def __init__(
+        self,
+        schedule: 'MatchSchedule',
+        scores: Scores,
+        arenas: Iterable[ArenaName],
+        num_teams_per_arena: int,
+        teams: Mapping[TLA, Team],
+        config: YAMLData,
+    ) -> None:
         self.schedule = schedule
         self.scores = scores
         self.arenas = arenas
@@ -41,7 +58,7 @@ class BaseKnockoutScheduler:
         # in this list is important (e.g. self.knockout_rounds[0][0] is
         # will involve the top seed, whilst self.knockout_rounds[0][-1] will
         # involve the second seed).
-        self.knockout_rounds = []
+        self.knockout_rounds = []  # type: List[List[Match]]
 
         period_config = self.config['match_periods']['knockout'][0]
         self.period = MatchPeriod(
@@ -55,7 +72,7 @@ class BaseKnockoutScheduler:
             MatchType.knockout,
         )
 
-    def _played_all_league_matches(self):
+    def _played_all_league_matches(self) -> bool:
         """
         Check if all league matches have been played.
 
@@ -74,7 +91,11 @@ class BaseKnockoutScheduler:
         return True
 
     @staticmethod
-    def get_match_display_name(rounds_remaining, round_num, global_num):
+    def get_match_display_name(
+        rounds_remaining: int,
+        round_num: int,
+        global_num: MatchNumber,
+    ) -> str:
         """
         Get a human-readable match display name.
 
@@ -96,7 +117,7 @@ class BaseKnockoutScheduler:
             global_num=global_num,
         )
 
-    def get_ranking(self, game):
+    def get_ranking(self, game: Match) -> List[TLA]:
         """
         Get a ranking of the given match's teams.
 
@@ -114,7 +135,7 @@ class BaseKnockoutScheduler:
         # Extract just TLAs
         return list(positions.keys())
 
-    def _get_non_dropped_out_teams(self, for_match):
+    def _get_non_dropped_out_teams(self, for_match: MatchNumber) -> List[TLA]:
         teams = list(self.scores.league.positions.keys())
         teams = [
             tla
@@ -123,7 +144,7 @@ class BaseKnockoutScheduler:
         ]
         return teams
 
-    def add_knockouts(self):
+    def add_knockouts(self) -> None:
         """
         Add the knockouts to the schedule.
 

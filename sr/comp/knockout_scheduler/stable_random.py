@@ -1,6 +1,9 @@
 """A stable random number generator implementation."""
 
 import hashlib
+from typing import MutableSequence, TypeVar, Union
+
+T = TypeVar('T')
 
 
 class Random:
@@ -21,16 +24,16 @@ class Random:
        is the same on all supported platforms.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.state = 0
 
-    def seed(self, s):
+    def seed(self, s: Union[bytes, bytearray, memoryview]) -> None:
         h = hashlib.md5()
         h.update(s)
 
         self.state = int(h.hexdigest(), 16) & 0xffffffff
 
-    def _rand_bit(self):
+    def _rand_bit(self) -> int:
         bit = self.state & 1
 
         nb = 0
@@ -42,17 +45,17 @@ class Random:
 
         return bit
 
-    def getrandbits(self, n):
+    def getrandbits(self, n: int) -> int:
         v = 0
         for _ in range(n):
             v <<= 1
             v |= self._rand_bit()
         return v
 
-    def random(self):
+    def random(self) -> float:
         return self.getrandbits(32) / float(1 << 32)
 
-    def shuffle(self, x):
+    def shuffle(self, x: MutableSequence[T]) -> None:
         # Based on python's shuffle function
 
         for i in reversed(range(1, len(x))):
@@ -61,7 +64,7 @@ class Random:
             x[i], x[j] = x[j], x[i]
 
 
-def _demo():
+def _demo() -> None:
     R = Random()
     R.seed('hello'.encode('utf-8'))
     for _ in range(10):

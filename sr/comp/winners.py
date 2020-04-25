@@ -11,10 +11,15 @@ The awards calculated are:
 
 import os.path
 from enum import Enum, unique
+from typing import Dict, List, Mapping, Optional
+
+from league_ranker import RankedPosition
 
 from . import yaml_loader
-from .match_period import MatchType
-from .scores import InvalidTeam
+from .match_period import Match, MatchType
+from .scores import InvalidTeam, Scores
+from .teams import Team
+from .types import AwardsData, MatchNumber, TLA
 
 
 @unique
@@ -35,7 +40,10 @@ class Award(Enum):
     web = 'web'              # Online Presence award
 
 
-def _compute_main_awards(scores, final_match_info):
+Winners = Mapping[Award, List[TLA]]
+
+
+def _compute_main_awards(scores: Scores, final_match_info: Match) -> Winners:
     """Compute awards resulting from the grand finals."""
     last_match_key = (final_match_info.arena, final_match_info.num)
 
@@ -50,25 +58,25 @@ def _compute_main_awards(scores, final_match_info):
         return {}
     awards = {}
     for award, key in (
-        (Award.first, 1),
-        (Award.second, 2),
-        (Award.third, 3),
+        (Award.first, RankedPosition(1)),
+        (Award.second, RankedPosition(2)),
+        (Award.third, RankedPosition(3)),
     ):
         candidates = positions.get(key, ())
         awards[award] = sorted(candidates)
 
     if not awards[Award.third] and len(final_match_info.teams) == 2:
         # Look in the previous match to find the third place
-        final_key = (final_match_info.arena, final_match_info.num - 1)
+        final_key = (final_match_info.arena, MatchNumber(final_match_info.num - 1))
         positions = scores.knockout.game_positions[final_key]
 
-        candidates = positions.get(3, ())
+        candidates = positions.get(RankedPosition(3), ())
         awards[Award.third] = sorted(candidates)
 
     return awards
 
 
-def _compute_rookie_award(scores, teams):
+def _compute_rookie_award(scores: Scores, teams: Mapping[TLA, Team]) -> Winners:
     """Compute the winner of the rookie award."""
     rookie_positions = {
         team: position
@@ -90,12 +98,12 @@ def _compute_rookie_award(scores, teams):
     }
 
 
-def _compute_explicit_awards(path, teams):
+def _compute_explicit_awards(path: str, teams: Mapping[TLA, Team]) -> Winners:
     """Compute awards explicitly provided in the compstate repo."""
     if not os.path.exists(path):
         return {}
 
-    explicit_awards = yaml_loader.load(path)
+    explicit_awards = yaml_loader.load(path)  # type: AwardsData
     assert explicit_awards, "Awards file should not be present if empty."
 
     awards = {
@@ -111,7 +119,12 @@ def _compute_explicit_awards(path, teams):
     return awards
 
 
-def compute_awards(scores, final_match, teams, path=None):
+def compute_awards(
+    scores: Scores,
+    final_match: Match,
+    teams: Mapping[TLA, Team],
+    path: Optional[str] = None,
+) -> Winners:
     """
     Compute the awards handed out from configuration.
 
@@ -124,7 +137,7 @@ def compute_awards(scores, final_match, teams, path=None):
              determined.
     """
 
-    awards = {}
+    awards = {}  # type: Dict[Award, List[TLA]]
     awards.update(_compute_main_awards(scores, final_match))
     awards.update(_compute_rookie_award(scores, teams))
     if path is not None:

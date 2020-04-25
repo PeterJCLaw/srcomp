@@ -1,5 +1,10 @@
 """A clock to manage match periods."""
 
+import datetime
+from typing import Iterable, Iterator, List, Optional
+
+from .match_period import Delay, MatchPeriod
+
 
 class OutOfTimeException(Exception):
     """
@@ -25,7 +30,7 @@ class MatchPeriodClock:
     """
 
     @staticmethod
-    def delays_for_period(period, delays):
+    def delays_for_period(period: MatchPeriod, delays: Iterable[Delay]) -> List[Delay]:
         """
         Filter and sort a list of all possible delays to include only those
         which occur after the start of the given `period`.
@@ -43,7 +48,7 @@ class MatchPeriodClock:
 
         return valid_delays
 
-    def __init__(self, period, delays):
+    def __init__(self, period: MatchPeriod, delays: Iterable[Delay]):
         """Create a new clock for the given period and collection of delays."""
         self._period = period
 
@@ -53,13 +58,13 @@ class MatchPeriodClock:
         self._current_time = period.start_time
 
         # The total applied delay
-        self._total_delay = None
+        self._total_delay = None  # type: Optional[datetime.timedelta]
 
         # Apply any delays which occur at the start
         self._apply_delays()
 
     @property
-    def current_time(self):
+    def current_time(self) -> datetime.datetime:
         """
         Get the apparent current time. This is a combination of the time which
         has passed (through calls to ``advance_time``) and the delays which
@@ -90,7 +95,7 @@ class MatchPeriodClock:
 
         return ct
 
-    def advance_time(self, duration):
+    def advance_time(self, duration: datetime.timedelta) -> None:
         """
         Make a given amount of time pass. This is expected to be called after
         scheduling some matches in order to move to the next timeslot.
@@ -104,12 +109,12 @@ class MatchPeriodClock:
         self._current_time += duration
         self._apply_delays()
 
-    def _apply_delays(self):
+    def _apply_delays(self) -> None:
         delays = self._delays
         while len(delays) and delays[0].time <= self._current_time:
             self._apply_delay(delays.pop(0).delay)
 
-    def _apply_delay(self, delay):
+    def _apply_delay(self, delay: datetime.timedelta) -> None:
         self._current_time += delay
 
         if self._total_delay is None:
@@ -117,13 +122,13 @@ class MatchPeriodClock:
         else:
             self._total_delay += delay
 
-    def _time_without_delays(self):
+    def _time_without_delays(self) -> datetime.datetime:
         if self._total_delay is None:
             return self._current_time
         else:
             return self._current_time - self._total_delay
 
-    def iterslots(self, slot_duration):
+    def iterslots(self, slot_duration: datetime.timedelta) -> Iterator[datetime.datetime]:
         """
         Iterate through all the available timeslots of the given size within
         the ``MatchPeriod``, taking into account delays.

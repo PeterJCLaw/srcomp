@@ -1,11 +1,26 @@
 import unittest
 from collections import OrderedDict
+from typing import cast, Dict, Mapping
 
-from sr.comp.scores import KnockoutScores
+from league_ranker import LeaguePoints, RankedPosition
+
+from sr.comp.scores import KnockoutScores, LeaguePosition
+from sr.comp.types import TLA
 
 
 class KnockoutScoresTests(unittest.TestCase):
-    def test_positions_simple(self):
+    def calculate_ranking(
+        self,
+        match_points: Mapping[str, float],
+        league_positions: Mapping[str, int],
+    ) -> Dict[TLA, RankedPosition]:
+        # pylint: disable=no-member
+        return KnockoutScores.calculate_ranking(
+            {TLA(k): cast(LeaguePoints, v) for k, v in match_points.items()},
+            {TLA(k): LeaguePosition(v) for k, v in league_positions.items()},
+        )
+
+    def test_positions_simple(self) -> None:
         knockout_points = {
             'ABC': 1.0,
             'DEF': 2.0,
@@ -13,7 +28,7 @@ class KnockoutScoresTests(unittest.TestCase):
             'JKL': 4.0,
         }
 
-        positions = KnockoutScores.calculate_ranking(knockout_points, {})
+        positions = self.calculate_ranking(knockout_points, {})
 
         expected = OrderedDict([
             ('JKL', 1),
@@ -24,7 +39,7 @@ class KnockoutScoresTests(unittest.TestCase):
 
         self.assertEqual(expected, positions)
 
-    def test_positions_tie_bottom(self):
+    def test_positions_tie_bottom(self) -> None:
         knockout_points = {
             'ABC': 1.5,
             'DEF': 1.5,
@@ -32,7 +47,7 @@ class KnockoutScoresTests(unittest.TestCase):
             'JKL': 4,
         }
 
-        positions = KnockoutScores.calculate_ranking(knockout_points, {})
+        positions = self.calculate_ranking(knockout_points, {})
 
         expected = OrderedDict([
             ('JKL', 1),
@@ -43,7 +58,7 @@ class KnockoutScoresTests(unittest.TestCase):
 
         self.assertEqual(expected, positions)
 
-    def test_positions_tie_top_with_league_positions(self):
+    def test_positions_tie_top_with_league_positions(self) -> None:
         knockout_points = {
             'ABC': 1,
             'DEF': 2,
@@ -56,7 +71,7 @@ class KnockoutScoresTests(unittest.TestCase):
             'GHI': 3,
             'JKL': 4,
         }
-        positions = KnockoutScores.calculate_ranking(knockout_points, league_positions)
+        positions = self.calculate_ranking(knockout_points, league_positions)
 
         # Tie should be resolved by league positions
         expected = OrderedDict([
@@ -68,7 +83,7 @@ class KnockoutScoresTests(unittest.TestCase):
 
         self.assertEqual(expected, positions)
 
-    def test_knockout_match_winners_tie(self):
+    def test_knockout_match_winners_tie(self) -> None:
         knockout_points = {
             'ABC': 1,
             'DEF': 2.5,
@@ -83,7 +98,7 @@ class KnockoutScoresTests(unittest.TestCase):
             'GHI': 3,
             'JKL': 2,
         }
-        positions = KnockoutScores.calculate_ranking(knockout_points, league_positions)
+        positions = self.calculate_ranking(knockout_points, league_positions)
 
         # Tie should be resolved by league positions
         expected = OrderedDict([

@@ -5,12 +5,14 @@ import os
 import sys
 from copy import copy
 from subprocess import check_output
+from typing import cast
 
 from . import arenas, matches, scores, teams, venue
+from .types import ScorerType
 from .winners import compute_awards
 
 
-def load_scorer(root):
+def load_scorer(root: str) -> ScorerType:
     """
     Load the scorer module from Compstate repo.
 
@@ -28,7 +30,8 @@ def load_scorer(root):
 
     sys.path = saved_path
 
-    return imported_library.Scorer
+    scorer = imported_library.Scorer  # type: ignore[attr-defined]
+    return cast(ScorerType, scorer)
 
 
 class SRComp:
@@ -38,7 +41,7 @@ class SRComp:
     :param str root: The root path of the ``compstate`` repo.
     """
 
-    def __init__(self, root):
+    def __init__(self, root: str) -> None:
         self.root = root
 
         self.state = check_output(

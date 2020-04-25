@@ -1,13 +1,14 @@
 import os
 import unittest
-from collections import namedtuple
 from datetime import datetime, timedelta
 from io import StringIO
+from typing import List, NamedTuple
 from unittest import mock
 
 from sr.comp.comp import SRComp
 from sr.comp.knockout_scheduler import UNKNOWABLE_TEAM
 from sr.comp.match_period import MatchType
+from sr.comp.types import TLA
 from sr.comp.validation import (
     find_missing_scores,
     find_teams_without_league_matches,
@@ -18,10 +19,21 @@ from sr.comp.validation import (
     validate_schedule_timings,
 )
 
-Match = namedtuple('Match', ['teams'])
-Match2 = namedtuple('Match2', ['num', 'start_time'])
-Match3 = namedtuple('Match3', ['num', 'type'])
-Match4 = namedtuple('Match4', ['teams', 'type'])
+Match = NamedTuple('Match', [
+    ('teams', List[TLA]),
+])
+Match2 = NamedTuple('Match2', [
+    ('num', int),
+    ('start_time', datetime),
+])
+Match3 = NamedTuple('Match3', [
+    ('num', int),
+    ('type', MatchType),
+])
+Match4 = NamedTuple('Match4', [
+    ('teams', List[TLA]),
+    ('type', MatchType),
+])
 
 
 class DummyTests(unittest.TestCase):
@@ -348,7 +360,6 @@ class FindMissingScoresTests(unittest.TestCase):
 
 class ValidateScheduleTimingsTests(unittest.TestCase):
     def test_ok(self):
-
         matches = [
             {'A': Match2(1, datetime(2014, 4, 1, 12, 0, 0))},
             {'A': Match2(2, datetime(2014, 4, 1, 13, 0, 0))},
@@ -359,7 +370,6 @@ class ValidateScheduleTimingsTests(unittest.TestCase):
         self.assertEqual([], errors)
 
     def test_same_time(self):
-
         time = datetime(2014, 4, 3, 12, 0, 0)
         time = datetime(2014, 4, 3, 12, 0, 0)
         match_duration = timedelta(minutes=5)
@@ -379,7 +389,6 @@ class ValidateScheduleTimingsTests(unittest.TestCase):
         self.assertIn("9", error)
 
     def test_overlap(self):
-
         time_8 = datetime(2014, 4, 3, 12, 0, 0)
         time_9 = datetime(2014, 4, 3, 12, 0, 1)
         match_duration = timedelta(minutes=5)
@@ -398,7 +407,6 @@ class ValidateScheduleTimingsTests(unittest.TestCase):
         self.assertIn(str(time_9), error)
 
     def test_overlap_2(self):
-
         time_7 = datetime(2014, 4, 3, 12, 0, 0)
         time_8 = datetime(2014, 4, 3, 12, 0, 3)
         time_9 = datetime(2014, 4, 3, 12, 0, 6)

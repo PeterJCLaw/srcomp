@@ -1,20 +1,24 @@
 import math
+from typing import cast, List
 
 
-def bit_mask(n):
+def bit_mask(n: int) -> int:
     """Return an n-bit mask of 1's."""
 
-    return 2 ** n - 1
+    if n < 0:
+        raise ValueError("Unable to produce a bit mask with negative length")
+
+    return cast(int, 2 ** n - 1)
 
 
-def reverse_bits(n, width):
+def reverse_bits(n: int, width: int) -> int:
     """Reverse the bits of ``n``."""
 
     b = '{:0{width}b}'.format(n, width=width)
     return int(b[::-1], 2)
 
 
-def first_round_seeding(n_teams):
+def first_round_seeding(n_teams: int) -> List[List[int]]:
     """
     Return the seed arrangement for the first round of a knockout with
     ``n_teams`` at 4 teams per match.
@@ -48,7 +52,7 @@ def first_round_seeding(n_teams):
             v ^= bit_mask(matches_bits)
         ins_order.append(v)
 
-    matches = []
+    matches = []  # type: List[List[int]]
     for n in range(n_matches):
         matches += [[]]
 

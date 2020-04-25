@@ -6,14 +6,14 @@ from sr.comp.knockout_scheduler.stable_random import Random
 
 
 class StableRandomTests(unittest.TestCase):
-    def test_getrandbits(self):
+    def test_getrandbits(self) -> None:
         rnd = Random()
         rnd.seed(b'this is a seed')
         bits = rnd.getrandbits(32)
 
         self.assertEqual(4025750249, bits)
 
-    def test_seeds_differ(self):
+    def test_seeds_differ(self) -> None:
         # A different seed than test_getrandbits above
         rnd = Random()
         rnd.seed(b'this is another seed')
@@ -21,14 +21,14 @@ class StableRandomTests(unittest.TestCase):
 
         self.assertEqual(682087810, bits)
 
-    def test_random(self):
+    def test_random(self) -> None:
         rnd = Random()
         rnd.seed(b'this is a seed')
         num = rnd.random()
 
         self.assertEqual(0.9373180216643959, num)
 
-    def test_shuffle(self):
+    def test_shuffle(self) -> None:
         rnd = Random()
         rnd.seed(b'this is a seed')
 
