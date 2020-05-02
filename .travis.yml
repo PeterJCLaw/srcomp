@@ -15,9 +15,8 @@ script:
   - ./run-tests
   # Deliberately after running the real tests so that we can't accidentally
   # depend on it
-  - pip install pylint
-  - script/linting/pylint
   - pip install -r script/linting/requirements.txt
+  - script/linting/pylint
   - script/linting/lint
   - pip install -r script/typing/requirements.txt
   - script/typing/check
