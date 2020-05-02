@@ -2,15 +2,7 @@
 
 import math
 from datetime import timedelta
-from typing import (
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Sized,
-    TYPE_CHECKING,
-)
+from typing import Iterable, List, Mapping, Optional, Sized, TYPE_CHECKING
 
 from ..match_period import Match, MatchSlot, MatchType
 from ..match_period_clock import MatchPeriodClock
@@ -50,7 +42,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
         self,
         schedule: 'MatchSchedule',
         scores: Scores,
-        arenas: Sequence[ArenaName],
+        arenas: Iterable[ArenaName],
         num_teams_per_arena: int,
         teams: Mapping[TLA, Team],
         config: YAMLData,
