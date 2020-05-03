@@ -203,7 +203,5 @@ class WinnersTests(unittest.TestCase):
             yaml_load.assert_called_with(Path('.'))
 
     def test_no_overrides_file(self):
-        self.assertEqual(
-            ['AAA'],
-            compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('missing.yaml')).get(Award.third),
-        )
+        awards = compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('missing.yaml'))
+        self.assertEqual(['AAA'], awards.get(Award.third))
