@@ -1,6 +1,7 @@
 import unittest
 from collections import OrderedDict
 from datetime import datetime
+from pathlib import Path
 from unittest import mock
 
 from dateutil.tz import tzutc
@@ -170,41 +171,37 @@ class WinnersTests(unittest.TestCase):
             yaml_load.return_value = {'third': 'DDD'}
             self.assertEqual(
                 ['DDD'],
-                compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.third),
+                compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('.')).get(Award.third),
             )
-            yaml_load.assert_called_with('.')
+            yaml_load.assert_called_with(Path('.'))
 
     def test_manual(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.return_value = {'web': 'BBB'}
             self.assertEqual(
                 ['BBB'],
-                compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
+                compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('.')).get(Award.web),
             )
-            yaml_load.assert_called_with('.')
+            yaml_load.assert_called_with(Path('.'))
 
     def test_manual_no_award(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.return_value = {'web': []}
             self.assertEqual(
                 [],
-                compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
+                compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('.')).get(Award.web),
             )
-            yaml_load.assert_called_with('.')
+            yaml_load.assert_called_with(Path('.'))
 
     def test_manual_tie(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.return_value = {'web': ['BBB', 'CCC']}
             self.assertEqual(
                 ['BBB', 'CCC'],
-                compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.web),
+                compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('.')).get(Award.web),
             )
-            yaml_load.assert_called_with('.')
+            yaml_load.assert_called_with(Path('.'))
 
     def test_no_overrides_file(self):
-        with mock.patch('os.path.exists') as test_file:
-            test_file.return_value = False
-            self.assertEqual(
-                ['AAA'],
-                compute_awards(MockScores(), FINAL_INFO, TEAMS, '.').get(Award.third),
-            )
+        awards = compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('missing.yaml'))
+        self.assertEqual(['AAA'], awards.get(Award.third))

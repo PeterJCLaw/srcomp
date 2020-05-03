@@ -1,9 +1,8 @@
 """Utilities for working with scores."""
 
-import glob
-import os
 from collections import OrderedDict
 from functools import total_ordering
+from pathlib import Path
 from typing import (
     cast,
     Dict,
@@ -113,14 +112,14 @@ class TeamScore:
         )
 
 
-def results_finder(root: str) -> Iterator[str]:
+def results_finder(root: Path) -> Iterator[Path]:
     """An iterator that finds score sheet files."""
 
-    for dname in glob.glob(os.path.join(root, "*")):
-        if not os.path.isdir(dname):
+    for dname in root.glob('*'):
+        if not dname.is_dir():
             continue
 
-        for resfile in glob.glob(os.path.join(dname, "*.yaml")):
+        for resfile in dname.glob('*.yaml'):
             yield resfile
 
 
@@ -178,7 +177,7 @@ class BaseScores:
     """
     A generic class that holds scores.
 
-    :param str resultdir: Where to find score sheet files.
+    :param Path resultdir: Where to find score sheet files.
     :param dict teams: The teams in the competition.
     :param dict scorer: The scorer logic.
     :param int num_teams_per_arena: The usual number of teams per arena.
@@ -186,7 +185,7 @@ class BaseScores:
 
     def __init__(
         self,
-        resultdir: str,
+        resultdir: Path,
         teams: Iterable[TLA],
         scorer: ScorerType,
         num_teams_per_arena: int,
@@ -238,7 +237,7 @@ class BaseScores:
                     raise InvalidTeam(tla, "score for match {0}{1}".format(*match_id))
                 self.teams[tla].add_game_points(score)
 
-    def _load_resfile(self, fname: str) -> None:
+    def _load_resfile(self, fname: Path) -> None:
         y = yaml_loader.load(fname)  # type: ScoreData
 
         match_id = (y['arena_id'], y['match_number'])
@@ -310,7 +309,7 @@ class LeagueScores(BaseScores):
 
     def __init__(
         self,
-        resultdir: str,
+        resultdir: Path,
         teams: Iterable[TLA],
         scorer: ScorerType,
         num_teams_per_arena: int,
@@ -364,7 +363,7 @@ class KnockoutScores(BaseScores):
 
     def __init__(
         self,
-        resultdir: str,
+        resultdir: Path,
         teams: Iterable[TLA],
         scorer: ScorerType,
         num_teams_per_arena: int,
@@ -398,7 +397,7 @@ class Scores:
 
     def __init__(
         self,
-        root: str,
+        root: Path,
         teams: Iterable[TLA],
         scorer: ScorerType,
         num_teams_per_arena: int,
@@ -406,7 +405,7 @@ class Scores:
         self.root = root
 
         self.league = LeagueScores(
-            os.path.join(root, 'league'),
+            root / 'league',
             teams,
             scorer,
             num_teams_per_arena,
@@ -416,7 +415,7 @@ class Scores:
         """
 
         self.knockout = KnockoutScores(
-            os.path.join(root, 'knockout'),
+            root / 'knockout',
             teams,
             scorer,
             num_teams_per_arena,
@@ -427,7 +426,7 @@ class Scores:
         """
 
         self.tiebreaker = TiebreakerScores(
-            os.path.join(root, 'tiebreaker'),
+            root / 'tiebreaker',
             teams,
             scorer,
             num_teams_per_arena,

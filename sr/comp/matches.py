@@ -2,6 +2,7 @@
 
 import datetime
 from datetime import timedelta
+from pathlib import Path
 from typing import (
     Any,
     Dict,
@@ -109,8 +110,8 @@ class MatchSchedule:
     @classmethod
     def create(
         cls: Type[TSchedule],
-        config_fname: str,
-        league_fname: str,
+        config_fname: Path,
+        league_fname: Path,
         scores: Scores,
         arenas: Mapping[ArenaName, Arena],
         num_teams_per_arena: int,
@@ -119,8 +120,8 @@ class MatchSchedule:
         """
         Create a new match schedule around the given config data.
 
-        :param str config_fname: The filename of the main config file.
-        :param str league_fname: The filename of the file containing the league matches.
+        :param Path config_fname: The filename of the main config file.
+        :param Path league_fname: The filename of the file containing the league matches.
         :param `.Scores` scores: The scores for the competition.
         :param dict arenas: A mapping of arena ids to :class:`.Arena` instances.
         :param int num_teams_per_arena: The usual number of teams per arena.

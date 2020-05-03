@@ -6,6 +6,7 @@ loader is used which is necessary for optimum performance.
 """
 
 import datetime
+from pathlib import Path
 from typing import Type
 
 import dateutil.parser
@@ -40,12 +41,12 @@ def add_time_constructor(loader: Type[YAML_Loader]) -> None:
 add_time_constructor(YAML_Loader)
 
 
-def load(file_path: str) -> YAMLData:
+def load(file_path: Path) -> YAMLData:
     """
     Load a YAML fie and return the results.
 
-    :param str file_path: The path to the YAML file.
+    :param Path file_path: The path to the YAML file.
     :return: The parsed contents.
     """
-    with open(file_path, 'r') as f:
+    with file_path.open(mode='r') as f:
         return yaml.load(f, Loader=YAML_Loader)

@@ -2,6 +2,7 @@
 
 from collections import Counter
 from itertools import chain
+from pathlib import Path
 from typing import cast, Dict, Generic, Iterable, List, Mapping, Tuple, TypeVar
 
 from . import yaml_loader
@@ -201,8 +202,8 @@ class Venue:
     def __init__(
         self,
         teams: Iterable[TLA],
-        layout_file: str,
-        shepherding_file: str,
+        layout_file: Path,
+        shepherding_file: Path,
     ):
 
         layout_data = yaml_loader.load(layout_file)  # type: LayoutData

@@ -1,6 +1,7 @@
 """Arena and corner loading routines."""
 
 from collections import OrderedDict
+from pathlib import Path
 from typing import Dict, NamedTuple, NewType
 
 from . import yaml_loader
@@ -19,7 +20,7 @@ Corner = NamedTuple('Corner', [
 ])
 
 
-def load_arenas(filename: str) -> Dict[ArenaName, Arena]:
+def load_arenas(filename: Path) -> Dict[ArenaName, Arena]:
     """
     Load arenas from a YAML file.
 
@@ -46,7 +47,7 @@ def load_arenas(filename: str) -> Dict[ArenaName, Arena]:
     return arenas
 
 
-def load_corners(filename: str) -> Dict[CornerNumber, Corner]:
+def load_corners(filename: Path) -> Dict[CornerNumber, Corner]:
     """
     Load corner colours from a YAML file.
 
