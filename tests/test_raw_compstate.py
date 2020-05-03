@@ -1,38 +1,14 @@
-import datetime
 import os.path
 import subprocess
 import unittest
-from typing import List, Optional
-
-from dateutil.tz import UTC
 
 from sr.comp.comp import SRComp
-from sr.comp.match_period import Match, MatchType
+from sr.comp.match_period import MatchType
 from sr.comp.raw_compstate import RawCompstate
-from sr.comp.types import ArenaName, MatchNumber, TLA
+
+from .factories import build_match
 
 DUMMY_PATH = os.path.dirname(os.path.abspath(__file__)) + '/dummy'
-
-
-def build_match(
-    num: int,
-    arena: str,
-    teams: Optional[List[Optional[TLA]]] = None,
-    start_time: datetime.datetime = datetime.datetime(2020, 1, 25, 11, 0, tzinfo=UTC),
-    end_time: datetime.datetime = datetime.datetime(2020, 1, 25, 11, 5, tzinfo=UTC),
-    type_: MatchType = MatchType.league,
-    use_resolved_ranking: bool = False,
-) -> Match:
-    return Match(
-        MatchNumber(num),
-        "Match {n}".format(n=num),
-        ArenaName(arena),
-        teams or [],
-        start_time,
-        end_time,
-        type_,
-        use_resolved_ranking,
-    )
 
 
 class RawCompstateTests(unittest.TestCase):
