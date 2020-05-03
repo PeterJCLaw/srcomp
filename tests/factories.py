@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Optional
+from typing import Optional, Sequence
 
 from dateutil.tz import UTC
 
@@ -8,9 +8,9 @@ from sr.comp.types import ArenaName, MatchNumber, TLA
 
 
 def build_match(
-    num: int,
-    arena: str,
-    teams: Optional[List[Optional[TLA]]] = None,
+    num: int = 0,
+    arena: str = 'main',
+    teams: Sequence[Optional[TLA]] = (),
     start_time: datetime.datetime = datetime.datetime(2020, 1, 25, 11, 0, tzinfo=UTC),
     end_time: datetime.datetime = datetime.datetime(2020, 1, 25, 11, 5, tzinfo=UTC),
     type_: MatchType = MatchType.league,
@@ -20,7 +20,7 @@ def build_match(
         MatchNumber(num),
         "Match {n}".format(n=num),
         ArenaName(arena),
-        teams or [],
+        list(teams),
         start_time,
         end_time,
         type_,
