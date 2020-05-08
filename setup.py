@@ -36,6 +36,5 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Software Development :: Libraries',
     ],
-    test_suite='tests',
     zip_safe=True,
 )
