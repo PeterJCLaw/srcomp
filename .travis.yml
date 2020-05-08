@@ -13,7 +13,7 @@ before_install:
 install:
   - pip install .
 script:
-  - ./run-tests
+  - ./run-tests --verbose
   # Deliberately after running the real tests so that we can't accidentally
   # depend on it
   - pip install -r script/linting/requirements.txt
