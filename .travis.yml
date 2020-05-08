@@ -8,8 +8,9 @@ python:
 matrix:
   allow_failures:
     - python: "3.9-dev"
-install:
+before_install:
   - pip install -U pip setuptools
+install:
   - pip install .
 script:
   - ./run-tests
