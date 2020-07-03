@@ -92,7 +92,7 @@ class RawCompstate:
         """Save raw score data for the given match."""
         path = self._get_score_path(match)
 
-        path.parent.mkdir(parents=True)
+        path.parent.mkdir(parents=True, exist_ok=True)
 
         with path.open(mode='w') as fd:
             yaml.safe_dump(score, fd, default_flow_style=False)
