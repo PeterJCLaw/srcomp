@@ -178,7 +178,7 @@ class RawCompstate:
         except subprocess.CalledProcessError as e:
             if err_msg:
                 if e.output:
-                    err_msg += '\n\n' + e.output
+                    err_msg += '\n\n' + e.output.decode('utf-8')
                 raise RuntimeError(err_msg)
             raise
         except OSError:
