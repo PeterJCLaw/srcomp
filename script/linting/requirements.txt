@@ -12,3 +12,6 @@ pyflakes>=2.2
 
 # Pylint 2.5 has issues on Travis
 pylint<2.5
+
+# The pylint version we need implicitly requires isort < 5
+isort<5
