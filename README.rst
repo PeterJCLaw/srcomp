@@ -18,8 +18,13 @@ consistent representations of that state.
 Usage
 -----
 
-Python clients should submodule this repo and then import it. Only the
-``SRComp`` is class directly exposed, and it should be constructed
+Python clients should install the library using:
+
+.. code:: shell
+
+    pip install git+https://github.com/PeterJCLaw/srcomp
+
+Only the ``SRComp`` is class directly exposed, and it should be constructed
 around the path to a local working copy of a *compstate repo*.
 
 .. code:: python
@@ -40,15 +45,13 @@ See the
 for an example of the structure and values expected in a *compstate
 repo*.
 
-Requirements
-------------
+Development
+-----------
 
--  python-dateutil
--  PyYAML
+**Install**:
+``pip install -e .``
 
-Test with
----------
-
+**Test**:
 ``./run-tests``
 
 .. |Build Status| image:: https://travis-ci.org/PeterJCLaw/srcomp.png?branch=master
