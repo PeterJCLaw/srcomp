@@ -1,4 +1,4 @@
-flake8
+flake8>=3.8
 flake8-builtins
 flake8-commas
 flake8-comprehensions
@@ -6,9 +6,6 @@ flake8-debugger
 flake8-isort
 flake8-mutable
 flake8-tuple
-
-# Need 2.2 for fixes around typing comments
-pyflakes>=2.2
 
 # Pylint 2.5 has issues on Travis
 pylint<2.5
