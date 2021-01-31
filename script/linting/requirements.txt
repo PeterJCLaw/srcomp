@@ -8,8 +8,7 @@ flake8-isort
 flake8-todo
 flake8-tuple
 
-# Pylint 2.5 has issues on Travis
-pylint<2.5
+pylint
 
 # The pylint version we need implicitly requires isort < 5
 isort<5

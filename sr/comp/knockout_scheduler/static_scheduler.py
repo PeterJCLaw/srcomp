@@ -64,7 +64,7 @@ class StaticScheduler(BaseKnockoutScheduler):
                         team_ref,
                         len(self._knockout_seeds),
                     ),
-                )
+                ) from None
 
         # get a position from a match
         assert len(team_ref) == 3
@@ -75,7 +75,7 @@ class StaticScheduler(BaseKnockoutScheduler):
         except IndexError:
             raise ValueError(
                 "Reference '{}' to unscheduled match!".format(team_ref),
-            )
+            ) from None
 
         try:
             ranking = self.get_ranking(match)
@@ -83,7 +83,7 @@ class StaticScheduler(BaseKnockoutScheduler):
         except IndexError:
             raise ValueError(
                 "Reference '{}' to invalid ranking!".format(team_ref),
-            )
+            ) from None
 
     def _add_match(
         self,
