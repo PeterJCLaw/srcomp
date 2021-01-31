@@ -22,8 +22,7 @@ setup(
         'python-dateutil >=2.2, <3',
         'typing-extensions >= 3.7.4.2',
     ],
-    # Note: there are known timezone issues in 3.5.0 (see https://bugs.python.org/issue23600)
-    python_requires='>=3.5.1',
+    python_requires='>=3.7',
     setup_requires=setup_requires,
     classifiers=[
         'Intended Audience :: Developers',
