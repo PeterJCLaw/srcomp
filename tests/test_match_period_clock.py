@@ -285,6 +285,7 @@ class SlotsTests(MatchPeriodClockTestsBase):
         clock = MatchPeriodClock(period, [])
         slots = []
         first_time = True
+
         for start in clock.iterslots(2):
             slots.append(clock.current_time)
             if first_time:
@@ -292,5 +293,6 @@ class SlotsTests(MatchPeriodClockTestsBase):
                 clock.advance_time(3)
                 # Now at 5
                 first_time = False
+
         expected = [0, 5]
         self.assertEqual(expected, slots)
