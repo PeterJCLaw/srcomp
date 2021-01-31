@@ -3,6 +3,9 @@ from setuptools import find_namespace_packages, setup
 with open('README.rst') as f:
     long_description = f.read()
 
+with open('setup-requirements.txt') as f:
+    setup_requires = f.readlines()
+
 setup(
     name='sr.comp',
     version='1.3.0',
@@ -21,9 +24,7 @@ setup(
     ],
     # Note: there are known timezone issues in 3.5.0 (see https://bugs.python.org/issue23600)
     python_requires='>=3.5.1',
-    setup_requires=[
-        'Sphinx >=3.0.2, <4',
-    ],
+    setup_requires=setup_requires,
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',

@@ -17,10 +17,10 @@ references:
         echo "# self" >> docs-requirements.txt
         echo "." >> docs-requirements.txt
 
-
         declare -a FILES=(
           "setup.py"
           ".circleci/requirements.txt"
+          "setup-requirements.txt"
           "docs-requirements.txt"
         )
         for f in ${FILES[@]}
@@ -37,7 +37,7 @@ references:
       name: Install Dependencies
       command: |
         python3 -m venv venv
-        venv/bin/pip install -r .circleci/requirements.txt
+        venv/bin/pip install -r .circleci/requirements.txt -r setup-requirements.txt
         venv/bin/pip install -r docs-requirements.txt
   save-docs-dependencies-cache: &save-docs-dependencies-cache
     save_cache:
@@ -64,6 +64,7 @@ references:
         declare -a FILES=(
           "setup.py"
           ".circleci/requirements.txt"
+          "setup-requirements.txt"
           "all-requirements.txt"
         )
         for f in ${FILES[@]}
@@ -80,7 +81,7 @@ references:
       name: Install Dependencies
       command: |
         python3 -m venv venv
-        venv/bin/pip install -r .circleci/requirements.txt
+        venv/bin/pip install -r .circleci/requirements.txt -r setup-requirements.txt
         venv/bin/pip install -r all-requirements.txt
   save-dependencies-cache: &save-dependencies-cache
     save_cache:
