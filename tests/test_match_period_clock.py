@@ -286,7 +286,7 @@ class SlotsTests(MatchPeriodClockTestsBase):
         slots = []
         first_time = True
 
-        for start in clock.iterslots(2):
+        for _ in clock.iterslots(2):
             slots.append(clock.current_time)
             if first_time:
                 # Advance an extra 3 the first time

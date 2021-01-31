@@ -53,7 +53,7 @@ def first_round_seeding(n_teams: int) -> List[List[int]]:
         ins_order.append(v)
 
     matches = []  # type: List[List[int]]
-    for n in range(n_matches):
+    for _ in range(n_matches):
         matches += [[]]
 
     for n in range(n_teams):

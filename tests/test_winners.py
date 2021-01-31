@@ -67,15 +67,19 @@ class MockScoreSet:
 
 
 class MockScores:
-    def __init__(
-        self,
-        league={'AAA': 1, 'BBB': 2, 'CCC': 0, 'DDD': 0},
-        league_dsq=(),
-        knockout={'AAA': 0, 'BBB': 3, 'CCC': 0, 'DDD': 2},
-        knockout_dsq=('CCC',),
-    ):
-        self.knockout = MockScoreSet('A', 1, knockout, knockout_dsq)
-        self.league = MockScoreSet('A', 0, league, league_dsq)
+    def __init__(self, league=None, league_dsq=(), knockout=None, knockout_dsq=('CCC',)):
+        self.knockout = MockScoreSet(
+            'A',
+            1,
+            knockout or {'AAA': 0, 'BBB': 3, 'CCC': 0, 'DDD': 2},
+            knockout_dsq,
+        )
+        self.league = MockScoreSet(
+            'A',
+            0,
+            league or {'AAA': 1, 'BBB': 2, 'CCC': 0, 'DDD': 0},
+            league_dsq,
+        )
 
 
 def build_tiebreaker_scores():
