@@ -150,6 +150,11 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          name: Checkout submodules
+          command: |
+            git submodule update --init --recursive
+
       - *build-checksum-file
       - *restore-dependencies-cache
       - *install-dependencies
