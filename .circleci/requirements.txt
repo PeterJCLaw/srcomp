@@ -1,0 +1,6 @@
+# Somewhat arbitrary values, roughly the latest at the time this file was
+# created. Mostly just needs to be new enough that `find_namespace_packages`
+# exists.
+pip >= 20
+wheel >= 0.36
+setuptools >= 50
