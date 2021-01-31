@@ -17,8 +17,8 @@ setup(
     author="Student Robotics Competition Software SIG",
     author_email='srobo-devel@googlegroups.com',
     install_requires=[
-        'PyYAML >=3.11, <5',
-        'league-ranker <0.1',
+        'PyYAML >=3.11, <6',
+        'league-ranker <0.2',
         'python-dateutil >=2.2, <3',
         'typing-extensions >= 3.7.4.2',
     ],
@@ -34,6 +34,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Software Development :: Libraries',
     ],
