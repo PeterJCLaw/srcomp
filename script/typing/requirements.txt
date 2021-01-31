@@ -1,1 +1,3 @@
-mypy
+# Limit mypy until https://github.com/python/mypy/issues/9981 is resolved to
+# avoid it complaining about the Python files in the test data.
+mypy < 0.800
