@@ -13,7 +13,6 @@ User Guide
    schedule
    league
    knockout
-   delays
 
 API Reference
 -------------
