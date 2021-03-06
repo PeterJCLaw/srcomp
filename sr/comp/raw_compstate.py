@@ -131,7 +131,7 @@ class RawCompstate:
         command_pieces: Iterable[str],
         err_msg: str = '',
         *,
-        return_output: Literal[True]
+        return_output: Literal[True],
     ) -> str:
         ...
 
