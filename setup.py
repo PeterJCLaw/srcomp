@@ -18,7 +18,7 @@ setup(
     packages=find_namespace_packages(exclude=('tests',)),
     package_data={'sr.comp': ['py.typed']},
     namespace_packages=['sr', 'sr.comp'],
-    description="Student Robotics Competition Software",
+    description="Reliable software for running robotics competitions",
     long_description=long_description,
     author="Student Robotics Competition Software SIG",
     author_email='srobo-devel@googlegroups.com',
