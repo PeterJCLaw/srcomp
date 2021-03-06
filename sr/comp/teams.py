@@ -6,15 +6,13 @@ from typing import Dict, NamedTuple, Optional
 from . import yaml_loader
 from .types import MatchNumber, TLA
 
-_Team = NamedTuple('Team', [
-    ('tla', TLA),
-    ('name', str),
-    ('rookie', bool),
-    ('dropped_out_after', Optional[MatchNumber]),
-])
 
+class Team(NamedTuple):
+    tla: TLA
+    name: str
+    rookie: bool
+    dropped_out_after: Optional[MatchNumber]
 
-class Team(_Team):
     def is_still_around(self, match_number: MatchNumber) -> bool:
         """
         Check if this team is still around at a certain match.

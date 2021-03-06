@@ -6,10 +6,10 @@ from typing import List, Mapping, NamedTuple, NewType, Optional
 
 from .types import ArenaName, MatchNumber, TLA
 
-Delay = NamedTuple('Delay', [
-    ('delay', datetime.timedelta),
-    ('time', datetime.datetime),
-])
+
+class Delay(NamedTuple):
+    delay: datetime.timedelta
+    time: datetime.datetime
 
 
 @unique
@@ -19,16 +19,15 @@ class MatchType(Enum):
     tiebreaker = 'tiebreaker'
 
 
-Match = NamedTuple('Match', [
-    ('num', MatchNumber),
-    ('display_name', str),
-    ('arena', ArenaName),
-    ('teams', List[Optional[TLA]]),
-    ('start_time', datetime.datetime),
-    ('end_time', datetime.datetime),
-    ('type', MatchType),
-    ('use_resolved_ranking', bool),
-])
+class Match(NamedTuple):
+    num: MatchNumber
+    display_name: str
+    arena: ArenaName
+    teams: List[Optional[TLA]]
+    start_time: datetime.datetime
+    end_time: datetime.datetime
+    type: MatchType  # noqa:A003
+    use_resolved_ranking: bool
 
 
 MatchSlot = NewType('MatchSlot', Mapping[ArenaName, Match])

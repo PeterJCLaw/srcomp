@@ -24,12 +24,12 @@ from .types import (
 
 Commitish = str
 
-ShepherdInfo = TypedDict('ShepherdInfo', {
-    'name': ShepherdName,
-    'colour': Colour,
-    'regions': List[RegionName],
-    'teams': List[TLA],
-})
+
+class ShepherdInfo(TypedDict):
+    name: ShepherdName
+    colour: Colour
+    regions: List[RegionName]
+    teams: List[TLA]
 
 
 class RawCompstate:
@@ -73,7 +73,7 @@ class RawCompstate:
 
     def _get_score_path(self, match: Match) -> Path:
         """Get the path to the score file for the given match."""
-        filename = "{0:0>3}.yaml".format(match.num)
+        filename = f"{match.num:0>3}.yaml"
         path = self._path / match.type.value / match.arena / filename  # type: Path
         return path
 
@@ -211,7 +211,7 @@ class RawCompstate:
         output = self.git(
             ['rev-parse', '--verify', revision],
             return_output=True,
-            err_msg="Unknown revision '{0}'.".format(revision),
+            err_msg=f"Unknown revision '{revision}'.",
         )
         return output.strip()
 
@@ -225,7 +225,7 @@ class RawCompstate:
 
     def _is_parent(self, parent: Commitish, child: Commitish) -> bool:
         try:
-            revspec = '{0}..{1}'.format(parent, child)
+            revspec = f'{parent}..{child}'
             revs = self.git(
                 ['rev-list', '-n1', revspec, '--'],
                 return_output=True,

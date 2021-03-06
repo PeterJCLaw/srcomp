@@ -40,7 +40,7 @@ class InvalidTeam(Exception):
     """An exception that occurs when a score contains an invalid team."""
 
     def __init__(self, tla: TLA, context: str) -> None:
-        message = "Team {0} (found in {1}) does not exist.".format(tla, context)
+        message = f"Team {tla} (found in {context}) does not exist."
         super().__init__(message)
         self.tla = tla
 
@@ -52,7 +52,7 @@ class DuplicateScoresheet(Exception):
     """
 
     def __init__(self, match_id: MatchId) -> None:
-        message = "Scoresheet for {0} has already been added.".format(match_id)
+        message = f"Scoresheet for {match_id} has already been added."
         super().__init__(message)
         self.match_id = match_id
 
@@ -106,10 +106,7 @@ class TeamScore:
         return self._ordering_key < other._ordering_key
 
     def __repr__(self) -> str:
-        return 'TeamScore({0}, {1})'.format(
-            self.league_points,
-            self.game_points,
-        )
+        return f'TeamScore({self.league_points!r}, {self.game_points!r})'
 
 
 def results_finder(root: Path) -> Iterator[Path]:
@@ -119,8 +116,7 @@ def results_finder(root: Path) -> Iterator[Path]:
         if not dname.is_dir():
             continue
 
-        for resfile in dname.glob('*.yaml'):
-            yield resfile
+        yield from dname.glob('*.yaml')
 
 
 def get_validated_scores(
@@ -234,7 +230,7 @@ class BaseScores:
         for match_id, match in self.game_points.items():
             for tla, score in match.items():
                 if tla not in self.teams:
-                    raise InvalidTeam(tla, "score for match {0}{1}".format(*match_id))
+                    raise InvalidTeam(tla, "score for match {}{}".format(*match_id))
                 self.teams[tla].add_game_points(score)
 
     def _load_resfile(self, fname: Path) -> None:
@@ -320,7 +316,7 @@ class LeagueScores(BaseScores):
         for match_id, match in self.ranked_points.items():
             for tla, score in match.items():
                 if tla not in self.teams:
-                    raise InvalidTeam(tla, "ranked score for match {0}{1}".format(*match_id))
+                    raise InvalidTeam(tla, "ranked score for match {}{}".format(*match_id))
                 self.teams[tla].add_league_points(score)
 
         self.positions = self.rank_league(self.teams)

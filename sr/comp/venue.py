@@ -28,6 +28,7 @@ class InvalidRegionException(Exception):
     An exception that occurs when there are invalid regions mentioned in
     the shepherding data.
     """
+
     def __init__(self, region: RegionName, area: str) -> None:
         tpl = "Invalid region '{0}' found in shepherding area '{1}'"
         super().__init__(tpl.format(region, area))
@@ -40,6 +41,7 @@ class MismatchException(Exception, Generic[T_str]):
     """
     An exception that occurs when there are duplicate, extra or missing items.
     """
+
     def __init__(
         self,
         tpl: str,
@@ -55,9 +57,9 @@ class MismatchException(Exception, Generic[T_str]):
             ("missing", missing),
         ):
             if teams:
-                details.append("{0}: ".format(label) + ", ".join(sorted(teams)))
+                details.append(f"{label}: " + ", ".join(sorted(teams)))
 
-        assert details, "No bad items given to {0}!".format(self.__class__)
+        assert details, f"No bad items given to {self.__class__}!"
 
         detail = "; ".join(details)
         super().__init__(tpl.format(detail))
@@ -72,6 +74,7 @@ class LayoutTeamsException(MismatchException[TLA]):
     An exception that occurs when there are duplicate, extra or missing
     teams in a layout.
     """
+
     def __init__(
         self,
         duplicate_teams: Iterable[TLA],
@@ -87,6 +90,7 @@ class ShepherdingAreasException(MismatchException[str]):
     An exception that occurs when there are duplicate, extra or missing
     shepherding areas in the staging times.
     """
+
     def __init__(
         self,
         where: str,
@@ -94,7 +98,7 @@ class ShepherdingAreasException(MismatchException[str]):
         extra: Iterable[str],
         missing: Iterable[str],
     ):
-        tpl = "Duplicate, extra or missing shepherding areas {0}! ({{0}})".format(where)
+        tpl = f"Duplicate, extra or missing shepherding areas {where}! ({{0}})"
         super().__init__(tpl, duplicate, extra, missing)
 
 

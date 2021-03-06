@@ -42,21 +42,21 @@ from .types import (
 
 TSchedule = TypeVar('TSchedule', bound='MatchSchedule')
 
-StagingOffsets = TypedDict('StagingOffsets', {
-    'opens': datetime.timedelta,
-    'closes': datetime.timedelta,
-    'duration': datetime.timedelta,
-    'signal_shepherds': Mapping[ShepherdName, datetime.timedelta],
-    'signal_teams': datetime.timedelta,
-})
 
-StagingTimes = TypedDict('StagingTimes', {
-    'opens': datetime.datetime,
-    'closes': datetime.datetime,
-    'duration': datetime.timedelta,
-    'signal_shepherds': Mapping[ShepherdName, datetime.datetime],
-    'signal_teams': datetime.datetime,
-})
+class StagingOffsets(TypedDict):
+    opens: datetime.timedelta
+    closes: datetime.timedelta
+    duration: datetime.timedelta
+    signal_shepherds: Mapping[ShepherdName, datetime.timedelta]
+    signal_teams: datetime.timedelta
+
+
+class StagingTimes(TypedDict):
+    opens: datetime.datetime
+    closes: datetime.datetime
+    duration: datetime.timedelta
+    signal_shepherds: Mapping[ShepherdName, datetime.datetime]
+    signal_teams: datetime.datetime
 
 
 class WrongNumberOfTeams(Exception):
@@ -67,7 +67,7 @@ class WrongNumberOfTeams(Exception):
         teams: Sequence[Optional[TLA]],
         num_teams_per_arena: int,
     ) -> None:
-        message = "Match {0}{1} has {2} teams but must have {3}".format(
+        message = "Match {}{} has {} teams but must have {}".format(
             arena_name,
             match_n,
             len(teams),
@@ -98,7 +98,7 @@ def parse_ranges(ranges: str) -> Set[int]:
 def get_timezone(name: str) -> datetime.tzinfo:
     tzinfo = dateutil.tz.gettz(name)
     if tzinfo is None:
-        raise ValueError("Failed to load timezone info for {!r}".format(name))
+        raise ValueError(f"Failed to load timezone info for {name!r}")
     return tzinfo
 
 
@@ -242,7 +242,7 @@ class MatchSchedule:
 
         for other in ('signal_teams', 'signal_shepherds'):
             if other not in durations:
-                msg = "Staging times missing '{0}' key.".format(other)
+                msg = f"Staging times missing '{other}' key."
                 raise ValueError(msg)
 
         self.staging_times = durations
@@ -380,7 +380,7 @@ class MatchSchedule:
         end_time = start_time + self.match_duration
         for arena_name, teams in arenas.items():
             teams = self.remove_drop_outs(teams, match_n)
-            display_name = "Match {n}".format(n=match_n)
+            display_name = f"Match {match_n}"
 
             if len(teams) != self._num_corners:
                 raise WrongNumberOfTeams(match_n, arena_name, teams, self._num_corners)
@@ -505,7 +505,7 @@ class MatchSchedule:
             arena = finals_info.arena
             match = Match(
                 num=MatchNumber(num),
-                display_name="Tiebreaker (#{0})".format(num),
+                display_name=f"Tiebreaker (#{num})",
                 arena=arena,
                 teams=tiebreaker_teams,
                 type=MatchType.tiebreaker,

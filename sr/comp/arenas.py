@@ -9,15 +9,16 @@ from .types import ArenaName, Colour
 
 CornerNumber = NewType('CornerNumber', int)
 
-Arena = NamedTuple('Arena', [
-    ('name', ArenaName),
-    ('display_name', str),
-    ('colour', Colour),
-])
-Corner = NamedTuple('Corner', [
-    ('number', CornerNumber),
-    ('colour', Colour),
-])
+
+class Arena(NamedTuple):
+    name: ArenaName
+    display_name: str
+    colour: Colour
+
+
+class Corner(NamedTuple):
+    number: CornerNumber
+    colour: Colour
 
 
 def load_arenas(filename: Path) -> Dict[ArenaName, Arena]:
