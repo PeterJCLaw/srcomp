@@ -33,16 +33,13 @@ class Match(NamedTuple):
 MatchSlot = NewType('MatchSlot', Mapping[ArenaName, Match])
 
 
-class MatchPeriod(NamedTuple('MatchPeriod', [
-    ('start_time', datetime.datetime),
-    ('end_time', datetime.datetime),
-    ('max_end_time', datetime.datetime),
-    ('description', str),
-    ('matches', List[MatchSlot]),
-    ('type', MatchType),
-])):
-
-    __slots__ = ()
+class MatchPeriod(NamedTuple):
+    start_time: datetime.datetime
+    end_time: datetime.datetime
+    max_end_time: datetime.datetime
+    description: str
+    matches: List[MatchSlot]
+    type: MatchType  # noqa:A003
 
     def __str__(self) -> str:
         return "{} ({}–{})".format(
