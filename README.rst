@@ -22,7 +22,7 @@ Python clients should install the library using:
 
 .. code:: shell
 
-    pip install git+https://github.com/PeterJCLaw/srcomp
+    pip install sr.comp
 
 Only the ``SRComp`` is class directly exposed, and it should be constructed
 around the path to a local working copy of a *compstate repo*.
