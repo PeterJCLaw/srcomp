@@ -242,8 +242,7 @@ class MatchSchedule:
 
         for other in ('signal_teams', 'signal_shepherds'):
             if other not in durations:
-                msg = f"Staging times missing '{other}' key."
-                raise ValueError(msg)
+                raise ValueError(f"Staging times missing {other!r} key.")
 
         self.staging_times = durations
 
