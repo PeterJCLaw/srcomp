@@ -9,6 +9,12 @@ with open('setup-requirements.txt') as f:
 setup(
     name='sr.comp',
     version='1.4.1',
+    url='https://github.com/PeterJCLaw/srcomp.wiki',
+    project_urls={
+        'Documentation': 'https://srcomp.readthedocs.org/',
+        'Code': 'https://github.com/PeterJCLaw/srcomp',
+        'Issue tracker': 'https://github.com/PeterJCLaw/srcomp/issues',
+    },
     packages=find_namespace_packages(exclude=('tests',)),
     package_data={'sr.comp': ['py.typed']},
     namespace_packages=['sr', 'sr.comp'],
