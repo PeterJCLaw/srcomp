@@ -8,7 +8,7 @@ with open('setup-requirements.txt') as f:
 
 setup(
     name='sr.comp',
-    version='1.4.0',
+    version='1.4.1',
     packages=find_namespace_packages(exclude=('tests',)),
     package_data={'sr.comp': ['py.typed']},
     namespace_packages=['sr', 'sr.comp'],
