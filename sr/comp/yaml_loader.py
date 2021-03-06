@@ -18,8 +18,9 @@ from .types import YAMLData
 try:
     from yaml import CLoader as YAML_Loader
 except ImportError:
-    from yaml import Loader as YAML_Loader  # type: ignore[misc]
     from warnings import warn
+
+    from yaml import Loader as YAML_Loader  # type: ignore[misc]
     warn(
         "Using pure-python PyYAML (without libyaml). "
         "srcomp reads many YAML files, this is liable to be very slow. "

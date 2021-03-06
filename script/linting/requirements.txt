@@ -10,5 +10,4 @@ flake8-tuple
 
 pylint
 
-# The pylint version we need implicitly requires isort < 5
-isort<5
+isort
