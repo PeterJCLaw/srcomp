@@ -14,6 +14,7 @@ jobs=4
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
 disable=C,
+    duplicate-code,
     locally-disabled,
     no-else-return,
     unsubscriptable-object,
