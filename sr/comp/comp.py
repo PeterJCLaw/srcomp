@@ -24,7 +24,7 @@ def load_scorer(root: Path) -> ScorerType:
     score_source = score_directory / 'score.py'
 
     saved_path = copy(sys.path)
-    sys.path.append(str(score_directory))
+    sys.path.insert(0, str(score_directory))
 
     imported_library = imp.load_source('score.py', str(score_source))
 
