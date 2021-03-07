@@ -26,9 +26,10 @@ def load_scorer(root: Path) -> ScorerType:
     saved_path = copy(sys.path)
     sys.path.insert(0, str(score_directory))
 
-    score = runpy.run_path(str(score_source))  # type: ignore[func-returns-value]
-
-    sys.path = saved_path
+    try:
+        score = runpy.run_path(str(score_source))  # type: ignore[func-returns-value]
+    finally:
+        sys.path = saved_path
 
     return cast(ScorerType, score['Scorer'])
 
