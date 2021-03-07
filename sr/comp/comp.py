@@ -31,6 +31,7 @@ def load_scorer(root: Path) -> ScorerType:
     saved_path = copy(sys.path)
     sys.path.insert(0, str(score_directory))
 
+    # pylint: disable=import-error
     from score import Scorer  # type: ignore[import]
 
     sys.path = saved_path
