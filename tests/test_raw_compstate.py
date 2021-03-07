@@ -65,6 +65,10 @@ class RawCompstateTests(unittest.TestCase):
 
         self.assertEqual(expected, shepherds, "Wrong shepherds data loaded")
 
+    def test_deployments(self) -> None:
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        self.assertTrue(state.deployments)
+
     def test_shepherding(self) -> None:
         state = RawCompstate(DUMMY_PATH, local_only=True)
         self.assertTrue(state.shepherding)

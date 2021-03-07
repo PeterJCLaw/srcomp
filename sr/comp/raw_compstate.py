@@ -102,7 +102,7 @@ class RawCompstate:
         deployments_path = self._path / 'deployments.yaml'
 
         with deployments_path.open() as dp:
-            raw_deployments = cast(DeploymentsData, yaml.load(dp))
+            raw_deployments = cast(DeploymentsData, yaml.safe_load(dp))
 
         hosts = raw_deployments['deployments']
         return hosts
