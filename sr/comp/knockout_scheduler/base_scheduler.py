@@ -58,7 +58,7 @@ class BaseKnockoutScheduler:
         # in this list is important (e.g. self.knockout_rounds[0][0] is
         # will involve the top seed, whilst self.knockout_rounds[0][-1] will
         # involve the second seed).
-        self.knockout_rounds = []  # type: List[List[Match]]
+        self.knockout_rounds: List[List[Match]] = []
 
         period_config = self.config['match_periods']['knockout'][0]
         self.period = MatchPeriod(

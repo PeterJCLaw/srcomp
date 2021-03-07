@@ -74,7 +74,7 @@ class RawCompstate:
     def _get_score_path(self, match: Match) -> Path:
         """Get the path to the score file for the given match."""
         filename = f"{match.num:0>3}.yaml"
-        path = self._path / match.type.value / match.arena / filename  # type: Path
+        path: Path = self._path / match.type.value / match.arena / filename
         return path
 
     def get_score_path(self, match: Match) -> str:
@@ -162,7 +162,7 @@ class RawCompstate:
         command = ['git'] + list(command_pieces)
 
         if return_output:
-            stderr = subprocess.STDOUT  # type: Optional[int]
+            stderr: Optional[int] = subprocess.STDOUT
 
             def func(*args: Any, **kwargs: Any) -> str:
                 return cast(

@@ -187,14 +187,14 @@ class BaseScores:
         self._scorer = scorer
         self._num_corners = num_teams_per_arena
 
-        self.game_points = {}  # type: Dict[MatchId, Mapping[TLA, GamePoints]]
+        self.game_points: Dict[MatchId, Mapping[TLA, GamePoints]] = {}
         """
         Game points data for each match. Keys are tuples of the form
         ``(arena_id, match_num)``, values are :class:`dict` s mapping
         TLAs to the number of game points they scored.
         """
 
-        self.game_positions = {}  # type: Dict[MatchId, Mapping[RankedPosition, Set[TLA]]]
+        self.game_positions: Dict[MatchId, Mapping[RankedPosition, Set[TLA]]] = {}
         """
         Game position data for each match. Keys are tuples of the form
         ``(arena_id, match_num)``, values are :class:`dict` s mapping
@@ -202,7 +202,7 @@ class BaseScores:
         which have that position. Based solely on teams' game points.
         """
 
-        self.ranked_points = {}  # type: Dict[MatchId, Dict[TLA, ranker.LeaguePoints]]
+        self.ranked_points: Dict[MatchId, Dict[TLA, ranker.LeaguePoints]] = {}
         """
         Normalised (aka 'league') points earned in each match. Keys are
         tuples of the form ``(arena_id, match_num)``, values are
@@ -232,7 +232,7 @@ class BaseScores:
                 self.teams[tla].add_game_points(score)
 
     def _load_resfile(self, fname: Path) -> None:
-        y = yaml_loader.load(fname)  # type: ScoreData
+        y: ScoreData = yaml_loader.load(fname)
 
         match_id = (y['arena_id'], y['match_number'])
         if match_id in self.game_points:

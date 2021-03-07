@@ -37,7 +37,7 @@ class ValidateMatchTests(unittest.TestCase):
     def test_unknowable_entrants(self) -> None:
         teams_a = [UNKNOWABLE_TEAM] * 4
         teams_b = [UNKNOWABLE_TEAM] * 4
-        teams = set()  # type: Set[TLA]
+        teams: Set[TLA] = set()
         knockout_match = MatchSlot({
             ArenaName('A'): build_match(teams=teams_a),
             ArenaName('B'): build_match(teams=teams_b),
@@ -236,7 +236,7 @@ class FindMissingScoresTests(unittest.TestCase):
 
         missing = find_missing_scores(MatchType.knockout, match_ids, last_match, schedule)
 
-        expected = []  # type: Sequence[Tuple[MatchNumber, Set[ArenaName]]]
+        expected: Sequence[Tuple[MatchNumber, Set[ArenaName]]] = []
         self.assertEqual(expected, missing)
 
     def test_knockouts_missing(self) -> None:

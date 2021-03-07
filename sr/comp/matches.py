@@ -83,7 +83,7 @@ def parse_ranges(ranges: str) -> Set[int]:
 
     From https://stackoverflow.com/questions/6405208
     """
-    result = []  # type: List[int]
+    result: List[int] = []
     for part in ranges.split(','):
         if '-' in part:
             a_, b_ = part.split('-')
@@ -130,12 +130,12 @@ class MatchSchedule:
 
         y = yaml_loader.load(config_fname)
 
-        league = yaml_loader.load(league_fname)['matches']  # type: LeagueMatches
+        league: LeagueMatches = yaml_loader.load(league_fname)['matches']
 
         schedule = cls(y, league, teams, num_teams_per_arena)
 
         if y['knockout'].get('static', False):
-            knockout_scheduler = StaticScheduler  # type: Type[BaseKnockoutScheduler]
+            knockout_scheduler: Type[BaseKnockoutScheduler] = StaticScheduler
         else:
             knockout_scheduler = KnockoutScheduler
 
@@ -162,13 +162,13 @@ class MatchSchedule:
         self.teams = teams
         """A mapping of TLAs to :class:`.Team` instances."""
 
-        self.match_periods = []  # type: List[MatchPeriod]
+        self.match_periods: List[MatchPeriod] = []
         """
         A list of the :class:`.MatchPeriod` s which contain the matches
         for the competition.
         """
 
-        self.knockout_rounds = []  # type: List[List[Match]]
+        self.knockout_rounds: List[List[Match]] = []
         """
         A list of the knockout matches by round. Each entry in the list
         represents a round of knockout matches, such that `knockout_rounds[-1]`
@@ -193,7 +193,7 @@ class MatchSchedule:
         self._build_extra_spacing(y['league']['extra_spacing'])
         self._build_delaylist(y['delays'])
 
-        self.matches = []  # type: List[MatchSlot]
+        self.matches: List[MatchSlot] = []
         """
         A list of match slots in the schedule. Each match slot is a dict of
         arena to the :class:`.Match` occuring in that arena.
@@ -220,7 +220,7 @@ class MatchSchedule:
         if total != pre + post + match:
             raise ValueError("Match slot lengths are inconsistent.")
         self.match_slot_lengths = durations
-        self.match_duration = total  # type: datetime.timedelta
+        self.match_duration: datetime.timedelta = total
 
     def _load_staging_times(self, yamldata: YAMLData) -> None:
         def to_timedeltas(item: Any) -> Any:
@@ -232,7 +232,7 @@ class MatchSchedule:
             else:
                 return datetime.timedelta(seconds=item)
 
-        durations = to_timedeltas(yamldata)  # type: StagingOffsets
+        durations: StagingOffsets = to_timedeltas(yamldata)
 
         opens = durations['opens']
         closes = durations['closes']
@@ -251,10 +251,10 @@ class MatchSchedule:
         match_start = match.start_time + pre
         offsets = self.staging_times
 
-        signal_shepherds = {
+        signal_shepherds: Dict[ShepherdName, datetime.datetime] = {
             area: match_start - offset
             for area, offset in offsets['signal_shepherds'].items()
-        }  # type: Dict[ShepherdName, datetime.datetime]
+        }
 
         return {
             'opens': match_start - offsets['opens'],
@@ -265,7 +265,7 @@ class MatchSchedule:
         }
 
     def _build_extra_spacing(self, yamldata: Optional[List[ExtraSpacingData]]) -> None:
-        spacing = {}  # type: Dict[MatchNumber, datetime.timedelta]
+        spacing: Dict[MatchNumber, datetime.timedelta] = {}
         if not yamldata:
             self._spacing = spacing
             return
@@ -280,7 +280,7 @@ class MatchSchedule:
         self._spacing = spacing
 
     def _build_delaylist(self, yamldata: Optional[List[DelayData]]) -> None:
-        delays = []  # type: List[Delay]
+        delays: List[Delay] = []
         if yamldata is None:
             # No delays, hurrah
             self.delays = delays
@@ -306,7 +306,7 @@ class MatchSchedule:
         :param int since_match: The match number to check for drop outs from.
         :return: A new list containing the approriate teams.
         """
-        new_teams = []  # type: List[Optional[TLA]]
+        new_teams: List[Optional[TLA]] = []
         for tla in teams:
             if tla is None:
                 new_teams.append(None)
@@ -374,7 +374,7 @@ class MatchSchedule:
         Returns a dict of arena to :class:`.Match` for the given start time,
         arenas dict and match number.
         """
-        match_slot = {}  # type: Dict[ArenaName, Match]
+        match_slot: Dict[ArenaName, Match] = {}
 
         end_time = start_time + self.match_duration
         for arena_name, teams in arenas.items():

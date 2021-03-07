@@ -103,7 +103,7 @@ def _compute_explicit_awards(path: Path, teams: Mapping[TLA, Team]) -> Winners:
     if not path.exists():
         return {}
 
-    explicit_awards = yaml_loader.load(path)  # type: AwardsData
+    explicit_awards: AwardsData = yaml_loader.load(path)
     assert explicit_awards, "Awards file should not be present if empty."
 
     awards = {
@@ -137,7 +137,7 @@ def compute_awards(
              determined.
     """
 
-    awards = {}  # type: Dict[Award, List[TLA]]
+    awards: Dict[Award, List[TLA]] = {}
     awards.update(_compute_main_awards(scores, final_match))
     awards.update(_compute_rookie_award(scores, teams))
     if path is not None:

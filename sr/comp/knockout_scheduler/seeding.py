@@ -52,7 +52,7 @@ def first_round_seeding(n_teams: int) -> List[List[int]]:
             v ^= bit_mask(matches_bits)
         ins_order.append(v)
 
-    matches = []  # type: List[List[int]]
+    matches: List[List[int]] = []
     for _ in range(n_matches):
         matches += [[]]
 

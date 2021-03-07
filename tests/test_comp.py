@@ -11,7 +11,7 @@ DUMMY_PATH = os.path.dirname(os.path.abspath(__file__)) + '/dummy'
 
 
 class CompTests(unittest.TestCase):
-    srcomp_instance = NotImplemented  # type: ClassVar[SRComp]
+    srcomp_instance: ClassVar[SRComp] = NotImplemented
 
     @classmethod
     def setUpClass(cls) -> None:

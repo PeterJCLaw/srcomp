@@ -143,7 +143,7 @@ def validate_schedule_timings(
         timing_map[time].append(game.num)
 
     errors = []
-    last_time = None  # type: Optional[datetime.datetime]
+    last_time: Optional[datetime.datetime] = None
     for time, match_numbers in sorted(timing_map.items()):
         if len(match_numbers) != 1:
             errors.append("Multiple matches scheduled for {}: {}.".format(
@@ -186,7 +186,7 @@ def validate_match(match: MatchSlot, possible_teams: Iterable[TLA]) -> Errors:
     """Check that the teams featuring in a match exist and are only
     required in one arena at a time."""
     errors = []
-    all_teams = []  # type: List[Optional[TLA]]
+    all_teams: List[Optional[TLA]] = []
 
     for a in match.values():
         all_teams += a.teams
@@ -198,7 +198,7 @@ def validate_match(match: MatchSlot, possible_teams: Iterable[TLA]) -> Errors:
     # Note: mypy doesn't know that removing META_TEAMS here means that we're
     # removing the Optional nature of the teams.
     # See https://github.com/python/mypy/issues/8526.
-    duplicates = set(all_teams) - META_TEAMS  # type: Set[TLA]  # type: ignore[assignment]
+    duplicates: Set[TLA] = set(all_teams) - META_TEAMS  # type: ignore[assignment]
     if len(duplicates):
         errors.append("Teams {} appear more than once.".format(
             join_and(duplicates),

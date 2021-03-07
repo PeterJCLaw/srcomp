@@ -58,7 +58,7 @@ class MatchPeriodClock:
         self._current_time = period.start_time
 
         # The total applied delay
-        self._total_delay = None  # type: Optional[datetime.timedelta]
+        self._total_delay: Optional[datetime.timedelta] = None
 
         # Apply any delays which occur at the start
         self._apply_delays()

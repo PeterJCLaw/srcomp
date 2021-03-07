@@ -210,11 +210,11 @@ class Venue:
         shepherding_file: Path,
     ):
 
-        layout_data = yaml_loader.load(layout_file)  # type: LayoutData
+        layout_data: LayoutData = yaml_loader.load(layout_file)
         teams_layout = layout_data['teams']
         self.check_teams(teams, teams_layout)
 
-        shepherding_data = yaml_loader.load(shepherding_file)  # type: ShepherdingData
+        shepherding_data: ShepherdingData = yaml_loader.load(shepherding_file)
         shepherds = shepherding_data['shepherds']
 
         self._shepherding_areas = [a['name'] for a in shepherds]
@@ -240,7 +240,7 @@ class Venue:
         shepherding region which contains that location.
         """
 
-        self._team_locations = {}  # type: Dict[TLA, Region]
+        self._team_locations: Dict[TLA, Region] = {}
 
         for location in self.locations.values():
             for team in location['teams']:
