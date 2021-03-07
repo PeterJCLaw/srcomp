@@ -1,17 +1,27 @@
 # pylint: disable=no-member
 
+import contextlib
 import datetime
 import os
+import tempfile
 import unittest
-from typing import ClassVar
+from pathlib import Path
+from typing import ClassVar, Iterator
 
-from sr.comp.comp import SRComp
+from sr.comp.comp import load_scorer, SRComp
 
 DUMMY_PATH = os.path.dirname(os.path.abspath(__file__)) + '/dummy'
 
 
 class CompTests(unittest.TestCase):
     srcomp_instance: ClassVar[SRComp] = NotImplemented
+
+    @contextlib.contextmanager
+    def temp_scoring_dir(self) -> Iterator[Path]:
+        with tempfile.TemporaryDirectory() as compstate_dir:
+            scoring_dir = Path(compstate_dir) / 'scoring'
+            scoring_dir.mkdir()
+            yield scoring_dir
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -37,3 +47,11 @@ class CompTests(unittest.TestCase):
                 datetime.datetime(2014, 4, 26),
             ),
         )
+
+    def test_scorer_missing(self) -> None:
+        with self.temp_scoring_dir() as scoring_dir:
+            score_file = scoring_dir / 'score.py'
+            with self.assertRaises(Exception) as cm:
+                load_scorer(scoring_dir.parent)
+
+            self.assertIn(str(score_file), str(cm.exception))
