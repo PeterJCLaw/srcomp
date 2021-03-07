@@ -3,7 +3,7 @@
 import datetime
 import os
 import unittest
-from typing_extensions import ClassVar
+from typing import ClassVar
 
 from sr.comp.comp import SRComp
 
