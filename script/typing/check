@@ -6,4 +6,4 @@ if [ -z "$MYPY" ]; then
     MYPY=mypy
 fi
 
-exec "$MYPY" sr tests
+exec "$MYPY" sr tests "$@"
