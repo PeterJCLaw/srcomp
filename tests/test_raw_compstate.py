@@ -105,7 +105,10 @@ class RawCompstateTests(unittest.TestCase):
             msg="Should have errored about bad command (returned '{0}').",
         ):
             output = state.git(['this-is-not-a-valid-command'], return_output=True)
-            print(output)
+            self.assertIsNone(
+                output,
+                "Command should have errored, but didn't. Instead it returned this.",
+            )
 
     def test_git_when_error(self) -> None:
         state = RawCompstate(DUMMY_PATH, local_only=True)
@@ -115,7 +118,10 @@ class RawCompstateTests(unittest.TestCase):
             msg="Should have errored about bad command (returned '{0}').",
         ):
             output = state.git(['this-is-not-a-valid-command'])
-            print(output)
+            self.assertIsNone(
+                output,
+                "Command should have errored, but didn't. Instead it returned this.",
+            )
 
     def test_git_converts_error(self) -> None:
         state = RawCompstate(DUMMY_PATH, local_only=True)
@@ -126,6 +132,9 @@ class RawCompstateTests(unittest.TestCase):
             msg="Should have errored about bad command (returned '{0}').",
         ) as cm:
             output = state.git(['this-is-not-a-valid-command'], err_msg=error_msg)
-            print(output)
+            self.assertIsNone(
+                output,
+                "Command should have errored, but didn't. Instead it returned this.",
+            )
 
         self.assertIn(error_msg, str(cm.exception))
