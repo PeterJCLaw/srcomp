@@ -1,6 +1,5 @@
 """Core competition functions."""
 
-import imp
 import sys
 from copy import copy
 from pathlib import Path
@@ -21,17 +20,23 @@ def load_scorer(root: Path) -> ScorerType:
 
     # Deep path hacks
     score_directory = root / 'scoring'
-    score_source = score_directory / 'score.py'
+    score_source_module = score_directory / 'score.py'
+    score_source_package = score_directory / 'score' / '__init__.py'
+
+    if not score_source_module.exists() and not score_source_package.exists():
+        raise ValueError(
+            f"Invalid compstate: expected a score package within {score_directory}.",
+        )
 
     saved_path = copy(sys.path)
-    sys.path.append(str(score_directory))
+    sys.path.insert(0, str(score_directory))
 
-    imported_library = imp.load_source('score.py', str(score_source))
+    # Note that by using this approach we're able
+    from score import Scorer  # type: ignore[import]
 
     sys.path = saved_path
 
-    scorer = imported_library.Scorer  # type: ignore[attr-defined]
-    return cast(ScorerType, scorer)
+    return cast(ScorerType, Scorer)
 
 
 class SRComp:
