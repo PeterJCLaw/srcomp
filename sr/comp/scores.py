@@ -40,8 +40,7 @@ class InvalidTeam(Exception):
     """An exception that occurs when a score contains an invalid team."""
 
     def __init__(self, tla: TLA, context: str) -> None:
-        message = f"Team {tla} (found in {context}) does not exist."
-        super().__init__(message)
+        super().__init__(f"Team {tla} (found in {context}) does not exist.")
         self.tla = tla
 
 
@@ -52,8 +51,7 @@ class DuplicateScoresheet(Exception):
     """
 
     def __init__(self, match_id: MatchId) -> None:
-        message = f"Scoresheet for {match_id} has already been added."
-        super().__init__(message)
+        super().__init__(f"Scoresheet for {match_id} has already been added.")
         self.match_id = match_id
 
 
