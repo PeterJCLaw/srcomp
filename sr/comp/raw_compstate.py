@@ -114,14 +114,14 @@ class RawCompstate:
         path = self._path / 'shepherding.yaml'
 
         with path.open() as shepherding_file:
-            return cast(ShepherdingData, yaml.load(shepherding_file))
+            return cast(ShepherdingData, yaml.safe_load(shepherding_file))
 
     @property
     def layout(self) -> LayoutData:
         path = self._path / 'layout.yaml'
 
         with path.open() as layout_file:
-            return cast(LayoutData, yaml.load(layout_file))
+            return cast(LayoutData, yaml.safe_load(layout_file))
 
     # Git repo related functionality
 
