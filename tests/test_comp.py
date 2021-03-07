@@ -55,3 +55,24 @@ class CompTests(unittest.TestCase):
                 load_scorer(scoring_dir.parent)
 
             self.assertIn(str(score_file), str(cm.exception))
+
+    def test_reloads_scorer(self) -> None:
+        # We're executing Python code in order to load the scorer. We want
+        # consumers to be able to load several compstates if they want, without
+        # leaking the scorer from one into another.
+
+        with self.temp_scoring_dir() as scoring_dir:
+            score_file = scoring_dir / 'score.py'
+            score_file.write_text('def Scorer(*a, **k): return 42')
+
+            Scorer = load_scorer(scoring_dir.parent)
+
+            self.assertEqual(42, Scorer({}, None))
+
+        with self.temp_scoring_dir() as scoring_dir:
+            score_file = scoring_dir / 'score.py'
+            score_file.write_text('def Scorer(*a, **k): return 21')
+
+            Scorer = load_scorer(scoring_dir.parent)
+
+            self.assertEqual(21, Scorer({}, None))

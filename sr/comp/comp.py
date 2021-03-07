@@ -1,5 +1,6 @@
 """Core competition functions."""
 
+import runpy
 import sys
 from copy import copy
 from pathlib import Path
@@ -22,18 +23,14 @@ def load_scorer(root: Path) -> ScorerType:
     score_directory = root / 'scoring'
     score_source = score_directory / 'score.py'
 
-    if not score_source.exists():
-        raise ValueError(f"Invalid compstate: expected a scorer at {score_source}.")
-
     saved_path = copy(sys.path)
     sys.path.insert(0, str(score_directory))
 
-    # pylint: disable=import-error
-    from score import Scorer  # type: ignore[import]
+    score = runpy.run_path(str(score_source))  # type: ignore[func-returns-value]
 
     sys.path = saved_path
 
-    return cast(ScorerType, Scorer)
+    return cast(ScorerType, score['Scorer'])
 
 
 class SRComp:
