@@ -54,8 +54,8 @@ Development
 **Test**:
 ``./run-tests``
 
-.. |Build Status| image:: https://circleci.com/gh/PeterJCLaw/srcomp.svg?style=svg
-   :target: https://circleci.com/gh/PeterJCLaw/srcomp
+.. |Build Status| image:: https://circleci.com/gh/PeterJCLaw/srcomp/tree/master.svg?style=svg
+   :target: https://circleci.com/gh/PeterJCLaw/srcomp/tree/master
 
 .. |Docs Status| image:: https://readthedocs.org/projects/srcomp/badge/?version=latest
    :target: http://srcomp.readthedocs.org/
