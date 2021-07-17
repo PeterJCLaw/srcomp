@@ -115,8 +115,8 @@ class TeamScoreRichComparisonTests(unittest.TestCase):
     def test_self(self) -> None:
         ts = TeamScore(game=GamePoints(5), league=LeaguePoints(4))
         # ignore[operator] due to https://github.com/python/mypy/issues/4610
-        self.assertTrue(ts >= ts)  # type: ignore[operator]
-        self.assertTrue(ts <= ts)  # type: ignore[operator]
+        self.assertTrue(ts >= ts)
+        self.assertTrue(ts <= ts)
         self.assertFalse(ts > ts)
         self.assertFalse(ts < ts)
 
@@ -124,8 +124,8 @@ class TeamScoreRichComparisonTests(unittest.TestCase):
         ts1 = TeamScore(game=GamePoints(5), league=LeaguePoints(4))
         ts2 = TeamScore(game=GamePoints(5), league=LeaguePoints(4))
         # ignore[operator] due to https://github.com/python/mypy/issues/4610
-        self.assertTrue(ts1 >= ts2)  # type: ignore[operator]
-        self.assertTrue(ts1 <= ts2)  # type: ignore[operator]
+        self.assertTrue(ts1 >= ts2)
+        self.assertTrue(ts1 <= ts2)
         self.assertFalse(ts1 > ts2)
         self.assertFalse(ts1 < ts2)
 
