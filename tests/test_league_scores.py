@@ -1,7 +1,10 @@
 import unittest
+from pathlib import Path
+from typing import Iterable, List
 from unittest import mock
 
 from sr.comp.scores import LeagueScores, TeamScore
+from sr.comp.types import ArenaName, MatchNumber, ScoreData, TLA
 
 
 class FakeScorer:
@@ -15,40 +18,40 @@ class FakeScorer:
         return scores
 
 
-def get_basic_data():
-    the_data = {
-        'match_number': 123,
-        'arena_id': 'A',
+def get_basic_data() -> ScoreData:
+    the_data = ScoreData({
+        'match_number': MatchNumber(123),
+        'arena_id': ArenaName('A'),
         'teams': {
-            'JMS': {
+            TLA('JMS'): {
                 'score': 4,
                 'disqualified': True,
                 'zone': 3,
             },
-            'PAS': {
+            TLA('PAS'): {
                 'score': 0,
                 'present': False,
                 'zone': 4,
             },
-            'RUN': {
+            TLA('RUN'): {
                 'score': 8,
                 'zone': 1,
             },
-            'ICE': {
+            TLA('ICE'): {
                 'score': 2,
                 'zone': 2,
             },
         },
-    }
+    })
     return the_data
 
 
-def load_data(the_data):
+def load_data(the_data: ScoreData) -> LeagueScores:
     teams = the_data['teams'].keys()
     return load_datas([the_data], teams)
 
 
-def load_datas(the_datas, teams):
+def load_datas(the_datas: List[ScoreData], teams: Iterable[TLA]) -> LeagueScores:
     my_datas = the_datas[:]
     the_files = ['whatever-{0}.yaml'.format(i) for i in range(len(the_datas))]
 
@@ -64,7 +67,7 @@ def load_datas(the_datas, teams):
         mock_loader.side_effect = loader
 
         scores = LeagueScores(
-            'somewhere',
+            Path('somewhere'),
             teams,
             FakeScorer,
             num_teams_per_arena=4,
@@ -72,7 +75,7 @@ def load_datas(the_datas, teams):
         return scores
 
 
-def load_basic_data():
+def load_basic_data() -> LeagueScores:
     return load_data(get_basic_data())
 
 

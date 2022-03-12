@@ -36,13 +36,20 @@ class ScoreTeamData(TypedDict, total=False):
     disqualified: bool
     present: bool
 
+    # Unused by SRComp
+    score: int
+    zone: int
 
-class ScoreData(TypedDict):
+
+class _ScoreData(TypedDict):
     arena_id: ArenaName
     match_number: MatchNumber
     teams: Dict[TLA, ScoreTeamData]
-    arena_zones: Optional[ScoreArenaZonesData]
-    other: Optional[ScoreOtherData]
+
+
+class ScoreData(_ScoreData, total=False):
+    arena_zones: ScoreArenaZonesData
+    other: ScoreOtherData
 
 
 class SimpleScorer(Protocol):
