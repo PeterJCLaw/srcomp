@@ -37,7 +37,6 @@ class ScoreTeamData(TypedDict, total=False):
     present: bool
 
     # Unused by SRComp
-    score: int
     zone: int
 
 
