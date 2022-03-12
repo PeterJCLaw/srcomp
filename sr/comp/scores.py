@@ -323,7 +323,7 @@ class LeagueScores(BaseScores):
 
         self.positions = self.rank_league(self.teams)
         """
-        An :class:`.OrderedDict` of TLAs to :class:`sr.comp.types.LeaguePosition`s.
+        An :class:`.OrderedDict` of TLAs to :class:`sr.comp.scores.LeaguePosition`s.
         """
 
 
