@@ -2,49 +2,9 @@ import unittest
 from typing import Iterable, List
 
 from sr.comp.scores import LeagueScores, TeamScore
-from sr.comp.types import ArenaName, MatchNumber, ScoreData, TLA
+from sr.comp.types import ScoreData, TLA
 
-
-class FakeScorer:
-    def __init__(self, score_data, arena_data_unused=None):
-        self.score_data = score_data
-
-    def calculate_scores(self):
-        scores = {}
-        for team, info in self.score_data.items():
-            scores[team] = info['score']
-        return scores
-
-
-def get_basic_data() -> ScoreData:
-    the_data = ScoreData({
-        'match_number': MatchNumber(123),
-        'arena_id': ArenaName('A'),
-        'teams': {
-            # TypedDicts don't have a way to allow for *extra* keys, which we do
-            # want to have here -- these dictionaries are the actual scoring
-            # data for the game and so contain arbitrary other keys.
-            TLA('JMS'): {  # type: ignore[typeddict-item]
-                'score': 4,
-                'disqualified': True,
-                'zone': 3,
-            },
-            TLA('PAS'): {  # type: ignore[typeddict-item]
-                'score': 0,
-                'present': False,
-                'zone': 4,
-            },
-            TLA('RUN'): {  # type: ignore[typeddict-item]
-                'score': 8,
-                'zone': 1,
-            },
-            TLA('ICE'): {  # type: ignore[typeddict-item]
-                'score': 2,
-                'zone': 2,
-            },
-        },
-    })
-    return the_data
+from .factories import build_score_data, FakeScorer
 
 
 def load_data(the_data: ScoreData) -> LeagueScores:
@@ -63,7 +23,7 @@ def load_datas(the_datas: List[ScoreData], teams: Iterable[TLA]) -> LeagueScores
 
 
 def load_basic_data() -> LeagueScores:
-    return load_data(get_basic_data())
+    return load_data(build_score_data())
 
 
 class LeagueScoresTests(unittest.TestCase):
@@ -106,8 +66,7 @@ class LeagueScoresTests(unittest.TestCase):
         self.assertEqual(expected, scores.teams)
 
     def test_last_scored_match(self):
-        m_1 = get_basic_data()
-        m_1['match_number'] = 1
+        m_1 = build_score_data(num=1)
         scores = load_data(m_1)
 
         self.assertEqual(
@@ -134,12 +93,8 @@ class LeagueScoresTests(unittest.TestCase):
         )
 
     def test_last_scored_match_many_scores(self):
-        m_1 = get_basic_data()
-        m_1['match_number'] = 1
-
-        m_2B = get_basic_data()
-        m_2B['match_number'] = 2
-        m_2B['arena_id'] = 'B'
+        m_1 = build_score_data(num=1)
+        m_2B = build_score_data(num=2, arena='B')
 
         scores = load_datas([m_1, m_2B], m_1['teams'].keys())
 
