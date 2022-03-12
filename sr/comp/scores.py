@@ -242,12 +242,12 @@ class BaseScores:
 
         # Build the disqualification dict
         dsq = []
-        for tla, scoreinfo in y['teams'].items():
+        for tla, teaminfo in y['teams'].items():
             # disqualifications and non-presence are effectively the same
             # in terms of league points awarding.
             if (
-                scoreinfo.get('disqualified', False) or
-                not scoreinfo.get('present', True)
+                teaminfo.get('disqualified', False) or
+                not teaminfo.get('present', True)
             ):
                 dsq.append(tla)
 
