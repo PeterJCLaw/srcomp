@@ -21,21 +21,24 @@ def get_basic_data() -> ScoreData:
         'match_number': MatchNumber(123),
         'arena_id': ArenaName('A'),
         'teams': {
-            TLA('JMS'): {
+            # TypedDicts don't have a way to allow for *extra* keys, which we do
+            # want to have here -- these dictionaries are the actual scoring
+            # data for the game and so contain arbitrary other keys.
+            TLA('JMS'): {  # type: ignore[typeddict-item]
                 'score': 4,
                 'disqualified': True,
                 'zone': 3,
             },
-            TLA('PAS'): {
+            TLA('PAS'): {  # type: ignore[typeddict-item]
                 'score': 0,
                 'present': False,
                 'zone': 4,
             },
-            TLA('RUN'): {
+            TLA('RUN'): {  # type: ignore[typeddict-item]
                 'score': 8,
                 'zone': 1,
             },
-            TLA('ICE'): {
+            TLA('ICE'): {  # type: ignore[typeddict-item]
                 'score': 2,
                 'zone': 2,
             },
