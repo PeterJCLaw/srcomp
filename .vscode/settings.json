@@ -11,6 +11,4 @@
         "**/.eggs": true,
         "**/__pycache__": true
     },
-    "restructuredtext.confPath": "${workspaceFolder}/docs",
-    "python.pythonPath": "${env:VIRTUAL_ENV}/bin/python",
 }
