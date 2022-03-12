@@ -35,10 +35,10 @@ class ScoresTests(unittest.TestCase):
     def test_league_only(self) -> None:
         self.assertScores(13, None, None, 13)
 
-    def test_knockout_only_not_actually_vaild(self) -> None:
+    def test_knockout_only_not_actually_valid(self) -> None:
         self.assertScores(None, 42, None, 42)
 
-    def test_tiebreaker_only_not_actually_vaild(self) -> None:
+    def test_tiebreaker_only_not_actually_valid(self) -> None:
         self.assertScores(None, None, 42, 42)
 
     def test_league_and_knockout_only(self) -> None:
