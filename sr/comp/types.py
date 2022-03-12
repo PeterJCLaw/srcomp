@@ -32,7 +32,7 @@ ScoreArenaZonesData = NewType('ScoreArenaZonesData', object)
 ScoreOtherData = NewType('ScoreOtherData', object)
 
 
-class ScoreTeamData(TypedDict):
+class ScoreTeamData(TypedDict, total=False):
     disqualified: bool
     present: bool
 
