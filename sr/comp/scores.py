@@ -217,7 +217,8 @@ class BaseScores:
         they would earn for that match.
         """
 
-        self.teams = {}
+        # Start with 0 points for each team
+        self.teams: Mapping[TLA, TeamScore] = {x: TeamScore() for x in teams}
         """
         Points for each team earned during this portion of the competition.
         Maps TLAs to :class:`.TeamScore` instances.
@@ -225,10 +226,6 @@ class BaseScores:
 
         for score_data in scores_data:
             self._load_score_data(score_data)
-
-        # Start with 0 points for each team
-        for tla in teams:
-            self.teams[tla] = TeamScore()
 
         # Sum the game for each team
         for match_id, match in self.game_points.items():
