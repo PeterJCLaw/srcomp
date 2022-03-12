@@ -1,5 +1,7 @@
 """Utilities for working with scores."""
 
+from __future__ import annotations
+
 from collections import OrderedDict
 from functools import total_ordering
 from pathlib import Path
@@ -386,43 +388,56 @@ class Scores:
     A simple class which stores references to the league and knockout scores.
     """
 
-    def __init__(
-        self,
+    @classmethod
+    def load(
+        cls,
         root: Path,
         teams: Iterable[TLA],
         scorer: ScorerType,
         num_teams_per_arena: int,
-    ) -> None:
-        self.root = root
-
-        self.league = LeagueScores(
+    ) -> Scores:
+        league = LeagueScores(
             root / 'league',
             teams,
             scorer,
             num_teams_per_arena,
         )
-        """
-        The :class:`LeagueScores` for the competition.
-        """
 
-        self.knockout = KnockoutScores(
+        knockout = KnockoutScores(
             root / 'knockout',
             teams,
             scorer,
             num_teams_per_arena,
-            self.league.positions,
+            league.positions,
         )
-        """
-        The :class:`KnockoutScores` for the competition.
-        """
 
-        self.tiebreaker = TiebreakerScores(
+        tiebreaker = TiebreakerScores(
             root / 'tiebreaker',
             teams,
             scorer,
             num_teams_per_arena,
-            self.league.positions,
+            league.positions,
         )
+
+        return cls(league, knockout, tiebreaker)
+
+    def __init__(
+        self,
+        league: LeagueScores,
+        knockout: KnockoutScores,
+        tiebreaker: TiebreakerScores,
+    ) -> None:
+        self.league = league
+        """
+        The :class:`LeagueScores` for the competition.
+        """
+
+        self.knockout = knockout
+        """
+        The :class:`KnockoutScores` for the competition.
+        """
+
+        self.tiebreaker = tiebreaker
         """
         The :class:`TiebreakerScores` for the competition.
         """

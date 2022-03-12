@@ -65,7 +65,7 @@ class SRComp:
         self.num_teams_per_arena = len(self.corners)
 
         scorer = load_scorer(self.root)
-        self.scores = scores.Scores(
+        self.scores = scores.Scores.load(
             self.root,
             self.teams.keys(),
             scorer,
