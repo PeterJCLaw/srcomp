@@ -33,6 +33,8 @@ from .types import (
 )
 
 T = TypeVar('T')
+TBaseScores = TypeVar('TBaseScores', bound='BaseScores')
+TKnockoutScores = TypeVar('TKnockoutScores', bound='KnockoutScores')
 
 LeaguePosition = NewType('LeaguePosition', int)
 LeaguePositions = Mapping[TLA, LeaguePosition]
@@ -162,6 +164,12 @@ def degroup(grouped_positions: Mapping[T, Iterable[TLA]]) -> OrderedDict[TLA, T]
     return positions
 
 
+def load_scores_data(resultdir: Path) -> Iterator[ScoreData]:
+    # Find the scores for each match
+    for resfile in results_finder(resultdir):
+        yield yaml_loader.load(resfile)
+
+
 # The scorer that these classes consume should be a class that is compatible
 # with libproton in its Proton 2.0.0-rc1 form.
 # See https://github.com/PeterJCLaw/proton and
@@ -178,7 +186,7 @@ class BaseScores:
 
     def __init__(
         self,
-        resultdir: Path,
+        scores_data: Iterable[ScoreData],
         teams: Iterable[TLA],
         scorer: ScorerType,
         num_teams_per_arena: int,
@@ -215,13 +223,12 @@ class BaseScores:
         Maps TLAs to :class:`.TeamScore` instances.
         """
 
+        for score_data in scores_data:
+            self._load_score_data(score_data)
+
         # Start with 0 points for each team
         for tla in teams:
             self.teams[tla] = TeamScore()
-
-        # Find the scores for each match
-        for resfile in results_finder(resultdir):
-            self._load_resfile(resfile)
 
         # Sum the game for each team
         for match_id, match in self.game_points.items():
@@ -230,19 +237,17 @@ class BaseScores:
                     raise InvalidTeam(tla, "score for match {}{}".format(*match_id))
                 self.teams[tla].add_game_points(score)
 
-    def _load_resfile(self, fname: Path) -> None:
-        y: ScoreData = yaml_loader.load(fname)
-
-        match_id = (y['arena_id'], y['match_number'])
+    def _load_score_data(self, score_data: ScoreData) -> None:
+        match_id = (score_data['arena_id'], score_data['match_number'])
         if match_id in self.game_points:
             raise DuplicateScoresheet(match_id)
 
-        game_points = get_validated_scores(self._scorer, y)
+        game_points = get_validated_scores(self._scorer, score_data)
         self.game_points[match_id] = game_points
 
         # Build the disqualification dict
         dsq = []
-        for tla, teaminfo in y['teams'].items():
+        for tla, teaminfo in score_data['teams'].items():
             # disqualifications and non-presence are effectively the same
             # in terms of league points awarding.
             if (
@@ -302,12 +307,12 @@ class LeagueScores(BaseScores):
 
     def __init__(
         self,
-        resultdir: Path,
+        scores_data: Iterable[ScoreData],
         teams: Iterable[TLA],
         scorer: ScorerType,
         num_teams_per_arena: int,
     ):
-        super().__init__(resultdir, teams, scorer, num_teams_per_arena)
+        super().__init__(scores_data, teams, scorer, num_teams_per_arena)
 
         # Sum the league scores for each team
         for match_id, match in self.ranked_points.items():
@@ -356,13 +361,13 @@ class KnockoutScores(BaseScores):
 
     def __init__(
         self,
-        resultdir: Path,
+        scores_data: Iterable[ScoreData],
         teams: Iterable[TLA],
         scorer: ScorerType,
         num_teams_per_arena: int,
         league_positions: LeaguePositions,
     ):
-        super().__init__(resultdir, teams, scorer, num_teams_per_arena)
+        super().__init__(scores_data, teams, scorer, num_teams_per_arena)
 
         self.resolved_positions = {}
         """
@@ -397,14 +402,14 @@ class Scores:
         num_teams_per_arena: int,
     ) -> Scores:
         league = LeagueScores(
-            root / 'league',
+            load_scores_data(root / 'league'),
             teams,
             scorer,
             num_teams_per_arena,
         )
 
         knockout = KnockoutScores(
-            root / 'knockout',
+            load_scores_data(root / 'knockout'),
             teams,
             scorer,
             num_teams_per_arena,
@@ -412,7 +417,7 @@ class Scores:
         )
 
         tiebreaker = TiebreakerScores(
-            root / 'tiebreaker',
+            load_scores_data(root / 'tiebreaker'),
             teams,
             scorer,
             num_teams_per_arena,

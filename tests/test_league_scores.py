@@ -1,7 +1,5 @@
 import unittest
-from pathlib import Path
 from typing import Iterable, List
-from unittest import mock
 
 from sr.comp.scores import LeagueScores, TeamScore
 from sr.comp.types import ArenaName, MatchNumber, ScoreData, TLA
@@ -52,27 +50,13 @@ def load_data(the_data: ScoreData) -> LeagueScores:
 
 
 def load_datas(the_datas: List[ScoreData], teams: Iterable[TLA]) -> LeagueScores:
-    my_datas = the_datas[:]
-    the_files = ['whatever-{0}.yaml'.format(i) for i in range(len(the_datas))]
-
-    def loader(*args):
-        if not my_datas:
-            raise ValueError("Should not be loading additional files")
-        return my_datas.pop(0)
-
-    with mock.patch('sr.comp.matches.yaml_loader.load') as mock_loader, \
-            mock.patch('sr.comp.scores.results_finder') as mock_finder:
-
-        mock_finder.return_value = the_files
-        mock_loader.side_effect = loader
-
-        scores = LeagueScores(
-            Path('somewhere'),
-            teams,
-            FakeScorer,
-            num_teams_per_arena=4,
-        )
-        return scores
+    scores = LeagueScores(
+        the_datas,
+        teams,
+        FakeScorer,
+        num_teams_per_arena=4,
+    )
+    return scores
 
 
 def load_basic_data() -> LeagueScores:
