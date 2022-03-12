@@ -1,3 +1,5 @@
-mypy
+# Version for enable_error_code = ignore-without-code
+mypy>=0.940
+
 types-python-dateutil
 types-PyYAML
