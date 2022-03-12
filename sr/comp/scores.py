@@ -86,7 +86,6 @@ class TeamScore:
         return self.league_points
 
     def __eq__(self, other: object) -> bool:
-        # pylint: disable=protected-access
         return (
             isinstance(other, type(self)) and
             self._ordering_key == other._ordering_key
@@ -100,7 +99,6 @@ class TeamScore:
         if not isinstance(other, TeamScore):
             return NotImplemented  # type: ignore[unreachable]
 
-        # pylint: disable=protected-access
         return self._ordering_key < other._ordering_key
 
     def __repr__(self) -> str:
@@ -139,7 +137,6 @@ def get_validated_scores(
     # that we don't accidentally hide any AttributeErrors (or similar)
     # which come from inside the method.
     if hasattr(scorer, 'validate'):
-        # pylint: disable=fixme
         # TODO: move to using runtime_checkable once we're Python 3.8+ only.
         scorer = cast(ValidatingScorer, scorer)
         scorer.validate(extra_data)

@@ -51,7 +51,6 @@ class SimpleScorer(Protocol):
         teams_data: Dict[TLA, ScoreTeamData],
         arena_data: Optional[ScoreArenaZonesData],
     ) -> None:
-        # pylint: disable=super-init-not-called
         ...
 
     def calculate_scores(self) -> Mapping[TLA, GamePoints]:

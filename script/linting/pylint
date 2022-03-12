@@ -1,9 +1,0 @@
-#!/bin/bash
-
-cd $(dirname $(dirname  $(dirname $0)))
-
-if [ -z "$PYLINT" ]; then
-    PYLINT=pylint
-fi
-
-exec "$PYLINT" sr setup.py "$@"

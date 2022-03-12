@@ -14,7 +14,6 @@ class KnockoutScoresTests(unittest.TestCase):
         match_points: Mapping[str, float],
         league_positions: Mapping[str, int],
     ) -> Dict[TLA, RankedPosition]:
-        # pylint: disable=no-member
         return KnockoutScores.calculate_ranking(
             {TLA(k): cast(LeaguePoints, v) for k, v in match_points.items()},
             {TLA(k): LeaguePosition(v) for k, v in league_positions.items()},

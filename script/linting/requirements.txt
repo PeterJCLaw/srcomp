@@ -8,6 +8,4 @@ flake8-isort
 flake8-todo
 flake8-tuple
 
-pylint
-
 isort

@@ -1,5 +1,3 @@
-# pylint: disable=no-member
-
 import contextlib
 import datetime
 import os

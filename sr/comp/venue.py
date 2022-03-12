@@ -189,7 +189,6 @@ class Venue:
     ) -> Mapping[RegionName, Region]:
 
         def add_shepherd(region_data: RegionData, shepherd: ShepherdData) -> Region:
-            # pylint: disable=fixme
             # TODO: would be good to remove this cast
             region = cast(Region, region_data)
             region['shepherds'] = ShepherdingArea({

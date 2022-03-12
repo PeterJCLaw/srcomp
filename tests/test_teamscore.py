@@ -85,8 +85,6 @@ class TeamScoreRichComparisonTests(unittest.TestCase):
             self.assertRichComparisons(2, 1)
 
     def test_none(self) -> None:
-        # pylint: disable=pointless-statement
-
         ts = TeamScore(game=GamePoints(5), league=LeaguePoints(4))
 
         comparisons = [

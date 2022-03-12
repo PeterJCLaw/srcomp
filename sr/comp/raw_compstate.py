@@ -1,7 +1,5 @@
 """Utilities for working with raw Compstate repositories."""
 
-# pylint: disable=no-self-use, missing-kwoa  # pylint doesn't like overloads
-
 import subprocess
 from pathlib import Path
 from typing import Any, cast, Iterable, List, Optional, overload, Union
