@@ -22,8 +22,18 @@ def load_datas(the_datas: List[ScoreData], teams: Iterable[TLA]) -> LeagueScores
     return scores
 
 
+def get_score_data(
+    num: int = 123,
+    arena: str = 'A',
+) -> ScoreData:
+    data = build_score_data(num, arena)
+    data['teams'][TLA('JMS')]['disqualified'] = True
+    data['teams'][TLA('PAS')]['present'] = False
+    return data
+
+
 def load_basic_data() -> LeagueScores:
-    return load_data(build_score_data())
+    return load_data(get_score_data())
 
 
 class LeagueScoresTests(unittest.TestCase):
@@ -66,7 +76,7 @@ class LeagueScoresTests(unittest.TestCase):
         self.assertEqual(expected, scores.teams)
 
     def test_last_scored_match(self):
-        m_1 = build_score_data(num=1)
+        m_1 = get_score_data(num=1)
         scores = load_data(m_1)
 
         self.assertEqual(
@@ -93,8 +103,8 @@ class LeagueScoresTests(unittest.TestCase):
         )
 
     def test_last_scored_match_many_scores(self):
-        m_1 = build_score_data(num=1)
-        m_2B = build_score_data(num=2, arena='B')
+        m_1 = get_score_data(num=1)
+        m_2B = get_score_data(num=2, arena='B')
 
         scores = load_datas([m_1, m_2B], m_1['teams'].keys())
 

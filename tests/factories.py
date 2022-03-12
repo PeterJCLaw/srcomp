@@ -1,5 +1,6 @@
 import datetime
-from typing import Dict, Mapping, Optional, Sequence
+import random
+from typing import Dict, Iterable, Mapping, Optional, Sequence, TypeVar
 
 from dateutil.tz import UTC
 
@@ -12,6 +13,8 @@ from sr.comp.types import (
     ScoreTeamData,
     TLA,
 )
+
+T = TypeVar('T')
 
 
 def build_match(
@@ -52,7 +55,25 @@ class FakeScorer:
         return scores
 
 
-def build_score_data(num: int = 123, arena: str = 'A') -> ScoreData:
+def shuffled(items: Iterable[T]) -> Iterable[T]:
+    items = list(items)
+    random.shuffle(items)
+    return items
+
+
+def build_score_data(
+    num: int = 123,
+    arena: str = 'A',
+    scores: Optional[Mapping[str, int]] = None,
+) -> ScoreData:
+    if not scores:
+        scores = {
+            'JMS': 4,
+            'PAS': 0,
+            'RUN': 8,
+            'ICE': 2,
+        }
+
     return ScoreData({
         'match_number': MatchNumber(num),
         'arena_id': ArenaName(arena),
@@ -60,23 +81,10 @@ def build_score_data(num: int = 123, arena: str = 'A') -> ScoreData:
             # TypedDicts don't have a way to allow for *extra* keys, which we do
             # want to have here -- these dictionaries are the actual scoring
             # data for the game and so contain arbitrary other keys.
-            TLA('JMS'): {  # type: ignore[typeddict-item]
-                'score': 4,
-                'disqualified': True,
-                'zone': 3,
-            },
-            TLA('PAS'): {  # type: ignore[typeddict-item]
-                'score': 0,
-                'present': False,
-                'zone': 4,
-            },
-            TLA('RUN'): {  # type: ignore[typeddict-item]
-                'score': 8,
-                'zone': 1,
-            },
-            TLA('ICE'): {  # type: ignore[typeddict-item]
-                'score': 2,
-                'zone': 2,
-            },
+            TLA(tla): {  # type: ignore[typeddict-item]
+                'score': score,
+                'zone': idx,
+            }
+            for idx, (tla, score) in enumerate(shuffled(scores.items()))
         },
     })
