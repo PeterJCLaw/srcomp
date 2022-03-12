@@ -146,7 +146,7 @@ def get_validated_scores(
 
 def degroup(grouped_positions: Mapping[T, Iterable[TLA]]) -> Dict[TLA, T]:
     """
-    Given a mapping of positions to collections ot teams at that position,
+    Given a mapping of positions to collections of teams at that position,
     returns an :class:`OrderedDict` of teams to their positions.
 
     Where more than one team has a given position, they are sorted before
