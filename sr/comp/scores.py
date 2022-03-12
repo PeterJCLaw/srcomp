@@ -146,7 +146,7 @@ def get_validated_scores(
     return scores
 
 
-def degroup(grouped_positions: Mapping[T, Iterable[TLA]]) -> Dict[TLA, T]:
+def degroup(grouped_positions: Mapping[T, Iterable[TLA]]) -> OrderedDict[TLA, T]:
     """
     Given a mapping of positions to collections of teams at that position,
     returns an :class:`OrderedDict` of teams to their positions.
