@@ -31,7 +31,7 @@ references:
   restore-docs-dependencies-cache: &restore-docs-dependencies-cache
     restore_cache:
       keys:
-        - deps-2-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
+        - deps-docs-3-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
   install-docs-dependencies: &install-docs-dependencies
     run:
       name: Install Dependencies
@@ -41,7 +41,7 @@ references:
         venv/bin/pip install -r docs-requirements.txt
   save-docs-dependencies-cache: &save-docs-dependencies-cache
     save_cache:
-      key: deps-2-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
+      key: deps-docs-3-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
       paths:
         - venv
   build-checksum-file: &build-checksum-file
@@ -75,7 +75,7 @@ references:
   restore-dependencies-cache: &restore-dependencies-cache
     restore_cache:
       keys:
-        - deps-2-py<< parameters.version >>-{{ checksum ".checksum" }}
+        - deps-3-py<< parameters.version >>-{{ checksum ".checksum" }}
   install-dependencies: &install-dependencies
     run:
       name: Install Dependencies
@@ -85,7 +85,7 @@ references:
         venv/bin/pip install -r all-requirements.txt
   save-dependencies-cache: &save-dependencies-cache
     save_cache:
-      key: deps-2-py<< parameters.version >>-{{ checksum ".checksum" }}
+      key: deps-3-py<< parameters.version >>-{{ checksum ".checksum" }}
       paths:
         - venv
   parametrised-python-executor: &parametrised-python-executor
