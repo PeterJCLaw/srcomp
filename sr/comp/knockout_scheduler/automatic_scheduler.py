@@ -5,7 +5,7 @@ from datetime import timedelta
 from typing import Iterable, List, Mapping, Optional, Sized, TYPE_CHECKING
 
 from ..match_period import Match, MatchSlot, MatchType
-from ..match_period_clock import MatchPeriodClock
+from ..match_period_clock import MatchPeriodClock, OutOfTimeException
 from ..scores import Scores
 from ..teams import Team
 from ..types import ArenaName, MatchNumber, TLA, YAMLData
@@ -176,7 +176,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
     def get_rounds_remaining(prev_matches: Sized) -> int:
         return int(math.log(len(prev_matches), 2))
 
-    def add_knockouts(self) -> None:
+    def _add_knockouts(self) -> None:
         knockout_conf = self.config['knockout']
         round_spacing = timedelta(seconds=knockout_conf['round_spacing'])
 
@@ -201,3 +201,14 @@ class KnockoutScheduler(BaseKnockoutScheduler):
                 self.clock.advance_time(final_delay)
 
             self._add_round(arenas, rounds_remaining - 1)
+
+    def add_knockouts(self) -> None:
+        try:
+            self._add_knockouts()
+        except OutOfTimeException as e:
+            raise OutOfTimeException(
+                "Ran out of time scheduling the knockouts. This usually indicates "
+                "that there are more teams than it is possible to schedule matches "
+                "for within the given period. Consider adjusting the number of teams "
+                "which progress to the knockouts or allowing more time.",
+            ) from e

@@ -85,13 +85,21 @@ class MatchPeriodClock:
         # (if we have then matches will get pushed into the next period)
         if ct > self._period.max_end_time:
             # we've filled this up to the maximum end time
-            raise OutOfTimeException()
+            raise OutOfTimeException(
+                "Current time (including delays) is beyond the maximum end time "
+                "of the period. Consider removing matches or delays, or adjusting "
+                "the maximum end time.",
+            )
 
         # Ensure we haven't attempted to pack in more time than will
         # fit in this period
         if self._time_without_delays() > self._period.end_time:
             # we've filled up this period
-            raise OutOfTimeException()
+            raise OutOfTimeException(
+                "Current time (without delays) is beyond the natural end time "
+                "of the period. Consider removing matches or adjusting the "
+                "natural end time.",
+            )
 
         return ct
 
