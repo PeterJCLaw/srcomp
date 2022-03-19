@@ -25,7 +25,7 @@ class MatchPeriodClock:
 
     - Only delays which are scheduled after the start of the given period will
       be considered.
-    - Delays are cumilative.
+    - Delays are cumulative.
     - Delays take effect as soon as their ``time`` is reached.
     """
 
