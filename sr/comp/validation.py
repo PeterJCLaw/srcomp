@@ -54,8 +54,9 @@ def report_errors(error_type: ErrorType, id_: object, errors: Errors) -> None:
     if len(errors) == 0:
         return
 
+    prefix = f"{error_type} {id_}" if id_ else error_type
     print(
-        f"{error_type} {id_} has the following errors:",
+        f"{prefix} has the following errors:",
         file=sys.stderr,
     )
     for error in errors:
