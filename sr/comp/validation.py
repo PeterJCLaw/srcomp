@@ -240,13 +240,13 @@ def validate_scores_inner(
 
     def get_scheduled_match(match_id: MatchId, type_: ErrorType) -> Optional[Match]:
         """Check that the requested match was scheduled, return it if so."""
-        num = match_id[1]
+        arena, num = match_id
+
         if num < 0 or num >= len(schedule):
             msg = f"{match_type_title} Match not scheduled"
             report_errors(type_, match_id, [msg])
             return None
 
-        arena = match_id[0]
         match = schedule[num]
         if arena not in match:
             msg = f"Arena not in this {match_type_title} match"
@@ -323,9 +323,9 @@ def warn_missing_scores(
     msg = f"The following {match_type.name} scores are missing:"
     print(msg, file=sys.stderr)
     print("Match   | Arena ", file=sys.stderr)
-    for m in missing:
-        arenas = join_and(sorted(m[1]))
-        print(" {:>3}    | {}".format(m[0], arenas), file=sys.stderr)
+    for match_num, arena_names in missing:
+        arenas = join_and(sorted(arena_names))
+        print(" {:>3}    | {}".format(match_num, arenas), file=sys.stderr)
 
 
 def find_missing_scores(
@@ -358,9 +358,7 @@ def find_missing_scores(
 
     missing_ids = expected - set(match_ids)
     missing = defaultdict(set)
-    for id_ in missing_ids:
-        arena = id_[0]
-        num = id_[1]
+    for arena, num in missing_ids:
         missing[num].add(arena)
 
     missing_items = sorted(missing.items())
