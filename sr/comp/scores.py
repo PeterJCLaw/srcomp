@@ -178,7 +178,7 @@ class BaseScores:
     """
     A generic class that holds scores.
 
-    :param Path resultdir: Where to find score sheet files.
+    :param iterable scores_data: A collection of loaded score sheet data.
     :param dict teams: The teams in the competition.
     :param dict scorer: The scorer logic.
     :param int num_teams_per_arena: The usual number of teams per arena.
