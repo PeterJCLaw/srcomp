@@ -42,7 +42,7 @@ def join_and(items: Iterable[object]) -> str:
     return " and ".join((", ".join(rest), last))
 
 
-def report_errors(type_: ErrorType, id_: object, errors: Errors) -> None:
+def report_errors(error_type: ErrorType, id_: object, errors: Errors) -> None:
     """
     Print out errors nicely formatted.
 
@@ -55,7 +55,7 @@ def report_errors(type_: ErrorType, id_: object, errors: Errors) -> None:
         return
 
     print(
-        f"{type_} {id_} has the following errors:",
+        f"{error_type} {id_} has the following errors:",
         file=sys.stderr,
     )
     for error in errors:
@@ -238,30 +238,30 @@ def validate_scores_inner(
     count = 0
     match_type_title = match_type.name.title()
 
-    def get_scheduled_match(match_id: MatchId, type_: ErrorType) -> Optional[Match]:
+    def get_scheduled_match(match_id: MatchId, error_type: ErrorType) -> Optional[Match]:
         """Check that the requested match was scheduled, return it if so."""
         arena, num = match_id
 
         if num < 0 or num >= len(schedule):
             msg = f"{match_type_title} Match not scheduled"
-            report_errors(type_, match_id, [msg])
+            report_errors(error_type, match_id, [msg])
             return None
 
         match = schedule[num]
         if arena not in match:
             msg = f"Arena not in this {match_type_title} match"
-            report_errors(type_, match_id, [msg])
+            report_errors(error_type, match_id, [msg])
             return None
 
         return match[arena]
 
-    def check(type_: ErrorType, match_id: MatchId, match: Mapping[TLA, object]) -> int:
-        scheduled_match = get_scheduled_match(match_id, type_)
+    def check(error_type: ErrorType, match_id: MatchId, match: Mapping[TLA, object]) -> int:
+        scheduled_match = get_scheduled_match(match_id, error_type)
         if scheduled_match is None:
             return 1
 
         errors = validate_match_score(match_type, match, scheduled_match)
-        report_errors(type_, match_id, errors)
+        report_errors(error_type, match_id, errors)
         return len(errors)
 
     for match_id, game_points in scores.game_points.items():
