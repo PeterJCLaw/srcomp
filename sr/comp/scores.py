@@ -515,13 +515,13 @@ class Scores:
             MatchType.tiebreaker: self.tiebreaker,
         }[match.type]
 
-        k = (match.arena, match.num)
-        if k not in scores.game_points:
+        match_id = (match.arena, match.num)
+        if match_id not in scores.game_points:
             return None
 
         return MatchScore(
-            k,
-            game=scores.game_points[k],
-            normalised=scores.ranked_points[k],
+            match_id,
+            game=scores.game_points[match_id],
+            normalised=scores.ranked_points[match_id],
             ranking=scores.get_rankings(match),
         )
