@@ -23,6 +23,7 @@ references:
           "setup-requirements.txt"
           "docs-requirements.txt"
         )
+        python3 --version >> .docs-checksum
         for f in ${FILES[@]}
         do
           echo "# $f" >> .docs-checksum
@@ -67,6 +68,7 @@ references:
           "setup-requirements.txt"
           "all-requirements.txt"
         )
+        python3 --version >> .checksum
         for f in ${FILES[@]}
         do
           echo "# $f" >> .checksum
