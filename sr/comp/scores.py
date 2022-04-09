@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 from collections import OrderedDict
 from functools import total_ordering
 from pathlib import Path
@@ -19,9 +20,10 @@ from typing import (
 )
 
 import league_ranker as ranker
-from league_ranker import RankedPosition
+from league_ranker import LeaguePoints, RankedPosition
 
 from . import yaml_loader
+from .match_period import Match, MatchType
 from .types import (
     GamePoints,
     MatchId,
@@ -107,6 +109,15 @@ class TeamScore:
 
     def __repr__(self) -> str:
         return f'TeamScore({self.league_points!r}, {self.game_points!r})'
+
+
+@dataclasses.dataclass(frozen=True)
+class MatchScore:
+    match_id: MatchId
+
+    game: Mapping[TLA, GamePoints]
+    normalised: Mapping[TLA, LeaguePoints]
+    ranking: Mapping[TLA, RankedPosition]
 
 
 def results_finder(root: Path) -> Iterator[Path]:
@@ -266,6 +277,16 @@ class BaseScores:
         matches = self.ranked_points.keys()
         return max(num for arena, num in matches)
 
+    def get_rankings(self, match: Match) -> Mapping[TLA, RankedPosition]:
+        """
+        Return a mapping of TLAs to ranked positions for the given match.
+
+        This is an internal API -- most consumers should use
+        ``Scores.get_scores`` instead.
+        """
+        match_id = (match.arena, match.num)
+        return degroup(self.game_positions[match_id])
+
 
 class LeagueScores(BaseScores):
     """A class which holds league scores."""
@@ -380,6 +401,20 @@ class KnockoutScores(BaseScores):
             positions = self.calculate_ranking(match_points, league_positions)
             self.resolved_positions[match_id] = positions
 
+    def get_rankings(self, match: Match) -> Mapping[TLA, RankedPosition]:
+        """
+        Return a mapping of TLAs to ranked positions for the given match.
+
+        This is an internal API -- most consumers should use
+        ``Scores.get_scores`` instead.
+        """
+
+        if match.use_resolved_ranking:
+            match_id = (match.arena, match.num)
+            return self.resolved_positions[match_id]
+
+        return super().get_rankings(match)
+
 
 class TiebreakerScores(KnockoutScores):
     pass
@@ -454,3 +489,36 @@ class Scores:
         """
         The match with the highest id for which we have score data.
         """
+
+    def get_scores(self, match: Match) -> Optional[MatchScore]:
+        """
+        Get the scores for a given match.
+
+        Parameters
+        ----------
+        match : sr.comp.match_period.Match
+            A match.
+
+        Returns
+        -------
+        MatchScore | None
+            An object describing the scores for the match, if scores have been
+            recorded yet. Otherwise None.
+        """
+
+        scores = {
+            MatchType.league: self.league,
+            MatchType.knockout: self.knockout,
+            MatchType.tiebreaker: self.tiebreaker,
+        }[match.type]
+
+        match_id = (match.arena, match.num)
+        if match_id not in scores.game_points:
+            return None
+
+        return MatchScore(
+            match_id,
+            game=scores.game_points[match_id],
+            normalised=scores.ranked_points[match_id],
+            ranking=scores.get_rankings(match),
+        )
