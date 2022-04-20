@@ -27,7 +27,7 @@ from .scores import BaseScores
 from .types import ArenaName, MatchId, MatchNumber, TLA
 
 ErrorType = NewType('ErrorType', str)
-ErrorLevel = Literal['error', 'warning']
+ErrorLevel = Literal['error', 'warning', 'hint']
 
 NO_TEAM = None
 META_TEAMS = {NO_TEAM, UNKNOWABLE_TEAM}
@@ -170,6 +170,7 @@ def validate_schedule(
                 "This usually indicates that the scheduled periods overlap.",
                 code='hint-period-overlap',
                 source=(ErrorType('Schedule'), 'timing'),
+                level='hint',
             ),
         )
         yield from errors
