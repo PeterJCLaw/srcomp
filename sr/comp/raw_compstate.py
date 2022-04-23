@@ -40,7 +40,7 @@ class RawCompstate:
                             pushing functionality.
     """
 
-    def __init__(self, path: str, local_only: bool):
+    def __init__(self, path: Union[str, Path], local_only: bool):
         self._path = Path(path)
         self._local_only = local_only
 
