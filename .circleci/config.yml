@@ -20,7 +20,6 @@ references:
         declare -a FILES=(
           "setup.py"
           ".circleci/requirements.txt"
-          "setup-requirements.txt"
           "docs-requirements.txt"
         )
         python3 --version >> .docs-checksum
@@ -38,7 +37,7 @@ references:
       name: Install Dependencies
       command: |
         python3 -m venv venv
-        venv/bin/pip install -r .circleci/requirements.txt -r setup-requirements.txt
+        venv/bin/pip install -r .circleci/requirements.txt
         venv/bin/pip install -r docs-requirements.txt
   save-docs-dependencies-cache: &save-docs-dependencies-cache
     save_cache:
@@ -50,6 +49,7 @@ references:
       name: Build checksum file
       command: |
         declare -a FILES=(
+          "script/docs/requirements.txt"
           "script/linting/requirements.txt"
           "script/typing/requirements.txt"
         )
@@ -65,7 +65,6 @@ references:
         declare -a FILES=(
           "setup.py"
           ".circleci/requirements.txt"
-          "setup-requirements.txt"
           "all-requirements.txt"
         )
         python3 --version >> .checksum
@@ -83,7 +82,7 @@ references:
       name: Install Dependencies
       command: |
         python3 -m venv venv
-        venv/bin/pip install -r .circleci/requirements.txt -r setup-requirements.txt
+        venv/bin/pip install -r .circleci/requirements.txt
         venv/bin/pip install -r all-requirements.txt
   save-dependencies-cache: &save-dependencies-cache
     save_cache:
@@ -138,7 +137,7 @@ jobs:
           name: Build the docs
           command: |
             source venv/bin/activate
-            python setup.py build_sphinx
+            ./script/docs/build.sh
 
   lint:
     <<: *parametrised-python-executor

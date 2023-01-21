@@ -3,9 +3,6 @@ from setuptools import find_namespace_packages, setup
 with open('README.rst') as f:
     long_description = f.read()
 
-with open('setup-requirements.txt') as f:
-    setup_requires = f.readlines()
-
 setup(
     name='sr.comp',
     version='1.5.0',
@@ -29,7 +26,6 @@ setup(
         'typing-extensions >= 3.7.4.2',
     ],
     python_requires='>=3.7',
-    setup_requires=setup_requires,
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
