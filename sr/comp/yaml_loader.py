@@ -7,7 +7,7 @@ loader is used which is necessary for optimum performance.
 
 import datetime
 from pathlib import Path
-from typing import Type
+from typing import Any, Type
 
 import dateutil.parser
 import dateutil.tz
@@ -20,7 +20,7 @@ try:
 except ImportError:
     from warnings import warn
 
-    from yaml import Loader as YAML_Loader  # type: ignore[misc]
+    from yaml import Loader as YAML_Loader  # type: ignore[assignment]
     warn(
         "Using pure-python PyYAML (without libyaml). "
         "srcomp reads many YAML files, this is liable to be very slow. "
@@ -28,12 +28,12 @@ except ImportError:
     )
 
 
-def time_constructor(_: object, node: yaml.Node) -> datetime.datetime:
+def time_constructor(_: Any, node: yaml.Node) -> datetime.datetime:
     return dateutil.parser.parse(node.value)
 
 
 def add_time_constructor(loader: Type[YAML_Loader]) -> None:
-    loader.add_constructor(  # type: ignore[no-untyped-call]
+    loader.add_constructor(
         'tag:yaml.org,2002:timestamp',
         time_constructor,
     )
