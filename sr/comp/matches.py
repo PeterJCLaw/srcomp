@@ -163,8 +163,8 @@ class MatchSchedule:
         """A mapping of TLAs to :class:`.Team` instances."""
 
         self.match_periods: List[MatchPeriod] = []
-        """
-        A list of the :class:`.MatchPeriod` s which contain the matches
+        r"""
+        A list of the :class:`.MatchPeriod`\s which contain the matches
         for the competition.
         """
 

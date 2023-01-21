@@ -206,25 +206,25 @@ class BaseScores:
         self._num_corners = num_teams_per_arena
 
         self.game_points: Dict[MatchId, Mapping[TLA, GamePoints]] = {}
-        """
+        r"""
         Game points data for each match. Keys are tuples of the form
-        ``(arena_id, match_num)``, values are :class:`dict` s mapping
+        ``(arena_id, match_num)``, values are :class:`dict`\s mapping
         TLAs to the number of game points they scored.
         """
 
         self.game_positions: Dict[MatchId, Mapping[RankedPosition, Set[TLA]]] = {}
-        """
+        r"""
         Game position data for each match. Keys are tuples of the form
-        ``(arena_id, match_num)``, values are :class:`dict` s mapping
+        ``(arena_id, match_num)``, values are :class:`dict`\s mapping
         ranked positions (i.e: first is `1`, etc.) to an iterable of TLAs
         which have that position. Based solely on teams' game points.
         """
 
         self.ranked_points: Dict[MatchId, Dict[TLA, ranker.LeaguePoints]] = {}
-        """
+        r"""
         Normalised (aka 'league') points earned in each match. Keys are
         tuples of the form ``(arena_id, match_num)``, values are
-        :class:`dict` s mapping TLAs to the number of normalised points
+        :class:`dict`\s mapping TLAs to the number of normalised points
         they would earn for that match.
         """
 
@@ -340,8 +340,8 @@ class LeagueScores(BaseScores):
                 self.teams[tla].add_league_points(score)
 
         self.positions = self.rank_league(self.teams)
-        """
-        An :class:`.OrderedDict` of TLAs to :class:`sr.comp.scores.LeaguePosition`s.
+        r"""
+        An :class:`.OrderedDict` of TLAs to :class:`sr.comp.scores.LeaguePosition`\s.
         """
 
 
@@ -388,10 +388,10 @@ class KnockoutScores(BaseScores):
         super().__init__(scores_data, teams, scorer, num_teams_per_arena)
 
         self.resolved_positions = {}
-        """
+        r"""
         Position data for each match which includes adjustment for ties.
         Keys are tuples of the form ``(arena_id, match_num)``, values are
-        :class:`.OrderedDict` s mapping TLAs to the ranked position (i.e:
+        :class:`.OrderedDict`\s mapping TLAs to the ranked position (i.e:
         first is `1`, etc.) of that team, with the winning team in the
         start of the list of keys. Tie resolution is done by league position.
         """

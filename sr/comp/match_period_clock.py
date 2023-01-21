@@ -31,12 +31,12 @@ class MatchPeriodClock:
 
     @staticmethod
     def delays_for_period(period: MatchPeriod, delays: Iterable[Delay]) -> List[Delay]:
-        """
+        r"""
         Filter and sort a list of all possible delays to include only those
         which occur after the start of the given `period`.
 
         :param `.MatchPeriod` period: The period to get the delays for.
-        :param list delays: The list of :class:`.Delay` s to consider.
+        :param list delays: The list of :class:`.Delay`\s to consider.
         :return: A sorted list of delays which occur after the start of the period.
         """
 
