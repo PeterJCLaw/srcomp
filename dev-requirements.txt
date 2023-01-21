@@ -1,0 +1,4 @@
+# Changing this? Also update the CI config which builds an equivalent expanded version.
+-r script/linting/requirements.txt
+-r script/release/requirements.txt
+-r script/typing/requirements.txt

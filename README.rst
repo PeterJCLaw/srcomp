@@ -49,7 +49,7 @@ Development
 -----------
 
 **Install**:
-``pip install -e .``
+``pip install -e . -r dev-requirements.txt``
 
 **Test**:
 ``./run-tests``
