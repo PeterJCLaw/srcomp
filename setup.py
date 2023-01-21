@@ -20,7 +20,7 @@ setup(
     author="Student Robotics Competition Software SIG",
     author_email='srobo-devel@googlegroups.com',
     install_requires=[
-        'PyYAML >=3.11, <6',
+        'PyYAML >=3.11, <7',
         'league-ranker >=0.1, <2',
         'python-dateutil >=2.2, <3',
         'typing-extensions >= 3.7.4.2',
