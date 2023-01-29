@@ -163,8 +163,7 @@ class LeagueScoresTests(unittest.TestCase):
         order = list(ranking.keys())
         self.assertEqual(expected_order, order)
 
-    # TODO: how do we resolve full ties?
-    # TODO: build something to alert us that we have a full tie.
+    # Note: full ties are not resolved, see https://github.com/PeterJCLaw/srcomp/issues/21
 
     def test_league_ranker_full_tie(self):
         team_scores = {
