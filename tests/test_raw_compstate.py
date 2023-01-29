@@ -138,3 +138,12 @@ class RawCompstateTests(unittest.TestCase):
             )
 
         self.assertIn(error_msg, str(cm.exception))
+
+    def test_get_default_branch(self) -> None:
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        branch_name = state.get_default_branch()
+        self.assertIn(
+            branch_name,
+            ['main', 'master'],
+            "Failed to determine upstream branch name.",
+        )

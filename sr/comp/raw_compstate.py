@@ -242,6 +242,15 @@ class RawCompstate:
     def has_descendant(self, commit: Commitish) -> bool:
         return self._is_parent('HEAD', commit)
 
+    def get_default_branch(self) -> str:
+        # Assume the default upstream is called 'origin'
+        output = self.git(['remote', 'show', 'origin'], return_output=True)
+        for line in output.splitlines():
+            if line.strip().startswith('HEAD branch:'):
+                _, branch = line.split(':')
+                return branch.strip()
+        raise RuntimeError("Unable to determine default branch")
+
     def reset_hard(self) -> None:
         self.git(['reset', '--hard', 'HEAD'], err_msg="Git reset failed.")
 
@@ -255,7 +264,7 @@ class RawCompstate:
             return
 
         self.git(
-            ['pull', '--ff-only', 'origin', 'master'],
+            ['pull', '--ff-only', 'origin', self.get_default_branch()],
             err_msg="Git pull failed, deal with the merge manually.",
         )
 
@@ -289,6 +298,6 @@ class RawCompstate:
 
         self.push(
             'origin',
-            'master',
+            self.get_default_branch(),
             err_msg="Git push failed, deal with the merge manually.",
         )
