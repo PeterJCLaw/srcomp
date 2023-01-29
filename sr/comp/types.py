@@ -10,7 +10,7 @@ from typing import (
     Type,
     Union,
 )
-from typing_extensions import Protocol, TypedDict
+from typing_extensions import NotRequired, Protocol, TypedDict
 
 TLA = NewType('TLA', str)
 
@@ -103,7 +103,7 @@ class ShepherdingArea(TypedDict):
 class RegionData(TypedDict):
     name: RegionName
     display_name: str
-    description: str
+    description: NotRequired[str]
     teams: List[TLA]
 
 
