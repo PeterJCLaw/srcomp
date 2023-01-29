@@ -3,7 +3,7 @@
 from collections import Counter
 from itertools import chain
 from pathlib import Path
-from typing import cast, Dict, Generic, Iterable, List, Mapping, Tuple, TypeVar
+from typing import Dict, Generic, Iterable, List, Mapping, Tuple, TypeVar
 
 from . import yaml_loader
 from .matches import StagingOffsets
@@ -188,17 +188,17 @@ class Venue:
         regions_and_shepherds: Iterable[Tuple[RegionData, ShepherdData]],
     ) -> Mapping[RegionName, Region]:
 
-        def add_shepherd(region_data: RegionData, shepherd: ShepherdData) -> Region:
-            # TODO: would be good to remove this cast
-            region = cast(Region, region_data)
-            region['shepherds'] = ShepherdingArea({
-                'name': shepherd['name'],
-                'colour': shepherd['colour'],
-            })
-            return region
-
         return {
-            region['name']: add_shepherd(region, shepherd)
+            region['name']: Region({
+                'name': region['name'],
+                'display_name': region['display_name'],
+                'description': region.get('description', ""),
+                'teams': region['teams'],
+                'shepherds': ShepherdingArea({
+                    'name': shepherd['name'],
+                    'colour': shepherd['colour'],
+                }),
+            })
             for region, shepherd in regions_and_shepherds
         }
 
