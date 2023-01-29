@@ -152,7 +152,7 @@ def get_validated_scores(
     # that we don't accidentally hide any AttributeErrors (or similar)
     # which come from inside the method.
     if hasattr(scorer, 'validate'):
-        # TODO: move to using runtime_checkable once we're Python 3.8+ only.
+        # TODO(python-upgrade): move to using runtime_checkable once we're Python 3.8+ only.
         scorer = cast(ValidatingScorer, scorer)
         scorer.validate(extra_data)
 
