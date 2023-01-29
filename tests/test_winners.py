@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
-from dateutil.tz import tzutc
+from dateutil.tz import UTC
 from league_ranker import calc_positions, calc_ranked_points
 
 from sr.comp.arenas import ArenaName
@@ -19,8 +19,8 @@ FINAL_INFO = Match(
     display_name="Match 1",
     arena=ArenaName('A'),
     teams=[TLA('AAA'), TLA('BBB'), TLA('CCC'), TLA('DDD')],
-    start_time=datetime(2014, 4, 26, 16, 30, tzinfo=tzutc()),
-    end_time=datetime(2014, 4, 26, 16, 35, tzinfo=tzutc()),
+    start_time=datetime(2014, 4, 26, 16, 30, tzinfo=UTC),
+    end_time=datetime(2014, 4, 26, 16, 35, tzinfo=UTC),
     type=MatchType.knockout,
     use_resolved_ranking=False,
 )
@@ -30,8 +30,8 @@ TIEBREAKER_INFO = Match(
     display_name="Tiebreaker (#2)",
     arena=ArenaName('A'),
     teams=[TLA('AAA'), TLA('BBB')],
-    start_time=datetime(2014, 4, 26, 16, 30, tzinfo=tzutc()),
-    end_time=datetime(2014, 4, 26, 16, 35, tzinfo=tzutc()),
+    start_time=datetime(2014, 4, 26, 16, 30, tzinfo=UTC),
+    end_time=datetime(2014, 4, 26, 16, 35, tzinfo=UTC),
     type=MatchType.tiebreaker,
     use_resolved_ranking=False,
 )
