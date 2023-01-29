@@ -150,6 +150,6 @@ class BaseKnockoutScheduler:
         """
         Add the knockouts to the schedule.
 
-        Derrived classes must override this method.
+        Derived classes must override this method.
         """
         raise NotImplementedError()

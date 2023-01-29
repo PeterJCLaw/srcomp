@@ -38,7 +38,7 @@ class RawCompstate:
     on disk.
 
     :param Path path: The path to the Compstate repository.
-    :param bool local_only: If true, this disabled the pulling, commiting and
+    :param bool local_only: If true, this disabled the pulling, committing and
                             pushing functionality.
     """
 

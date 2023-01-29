@@ -112,11 +112,11 @@ class MatchScore:
 def results_finder(root: Path) -> Iterator[Path]:
     """An iterator that finds score sheet files."""
 
-    for dname in root.glob('*'):
-        if not dname.is_dir():
+    for name in root.glob('*'):
+        if not name.is_dir():
             continue
 
-        yield from dname.glob('*.yaml')
+        yield from name.glob('*.yaml')
 
 
 def get_validated_scores(
@@ -164,10 +164,10 @@ def degroup(grouped_positions: Mapping[T, Iterable[TLA]]) -> OrderedDict[TLA, T]
     return positions
 
 
-def load_scores_data(resultdir: Path) -> Iterator[ScoreData]:
+def load_scores_data(result_dir: Path) -> Iterator[ScoreData]:
     # Find the scores for each match
-    for resfile in results_finder(resultdir):
-        yield yaml_loader.load(resfile)
+    for result_file in results_finder(result_dir):
+        yield yaml_loader.load(result_file)
 
 
 # The scorer that these classes consume should be a class that is compatible
@@ -244,12 +244,12 @@ class BaseScores:
 
         # Build the disqualification dict
         dsq = []
-        for tla, teaminfo in score_data['teams'].items():
+        for tla, team_info in score_data['teams'].items():
             # disqualifications and non-presence are effectively the same
             # in terms of league points awarding.
             if (
-                teaminfo.get('disqualified', False) or
-                not teaminfo.get('present', True)
+                team_info.get('disqualified', False) or
+                not team_info.get('present', True)
             ):
                 dsq.append(tla)
 

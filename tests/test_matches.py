@@ -250,7 +250,7 @@ class MatchesTests(unittest.TestCase):
             'match_numbers': '1',
             'duration': 30,
         }]
-        # Inject a delay which occurs during our extra spcing time
+        # Inject a delay which occurs during our extra spacing time
         the_data['delays'] = [{
             'delay': 15,
             "time": datetime(2014, 3, 26, 13, 5, 10),
@@ -483,7 +483,7 @@ class MatchesTests(unittest.TestCase):
 
         self.assertTimes(expected, matches.matches, "Wrong compound match delays")
 
-    def test_two_sepearate_delays(self):
+    def test_two_separate_delays(self):
         the_data = get_basic_data()
         the_data['delays'] = [
             {'delay': 5 * 60, 'time': datetime(2014, 3, 26, 13, 2)},

@@ -68,7 +68,7 @@ class WrongNumberOfTeams(Exception):
 
 def parse_ranges(ranges: str) -> set[int]:
     """
-    Parse a comma seprated list of numbers which may include ranges
+    Parse a comma separated list of numbers which may include ranges
     specified as hyphen-separated numbers.
 
     From https://stackoverflow.com/questions/6405208
@@ -190,7 +190,7 @@ class MatchSchedule:
         self.matches: list[MatchSlot] = []
         """
         A list of match slots in the schedule. Each match slot is a dict of
-        arena to the :class:`.Match` occuring in that arena.
+        arena to the :class:`.Match` occurring in that arena.
         """
 
         self.n_planned_league_matches = 0
@@ -298,7 +298,7 @@ class MatchSchedule:
 
         :param list teams: A list of TLAs.
         :param int since_match: The match number to check for drop outs from.
-        :return: A new list containing the approriate teams.
+        :return: A new list containing the appropriate teams.
         """
         new_teams: list[TLA | None] = []
         for tla in teams:

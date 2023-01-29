@@ -153,7 +153,7 @@ class Venue:
         Will throw a :class:`LayoutTeamsException` if there are any
         missing, extra or duplicate teams found.
 
-        :param list teans: The reference list of teams in the competition.
+        :param list teams: The reference list of teams in the competition.
         :param list teams_layout: A list of maps with a list of teams
                                   under the ``teams`` key.
         """
@@ -255,7 +255,7 @@ class Venue:
         Get the name of the location allocated to the given team within
         the venue.
 
-        :param str tean: The TLA of the team in question.
+        :param str team: The TLA of the team in question.
         :returns: The name of the location allocated to the team.
         """
 

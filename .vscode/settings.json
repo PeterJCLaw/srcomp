@@ -11,4 +11,19 @@
         "**/.eggs": true,
         "**/__pycache__": true
     },
+    "cSpell.words": [
+        "Commitish",
+        "dateutil",
+        "delaylist",
+        "gettz",
+        "libproton",
+        "libyaml",
+        "matchlist",
+        "revspec",
+        "scoresheet",
+        "scoresheets",
+        "timedeltas",
+        "TLA",
+        "yamldata",
+    ],
 }
