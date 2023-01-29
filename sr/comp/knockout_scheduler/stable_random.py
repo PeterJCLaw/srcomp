@@ -1,7 +1,9 @@
 """A stable random number generator implementation."""
 
+from __future__ import annotations
+
 import hashlib
-from typing import MutableSequence, TypeVar, Union
+from typing import MutableSequence, TypeVar
 
 T = TypeVar('T')
 
@@ -27,7 +29,7 @@ class Random:
     def __init__(self) -> None:
         self.state = 0
 
-    def seed(self, s: Union[bytes, bytearray, memoryview]) -> None:
+    def seed(self, s: bytes | bytearray | memoryview) -> None:
         h = hashlib.md5()
         h.update(s)
 
@@ -66,7 +68,7 @@ class Random:
 
 def _demo() -> None:
     R = Random()
-    R.seed('hello'.encode('utf-8'))
+    R.seed(b'hello')
     for _ in range(10):
         print(R.random())
 

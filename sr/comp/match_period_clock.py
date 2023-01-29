@@ -1,7 +1,9 @@
 """A clock to manage match periods."""
 
+from __future__ import annotations
+
 import datetime
-from typing import Iterable, Iterator, List, Optional
+from typing import Iterable, Iterator
 
 from .match_period import Delay, MatchPeriod
 
@@ -30,7 +32,7 @@ class MatchPeriodClock:
     """
 
     @staticmethod
-    def delays_for_period(period: MatchPeriod, delays: Iterable[Delay]) -> List[Delay]:
+    def delays_for_period(period: MatchPeriod, delays: Iterable[Delay]) -> list[Delay]:
         r"""
         Filter and sort a list of all possible delays to include only those
         which occur after the start of the given `period`.
@@ -58,7 +60,7 @@ class MatchPeriodClock:
         self._current_time = period.start_time
 
         # The total applied delay
-        self._total_delay: Optional[datetime.timedelta] = None
+        self._total_delay: datetime.timedelta | None = None
 
         # Apply any delays which occur at the start
         self._apply_delays()

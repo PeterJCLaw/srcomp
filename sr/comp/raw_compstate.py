@@ -1,8 +1,10 @@
 """Utilities for working with raw Compstate repositories."""
 
+from __future__ import annotations
+
 import subprocess
 from pathlib import Path
-from typing import Any, cast, Iterable, List, Optional, overload, Union
+from typing import Any, cast, Iterable, List, overload
 from typing_extensions import Literal, TypedDict
 
 import yaml
@@ -26,8 +28,8 @@ Commitish = str
 class ShepherdInfo(TypedDict):
     name: ShepherdName
     colour: Colour
-    regions: List[RegionName]
-    teams: List[TLA]
+    regions: list[RegionName]
+    teams: list[TLA]
 
 
 class RawCompstate:
@@ -40,7 +42,7 @@ class RawCompstate:
                             pushing functionality.
     """
 
-    def __init__(self, path: Union[str, Path], local_only: bool):
+    def __init__(self, path: str | Path, local_only: bool):
         self._path = Path(path)
         self._local_only = local_only
 
@@ -50,7 +52,7 @@ class RawCompstate:
         """Load the state as an ``SRComp`` instance."""
         return SRComp(self._path)
 
-    def load_shepherds(self) -> List[ShepherdInfo]:
+    def load_shepherds(self) -> list[ShepherdInfo]:
         """Load the shepherds' state."""
 
         layout = self.layout['teams']
@@ -96,7 +98,7 @@ class RawCompstate:
             yaml.safe_dump(score, fd, default_flow_style=False)
 
     @property
-    def deployments(self) -> List[str]:
+    def deployments(self) -> list[str]:
         deployments_path = self._path / 'deployments.yaml'
 
         with deployments_path.open() as dp:
@@ -148,7 +150,7 @@ class RawCompstate:
         command_pieces: Iterable[str],
         err_msg: str = '',
         return_output: bool = False,
-    ) -> Union[str, int]:
+    ) -> str | int:
         ...
 
     def git(
@@ -156,11 +158,11 @@ class RawCompstate:
         command_pieces: Iterable[str],
         err_msg: str = '',
         return_output: bool = False,
-    ) -> Union[str, int]:
+    ) -> str | int:
         command = ['git'] + list(command_pieces)
 
         if return_output:
-            stderr: Optional[int] = subprocess.STDOUT
+            stderr: int | None = subprocess.STDOUT
 
             def func(*args: Any, **kwargs: Any) -> str:
                 return cast(

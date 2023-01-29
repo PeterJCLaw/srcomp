@@ -1,7 +1,9 @@
 """Team metadata library."""
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Dict, NamedTuple, Optional
+from typing import NamedTuple
 
 from . import yaml_loader
 from .types import MatchNumber, TLA
@@ -11,7 +13,7 @@ class Team(NamedTuple):
     tla: TLA
     name: str
     rookie: bool
-    dropped_out_after: Optional[MatchNumber]
+    dropped_out_after: MatchNumber | None
 
     def is_still_around(self, match_number: MatchNumber) -> bool:
         """
@@ -27,7 +29,7 @@ class Team(NamedTuple):
             return match_number <= self.dropped_out_after
 
 
-def load_teams(filename: Path) -> Dict[TLA, Team]:
+def load_teams(filename: Path) -> dict[TLA, Team]:
     """
     Load teams from a YAML file.
 

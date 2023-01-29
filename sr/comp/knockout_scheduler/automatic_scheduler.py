@@ -1,8 +1,10 @@
 """An automatic seeded knockout schedule."""
 
+from __future__ import annotations
+
 import math
 from datetime import timedelta
-from typing import Iterable, List, Mapping, Optional, Sized, TYPE_CHECKING
+from typing import Iterable, Mapping, Sized, TYPE_CHECKING
 
 from ..match_period import Match, MatchSlot, MatchType
 from ..match_period_clock import MatchPeriodClock, OutOfTimeException
@@ -40,7 +42,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
     def __init__(
         self,
-        schedule: 'MatchSchedule',
+        schedule: MatchSchedule,
         scores: Scores,
         arenas: Iterable[ArenaName],
         num_teams_per_arena: int,
@@ -49,8 +51,8 @@ class KnockoutScheduler(BaseKnockoutScheduler):
     ) -> None:
         if num_teams_per_arena != self.num_teams_per_arena:
             raise ValueError(
-                "The automatic knockout scheduler can only be used for {0} teams"
-                " per arena (and not {1})".format(
+                "The automatic knockout scheduler can only be used for {} teams"
+                " per arena (and not {})".format(
                     self.num_teams_per_arena,
                     num_teams_per_arena,
                 ),
@@ -64,7 +66,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
     def _add_round_of_matches(
         self,
-        matches: List[List[TLA]],
+        matches: list[list[TLA]],
         arenas: Iterable[ArenaName],
         rounds_remaining: int,
     ) -> None:
@@ -85,7 +87,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
             new_matches = {}
             for arena in arenas:
-                teams: List[Optional[TLA]] = list(matches.pop(0))
+                teams: list[TLA | None] = list(matches.pop(0))
 
                 if len(teams) < self.num_teams_per_arena:
                     # Fill empty zones with None
@@ -125,7 +127,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
             round_num += 1
 
-    def get_winners(self, game: Match) -> List[TLA]:
+    def get_winners(self, game: Match) -> list[TLA]:
         """
         Find the parent match's winners.
 
@@ -148,7 +150,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
         self._add_round_of_matches(matches, arenas, rounds_remaining)
 
-    def _add_first_round(self, conf_arity: Optional[int] = None) -> None:
+    def _add_first_round(self, conf_arity: int | None = None) -> None:
         next_match_num = len(self.schedule.matches)
         teams = self._get_non_dropped_out_teams(MatchNumber(next_match_num))
         if not self._played_all_league_matches():

@@ -1,8 +1,10 @@
 """Classes that are useful for dealing with match periods."""
 
+from __future__ import annotations
+
 import datetime
 from enum import Enum, unique
-from typing import List, Mapping, NamedTuple, NewType, Optional
+from typing import Mapping, NamedTuple, NewType
 
 from .types import ArenaName, MatchNumber, TLA
 
@@ -23,7 +25,7 @@ class Match(NamedTuple):
     num: MatchNumber
     display_name: str
     arena: ArenaName
-    teams: List[Optional[TLA]]
+    teams: list[TLA | None]
     start_time: datetime.datetime
     end_time: datetime.datetime
     type: MatchType  # noqa:A003
@@ -38,7 +40,7 @@ class MatchPeriod(NamedTuple):
     end_time: datetime.datetime
     max_end_time: datetime.datetime
     description: str
-    matches: List[MatchSlot]
+    matches: list[MatchSlot]
     type: MatchType  # noqa:A003
 
     def __str__(self) -> str:

@@ -5,9 +5,11 @@ This includes parsing of dates and times properly, and also ensures the C YAML
 loader is used which is necessary for optimum performance.
 """
 
+from __future__ import annotations
+
 import datetime
 from pathlib import Path
-from typing import Any, Type
+from typing import Any
 
 import dateutil.parser
 import dateutil.tz
@@ -32,7 +34,7 @@ def time_constructor(_: Any, node: yaml.Node) -> datetime.datetime:
     return dateutil.parser.parse(node.value)
 
 
-def add_time_constructor(loader: Type[YAML_Loader]) -> None:
+def add_time_constructor(loader: type[YAML_Loader]) -> None:
     loader.add_constructor(
         'tag:yaml.org,2002:timestamp',
         time_constructor,

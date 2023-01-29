@@ -6,18 +6,7 @@ import dataclasses
 from collections import OrderedDict
 from functools import total_ordering
 from pathlib import Path
-from typing import (
-    cast,
-    Dict,
-    Iterable,
-    Iterator,
-    Mapping,
-    NewType,
-    Optional,
-    Set,
-    Tuple,
-    TypeVar,
-)
+from typing import cast, Iterable, Iterator, Mapping, NewType, TypeVar
 
 import league_ranker as ranker
 from league_ranker import LeaguePoints, RankedPosition
@@ -79,7 +68,7 @@ class TeamScore:
         self.game_points = game
 
     @property
-    def _ordering_key(self) -> Tuple[int, int]:
+    def _ordering_key(self) -> tuple[int, int]:
         # Sort lexicographically by league points, then game points
         return self.league_points, self.game_points
 
@@ -101,7 +90,7 @@ class TeamScore:
     def __ne__(self, other: object) -> bool:
         return not (self == other)
 
-    def __lt__(self, other: 'TeamScore') -> bool:
+    def __lt__(self, other: TeamScore) -> bool:
         if not isinstance(other, TeamScore):
             return NotImplemented  # type: ignore[unreachable]
 
@@ -205,14 +194,14 @@ class BaseScores:
         self._scorer = scorer
         self._num_corners = num_teams_per_arena
 
-        self.game_points: Dict[MatchId, Mapping[TLA, GamePoints]] = {}
+        self.game_points: dict[MatchId, Mapping[TLA, GamePoints]] = {}
         r"""
         Game points data for each match. Keys are tuples of the form
         ``(arena_id, match_num)``, values are :class:`dict`\s mapping
         TLAs to the number of game points they scored.
         """
 
-        self.game_positions: Dict[MatchId, Mapping[RankedPosition, Set[TLA]]] = {}
+        self.game_positions: dict[MatchId, Mapping[RankedPosition, set[TLA]]] = {}
         r"""
         Game position data for each match. Keys are tuples of the form
         ``(arena_id, match_num)``, values are :class:`dict`\s mapping
@@ -220,7 +209,7 @@ class BaseScores:
         which have that position. Based solely on teams' game points.
         """
 
-        self.ranked_points: Dict[MatchId, Dict[TLA, ranker.LeaguePoints]] = {}
+        self.ranked_points: dict[MatchId, dict[TLA, ranker.LeaguePoints]] = {}
         r"""
         Normalised (aka 'league') points earned in each match. Keys are
         tuples of the form ``(arena_id, match_num)``, values are
@@ -270,7 +259,7 @@ class BaseScores:
             ranker.calc_ranked_points(positions, dsq, self._num_corners)
 
     @property
-    def last_scored_match(self) -> Optional[MatchNumber]:
+    def last_scored_match(self) -> MatchNumber | None:
         """The most match with the highest id for which we have score data."""
         if len(self.ranked_points) == 0:
             return None
@@ -352,7 +341,7 @@ class KnockoutScores(BaseScores):
     def calculate_ranking(
         match_points: Mapping[TLA, ranker.LeaguePoints],
         league_positions: LeaguePositions,
-    ) -> Dict[TLA, RankedPosition]:
+    ) -> dict[TLA, RankedPosition]:
         """
         Get a ranking of the given match's teams.
 
@@ -360,7 +349,7 @@ class KnockoutScores(BaseScores):
         :param league_positions: A map of TLAs to league positions.
         """
 
-        def key(tla: TLA, points: ranker.LeaguePoints) -> Tuple[ranker.LeaguePoints, int]:
+        def key(tla: TLA, points: ranker.LeaguePoints) -> tuple[ranker.LeaguePoints, int]:
             # Lexicographically sort by game result, then by league position
             # League positions are sorted in the opposite direction
             return points, -league_positions.get(tla, 0)
@@ -490,7 +479,7 @@ class Scores:
         The match with the highest id for which we have score data.
         """
 
-    def get_scores(self, match: Match) -> Optional[MatchScore]:
+    def get_scores(self, match: Match) -> MatchScore | None:
         """
         Get the scores for a given match.
 

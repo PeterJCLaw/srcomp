@@ -1,19 +1,11 @@
 """Compstate validation routines."""
 
+from __future__ import annotations
+
 import datetime
 import sys
 from collections import defaultdict
-from typing import (
-    Container,
-    Iterable,
-    List,
-    Mapping,
-    NewType,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-)
+from typing import Container, Iterable, List, Mapping, NewType, Sequence
 
 from .comp import SRComp
 from .knockout_scheduler import UNKNOWABLE_TEAM
@@ -144,7 +136,7 @@ def validate_schedule_timings(
         timing_map[time].append(game.num)
 
     errors = []
-    last_time: Optional[datetime.datetime] = None
+    last_time: datetime.datetime | None = None
     for time, match_numbers in sorted(timing_map.items()):
         if len(match_numbers) != 1:
             errors.append("Multiple matches scheduled for {}: {}.".format(
@@ -187,7 +179,7 @@ def validate_match(match: MatchSlot, possible_teams: Iterable[TLA]) -> Errors:
     """Check that the teams featuring in a match exist and are only
     required in one arena at a time."""
     errors = []
-    all_teams: List[Optional[TLA]] = []
+    all_teams: list[TLA | None] = []
 
     for a in match.values():
         all_teams += a.teams
@@ -199,7 +191,7 @@ def validate_match(match: MatchSlot, possible_teams: Iterable[TLA]) -> Errors:
     # Note: mypy doesn't know that removing META_TEAMS here means that we're
     # removing the Optional nature of the teams.
     # See https://github.com/python/mypy/issues/8526.
-    duplicates: Set[TLA] = set(all_teams) - META_TEAMS  # type: ignore[assignment]
+    duplicates: set[TLA] = set(all_teams) - META_TEAMS  # type: ignore[assignment]
     if len(duplicates):
         errors.append("Teams {} appear more than once.".format(
             join_and(duplicates),
@@ -239,7 +231,7 @@ def validate_scores_inner(
     count = 0
     match_type_title = match_type.name.title()
 
-    def get_scheduled_match(match_id: MatchId, error_type: ErrorType) -> Optional[Match]:
+    def get_scheduled_match(match_id: MatchId, error_type: ErrorType) -> Match | None:
         """Check that the requested match was scheduled, return it if so."""
         arena, num = match_id
 
@@ -326,15 +318,15 @@ def warn_missing_scores(
     print("Match   | Arena ", file=sys.stderr)
     for match_num, arena_names in missing:
         arenas = join_and(sorted(arena_names))
-        print(" {:>3}    | {}".format(match_num, arenas), file=sys.stderr)
+        print(f" {match_num:>3}    | {arenas}", file=sys.stderr)
 
 
 def find_missing_scores(
     match_type: MatchType,
     match_ids: Iterable[MatchId],
-    last_match: Optional[int],
+    last_match: int | None,
     schedule: Iterable[MatchSlot],
-) -> Sequence[Tuple[MatchNumber, Set[ArenaName]]]:
+) -> Sequence[tuple[MatchNumber, set[ArenaName]]]:
     """
     Given a collection of ``match_ids`` for which we have scores, the
     ``match_type`` currently under consideration, the number of the
@@ -391,7 +383,7 @@ def validate_team_matches(
 def find_teams_without_league_matches(
     matches: Iterable[MatchSlot],
     possible_teams: Iterable[TLA],
-) -> Set[TLA]:
+) -> set[TLA]:
     """
     Find teams that don't have league matches.
 

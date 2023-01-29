@@ -1,9 +1,11 @@
 """Venue layout metadata library."""
 
+from __future__ import annotations
+
 from collections import Counter
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Generic, Iterable, List, Mapping, Tuple, TypeVar
+from typing import Generic, Iterable, Mapping, TypeVar
 
 from . import yaml_loader
 from .matches import StagingOffsets
@@ -139,11 +141,11 @@ class Venue:
             )
 
     @staticmethod
-    def _get_duplicates(items: Iterable[T]) -> List[T]:
+    def _get_duplicates(items: Iterable[T]) -> list[T]:
         return [item for item, count in Counter(items).items() if count > 1]
 
     @classmethod
-    def check_teams(cls, teams: Iterable[TLA], teams_layout: List[RegionData]) -> None:
+    def check_teams(cls, teams: Iterable[TLA], teams_layout: list[RegionData]) -> None:
         """
         Check that the given layout of teams contains the same set of
         teams as the reference.
@@ -171,8 +173,8 @@ class Venue:
     @staticmethod
     def _match_regions_and_shepherds(
         shepherds: Iterable[ShepherdData],
-        teams_layout: List[RegionData],
-    ) -> Iterable[Tuple[RegionData, ShepherdData]]:
+        teams_layout: list[RegionData],
+    ) -> Iterable[tuple[RegionData, ShepherdData]]:
         regions_by_name = {r['name']: r for r in teams_layout}
 
         for shepherd in shepherds:
@@ -185,7 +187,7 @@ class Venue:
 
     @staticmethod
     def _build_locations(
-        regions_and_shepherds: Iterable[Tuple[RegionData, ShepherdData]],
+        regions_and_shepherds: Iterable[tuple[RegionData, ShepherdData]],
     ) -> Mapping[RegionName, Region]:
 
         return {
@@ -239,7 +241,7 @@ class Venue:
         shepherding region which contains that location.
         """
 
-        self._team_locations: Dict[TLA, Region] = {}
+        self._team_locations: dict[TLA, Region] = {}
 
         for location in self.locations.values():
             for team in location['teams']:

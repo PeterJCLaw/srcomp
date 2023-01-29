@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import math
-from typing import cast, List
+from typing import cast
 
 
 def bit_mask(n: int) -> int:
@@ -18,7 +20,7 @@ def reverse_bits(n: int, width: int) -> int:
     return int(b[::-1], 2)
 
 
-def first_round_seeding(n_teams: int) -> List[List[int]]:
+def first_round_seeding(n_teams: int) -> list[list[int]]:
     """
     Return the seed arrangement for the first round of a knockout with
     ``n_teams`` at 4 teams per match.
@@ -52,7 +54,7 @@ def first_round_seeding(n_teams: int) -> List[List[int]]:
             v ^= bit_mask(matches_bits)
         ins_order.append(v)
 
-    matches: List[List[int]] = []
+    matches: list[list[int]] = []
     for _ in range(n_matches):
         matches += [[]]
 

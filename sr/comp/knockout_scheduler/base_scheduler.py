@@ -1,6 +1,8 @@
 """Base for knockout scheduling."""
 
-from typing import Iterable, List, Mapping, TYPE_CHECKING
+from __future__ import annotations
+
+from typing import Iterable, Mapping, TYPE_CHECKING
 
 from ..match_period import Match, MatchPeriod, MatchType
 from ..scores import Scores
@@ -28,7 +30,7 @@ class BaseKnockoutScheduler:
 
     def __init__(
         self,
-        schedule: 'MatchSchedule',
+        schedule: MatchSchedule,
         scores: Scores,
         arenas: Iterable[ArenaName],
         num_teams_per_arena: int,
@@ -58,7 +60,7 @@ class BaseKnockoutScheduler:
         # in this list is important (e.g. self.knockout_rounds[0][0] is
         # will involve the top seed, whilst self.knockout_rounds[0][-1] will
         # involve the second seed).
-        self.knockout_rounds: List[List[Match]] = []
+        self.knockout_rounds: list[list[Match]] = []
 
         period_config = self.config['match_periods']['knockout'][0]
         self.period = MatchPeriod(
@@ -117,7 +119,7 @@ class BaseKnockoutScheduler:
             global_num=global_num,
         )
 
-    def get_ranking(self, game: Match) -> List[TLA]:
+    def get_ranking(self, game: Match) -> list[TLA]:
         """
         Get a ranking of the given match's teams.
 
@@ -135,7 +137,7 @@ class BaseKnockoutScheduler:
         # Extract just TLAs
         return list(positions.keys())
 
-    def _get_non_dropped_out_teams(self, for_match: MatchNumber) -> List[TLA]:
+    def _get_non_dropped_out_teams(self, for_match: MatchNumber) -> list[TLA]:
         teams = list(self.scores.league.positions.keys())
         teams = [
             tla

@@ -1,11 +1,13 @@
 """Core competition functions."""
 
+from __future__ import annotations
+
 import runpy
 import sys
 from copy import copy
 from pathlib import Path
 from subprocess import check_output
-from typing import cast, Union
+from typing import cast
 
 from . import arenas, matches, scores, teams, venue
 from .types import ScorerType
@@ -41,12 +43,12 @@ class SRComp:
     :param Path root: The root path of the ``compstate`` repo.
     """
 
-    def __init__(self, root: Union[str, Path]) -> None:
+    def __init__(self, root: str | Path) -> None:
         self.root = Path(root)
 
         self.state = check_output(
             ('git', 'rev-parse', 'HEAD'),
-            universal_newlines=True,
+            text=True,
             cwd=str(self.root),
         ).strip()
         """The current commit of the Compstate repository."""

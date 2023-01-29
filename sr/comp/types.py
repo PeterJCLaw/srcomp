@@ -1,15 +1,7 @@
+from __future__ import annotations
+
 import datetime
-from typing import (
-    Any,
-    Dict,
-    List,
-    Mapping,
-    NewType,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import Any, Dict, List, Mapping, NewType, Tuple, Type, Union
 from typing_extensions import NotRequired, Protocol, TypedDict
 
 TLA = NewType('TLA', str)
@@ -43,7 +35,7 @@ class ScoreTeamData(TypedDict, total=False):
 class _ScoreData(TypedDict):
     arena_id: ArenaName
     match_number: MatchNumber
-    teams: Dict[TLA, ScoreTeamData]
+    teams: dict[TLA, ScoreTeamData]
 
 
 class ScoreData(_ScoreData, total=False):
@@ -54,8 +46,8 @@ class ScoreData(_ScoreData, total=False):
 class SimpleScorer(Protocol):
     def __init__(
         self,
-        teams_data: Dict[TLA, ScoreTeamData],
-        arena_data: Optional[ScoreArenaZonesData],
+        teams_data: dict[TLA, ScoreTeamData],
+        arena_data: ScoreArenaZonesData | None,
     ) -> None:
         ...
 
@@ -64,7 +56,7 @@ class SimpleScorer(Protocol):
 
 
 class ValidatingScorer(SimpleScorer, Protocol):
-    def validate(self, extra_data: Optional[ScoreOtherData]) -> None:
+    def validate(self, extra_data: ScoreOtherData | None) -> None:
         ...
 
 
@@ -82,17 +74,17 @@ ShepherdName = NewType('ShepherdName', str)
 # files of that name.
 
 class DeploymentsData(TypedDict):
-    deployments: List[str]
+    deployments: list[str]
 
 
 class ShepherdData(TypedDict):
     name: ShepherdName
     colour: Colour
-    regions: List[RegionName]
+    regions: list[RegionName]
 
 
 class ShepherdingData(TypedDict):
-    shepherds: List[ShepherdData]
+    shepherds: list[ShepherdData]
 
 
 class ShepherdingArea(TypedDict):
@@ -104,18 +96,18 @@ class RegionData(TypedDict):
     name: RegionName
     display_name: str
     description: NotRequired[str]
-    teams: List[TLA]
+    teams: list[TLA]
 
 
 class LayoutData(TypedDict):
-    teams: List[RegionData]
+    teams: list[RegionData]
 
 
 class Region(TypedDict):
     name: RegionName
     display_name: str
     description: str
-    teams: List[TLA]
+    teams: list[TLA]
     shepherds: ShepherdingArea
 
 

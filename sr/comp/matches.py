@@ -1,21 +1,11 @@
 """Match schedule library."""
 
+from __future__ import annotations
+
 import datetime
 from datetime import timedelta
 from pathlib import Path
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Set,
-    Type,
-    TypeVar,
-)
+from typing import Any, Iterable, Iterator, Mapping, Sequence, TypeVar
 from typing_extensions import TypedDict
 
 import dateutil.tz
@@ -64,7 +54,7 @@ class WrongNumberOfTeams(Exception):
         self,
         match_n: int,
         arena_name: str,
-        teams: Sequence[Optional[TLA]],
+        teams: Sequence[TLA | None],
         num_teams_per_arena: int,
     ) -> None:
         message = "Match {}{} has {} teams but must have {}".format(
@@ -76,14 +66,14 @@ class WrongNumberOfTeams(Exception):
         super().__init__(message)
 
 
-def parse_ranges(ranges: str) -> Set[int]:
+def parse_ranges(ranges: str) -> set[int]:
     """
     Parse a comma seprated list of numbers which may include ranges
     specified as hyphen-separated numbers.
 
     From https://stackoverflow.com/questions/6405208
     """
-    result: List[int] = []
+    result: list[int] = []
     for part in ranges.split(','):
         if '-' in part:
             a_, b_ = part.split('-')
@@ -109,7 +99,7 @@ class MatchSchedule:
 
     @classmethod
     def create(
-        cls: Type[TSchedule],
+        cls: type[TSchedule],
         config_fname: Path,
         league_fname: Path,
         scores: Scores,
@@ -135,7 +125,7 @@ class MatchSchedule:
         schedule = cls(y, league, teams, num_teams_per_arena)
 
         if y['knockout'].get('static', False):
-            knockout_scheduler: Type[BaseKnockoutScheduler] = StaticScheduler
+            knockout_scheduler: type[BaseKnockoutScheduler] = StaticScheduler
         else:
             knockout_scheduler = KnockoutScheduler
 
@@ -162,13 +152,13 @@ class MatchSchedule:
         self.teams = teams
         """A mapping of TLAs to :class:`.Team` instances."""
 
-        self.match_periods: List[MatchPeriod] = []
+        self.match_periods: list[MatchPeriod] = []
         r"""
         A list of the :class:`.MatchPeriod`\s which contain the matches
         for the competition.
         """
 
-        self.knockout_rounds: List[List[Match]] = []
+        self.knockout_rounds: list[list[Match]] = []
         """
         A list of the knockout matches by round. Each entry in the list
         represents a round of knockout matches, such that `knockout_rounds[-1]`
@@ -193,7 +183,7 @@ class MatchSchedule:
         self._build_extra_spacing(y['league']['extra_spacing'])
         self._build_delaylist(y['delays'])
 
-        self.matches: List[MatchSlot] = []
+        self.matches: list[MatchSlot] = []
         """
         A list of match slots in the schedule. Each match slot is a dict of
         arena to the :class:`.Match` occuring in that arena.
@@ -251,7 +241,7 @@ class MatchSchedule:
         match_start = match.start_time + pre
         offsets = self.staging_times
 
-        signal_shepherds: Dict[ShepherdName, datetime.datetime] = {
+        signal_shepherds: dict[ShepherdName, datetime.datetime] = {
             area: match_start - offset
             for area, offset in offsets['signal_shepherds'].items()
         }
@@ -264,8 +254,8 @@ class MatchSchedule:
             'signal_teams': match_start - offsets['signal_teams'],
         }
 
-    def _build_extra_spacing(self, yamldata: Optional[List[ExtraSpacingData]]) -> None:
-        spacing: Dict[MatchNumber, datetime.timedelta] = {}
+    def _build_extra_spacing(self, yamldata: list[ExtraSpacingData] | None) -> None:
+        spacing: dict[MatchNumber, datetime.timedelta] = {}
         if not yamldata:
             self._spacing = spacing
             return
@@ -279,8 +269,8 @@ class MatchSchedule:
 
         self._spacing = spacing
 
-    def _build_delaylist(self, yamldata: Optional[List[DelayData]]) -> None:
-        delays: List[Delay] = []
+    def _build_delaylist(self, yamldata: list[DelayData] | None) -> None:
+        delays: list[Delay] = []
         if yamldata is None:
             # No delays, hurrah
             self.delays = delays
@@ -295,9 +285,9 @@ class MatchSchedule:
 
     def remove_drop_outs(
         self,
-        teams: Iterable[Optional[TLA]],
+        teams: Iterable[TLA | None],
         since_match: MatchNumber,
-    ) -> List[Optional[TLA]]:
+    ) -> list[TLA | None]:
         """
         Take a list of TLAs and replace the teams that have dropped out with
         ``None`` values.
@@ -306,7 +296,7 @@ class MatchSchedule:
         :param int since_match: The match number to check for drop outs from.
         :return: A new list containing the approriate teams.
         """
-        new_teams: List[Optional[TLA]] = []
+        new_teams: list[TLA | None] = []
         for tla in teams:
             if tla is None:
                 new_teams.append(None)
@@ -317,7 +307,7 @@ class MatchSchedule:
                     new_teams.append(None)
         return new_teams
 
-    def _build_matchlist(self, yamldata: Optional[LeagueMatches]) -> None:
+    def _build_matchlist(self, yamldata: LeagueMatches | None) -> None:
         """
         Build the match list.
 
@@ -367,14 +357,14 @@ class MatchSchedule:
     def _create_league_match_slot(
         self,
         start_time: datetime.datetime,
-        arenas: Mapping[ArenaName, Sequence[Optional[TLA]]],
+        arenas: Mapping[ArenaName, Sequence[TLA | None]],
         match_n: MatchNumber,
     ) -> MatchSlot:
         """
         Returns a dict of arena to :class:`.Match` for the given start time,
         arenas dict and match number.
         """
-        match_slot: Dict[ArenaName, Match] = {}
+        match_slot: dict[ArenaName, Match] = {}
 
         end_time = start_time + self.match_duration
         for arena_name, teams in arenas.items():
@@ -431,7 +421,7 @@ class MatchSchedule:
                 if match.start_time <= date < match.end_time:
                     yield match
 
-    def period_at(self, date: datetime.datetime) -> Optional[MatchPeriod]:
+    def period_at(self, date: datetime.datetime) -> MatchPeriod | None:
         """
         Get the match period that occur around a specific ``date``.
 

@@ -9,9 +9,11 @@ The awards calculated are:
  * Rookie award (rookie team with highest league position).
 """
 
+from __future__ import annotations
+
 from enum import Enum, unique
 from pathlib import Path
-from typing import Dict, List, Mapping, Optional
+from typing import List, Mapping
 
 from league_ranker import RankedPosition
 
@@ -123,7 +125,7 @@ def compute_awards(
     scores: Scores,
     final_match: Match,
     teams: Mapping[TLA, Team],
-    path: Optional[Path] = None,
+    path: Path | None = None,
 ) -> Winners:
     """
     Compute the awards handed out from configuration.
@@ -137,7 +139,7 @@ def compute_awards(
              determined.
     """
 
-    awards: Dict[Award, List[TLA]] = {}
+    awards: dict[Award, list[TLA]] = {}
     awards.update(_compute_main_awards(scores, final_match))
     awards.update(_compute_rookie_award(scores, teams))
     if path is not None:

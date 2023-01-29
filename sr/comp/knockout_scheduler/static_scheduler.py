@@ -2,8 +2,10 @@
 A static knockout schedule.
 """
 
+from __future__ import annotations
+
 import datetime
-from typing import Any, List, NewType, Optional
+from typing import Any, NewType
 from typing_extensions import TypedDict
 
 from ..match_period import Match, MatchSlot, MatchType
@@ -12,12 +14,12 @@ from .base_scheduler import BaseKnockoutScheduler, UNKNOWABLE_TEAM
 
 StaticMatchTeamReference = NewType('StaticMatchTeamReference', str)
 
-StaticMatchInfo = TypedDict('StaticMatchInfo', {
-    'arena': ArenaName,
-    'start_time': datetime.datetime,
-    'teams': List[StaticMatchTeamReference],
-    'display_name': Optional[str],
-})
+
+class StaticMatchInfo(TypedDict):
+    arena: ArenaName
+    start_time: datetime.datetime
+    teams: list[StaticMatchTeamReference]
+    display_name: str | None
 
 
 class StaticScheduler(BaseKnockoutScheduler):
@@ -45,7 +47,7 @@ class StaticScheduler(BaseKnockoutScheduler):
             MatchNumber(last_league_match_num),
         )
 
-    def get_team(self, team_ref: Optional[StaticMatchTeamReference]) -> Optional[TLA]:
+    def get_team(self, team_ref: StaticMatchTeamReference | None) -> TLA | None:
         if not self._played_all_league_matches():
             return UNKNOWABLE_TEAM
 
@@ -68,13 +70,13 @@ class StaticScheduler(BaseKnockoutScheduler):
 
         # get a position from a match
         assert len(team_ref) == 3
-        round_num, match_num, pos = [int(x) for x in team_ref]
+        round_num, match_num, pos = (int(x) for x in team_ref)
 
         try:
             match = self.knockout_rounds[round_num][match_num]
         except IndexError:
             raise ValueError(
-                "Reference '{}' to unscheduled match!".format(team_ref),
+                f"Reference '{team_ref}' to unscheduled match!",
             ) from None
 
         try:
@@ -82,7 +84,7 @@ class StaticScheduler(BaseKnockoutScheduler):
             return ranking[pos]
         except IndexError:
             raise ValueError(
-                "Reference '{}' to invalid ranking!".format(team_ref),
+                f"Reference '{team_ref}' to invalid ranking!",
             ) from None
 
     def _add_match(
@@ -116,7 +118,7 @@ class StaticScheduler(BaseKnockoutScheduler):
         # allow overriding the name
         override_name = match_info.get('display_name')
         if override_name is not None:
-            display_name = "{} (#{})".format(override_name, num)
+            display_name = f"{override_name} (#{num})"
 
         is_final = rounds_remaining == 0
         match = Match(
