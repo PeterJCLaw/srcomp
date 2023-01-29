@@ -107,8 +107,12 @@ class TiebreakerTests(unittest.TestCase):
         last_period_matches.pop()  # simplify the next comparison
 
         expected_period = MatchPeriod(
-            start_time, end_time, end_time,
-            'Tiebreaker', [], MatchType.tiebreaker,
+            start_time,
+            end_time,
+            end_time,
+            'Tiebreaker',
+            [],
+            MatchType.tiebreaker,
         )
 
         self.assertEqual(expected_period, last_period, "Wrong last period")

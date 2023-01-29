@@ -482,14 +482,17 @@ class TeamsWithoutMatchesTests(unittest.TestCase):
         teams_a = [TLA('ABC'), TLA('DEF')]
         teams_b = [TLA('LMN'), TLA('OPQ')]
         other_teams = [TLA('NOPE')]
-        bad_matches = [MatchSlot({
-            ArenaName('A'): build_match(teams=teams_a, type_=MatchType.league),
-            ArenaName('B'): build_match(teams=teams_b, type_=MatchType.league),
-        }), MatchSlot({
-            # Unless restricted, all teams end up in the knockouts.
-            # We therefore ignore those for this consideration
-            ArenaName('A'): build_match(teams=other_teams, type_=MatchType.knockout),
-        })]
+        bad_matches = [
+            MatchSlot({
+                ArenaName('A'): build_match(teams=teams_a, type_=MatchType.league),
+                ArenaName('B'): build_match(teams=teams_b, type_=MatchType.league),
+            }),
+            MatchSlot({
+                # Unless restricted, all teams end up in the knockouts.
+                # We therefore ignore those for this consideration
+                ArenaName('A'): build_match(teams=other_teams, type_=MatchType.knockout),
+            }),
+        ]
 
         teams = find_teams_without_league_matches(bad_matches, teams_a + teams_b + other_teams)
         self.assertEqual(

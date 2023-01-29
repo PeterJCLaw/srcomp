@@ -150,7 +150,9 @@ class WinnersTests(unittest.TestCase):
             MockScores(
                 knockout={'AAA': 2, 'BBB': 1, 'CCC': 1, 'DDD': 1},
                 knockout_dsq=(),
-            ), FINAL_INFO, TEAMS,
+            ),
+            FINAL_INFO,
+            TEAMS,
         )
         self.assertEqual(
             ['AAA'],

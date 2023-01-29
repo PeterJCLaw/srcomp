@@ -172,8 +172,12 @@ class MatchSchedule:
                 max_end_time = e['end_time']
 
             period = MatchPeriod(
-                e['start_time'], e['end_time'], max_end_time,
-                e['description'], [], MatchType.league,
+                e['start_time'],
+                e['end_time'],
+                max_end_time,
+                e['description'],
+                [],
+                MatchType.league,
             )
             self.match_periods.append(period)
 
@@ -375,8 +379,13 @@ class MatchSchedule:
                 raise WrongNumberOfTeams(match_n, arena_name, teams, self._num_corners)
 
             match = Match(
-                match_n, display_name, arena_name, teams,
-                start_time, end_time, MatchType.league,
+                match_n,
+                display_name,
+                arena_name,
+                teams,
+                start_time,
+                end_time,
+                MatchType.league,
                 use_resolved_ranking=False,
             )
             match_slot[arena_name] = match
