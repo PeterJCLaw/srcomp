@@ -2,10 +2,23 @@
 
 from __future__ import annotations
 
+import dataclasses
 import datetime
+import itertools
 import sys
 from collections import defaultdict
-from typing import Container, Iterable, List, Mapping, NewType, Sequence
+from typing import (
+    Container,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    NewType,
+    Optional,
+    Sequence,
+    Tuple,
+)
+from typing_extensions import Literal
 
 from .comp import SRComp
 from .knockout_scheduler import UNKNOWABLE_TEAM
@@ -14,11 +27,58 @@ from .matches import MatchSchedule
 from .scores import BaseScores
 from .types import ArenaName, MatchId, MatchNumber, TLA
 
-Errors = List[str]
 ErrorType = NewType('ErrorType', str)
+ErrorLevel = Literal['error', 'warning']
 
 NO_TEAM = None
 META_TEAMS = {NO_TEAM, UNKNOWABLE_TEAM}
+
+
+@dataclasses.dataclass(frozen=True)
+class ValidationError(Exception):
+    message: str
+    code: str
+    source: Optional[Tuple[ErrorType, object]]
+    level: ErrorLevel = 'error'
+
+
+class ScheduleValidationError(ValidationError):
+    def __init__(
+        self,
+        message: str,
+        code: str,
+        source: str = '',
+        level: ErrorLevel = 'error',
+    ) -> None:
+        super().__init__(
+            message=message,
+            code=code,
+            source=(ErrorType('Schedule'), source),
+            level=level,
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class NaiveValidationError:
+    message: str
+    code: str
+    level: ErrorLevel = 'error'
+
+    def with_source(self, error_type: ErrorType, id_: object) -> ValidationError:
+        return ValidationError(
+            self.message,
+            self.code,
+            source=(error_type, id_),
+            level=self.level,
+        )
+
+
+def with_source(
+    naive_errors: Iterable[NaiveValidationError],
+    source: Tuple[ErrorType, object],
+) -> Iterator[ValidationError]:
+    for error in naive_errors:
+        yield error.with_source(*source)
 
 
 def join_and(items: Iterable[object]) -> str:
@@ -34,7 +94,7 @@ def join_and(items: Iterable[object]) -> str:
     return " and ".join((", ".join(rest), last))
 
 
-def report_errors(error_type: ErrorType, id_: object, errors: Errors) -> None:
+def report_errors(error_type: ErrorType, id_: object, errors: List[str]) -> None:
     """
     Print out errors nicely formatted.
 
@@ -55,6 +115,16 @@ def report_errors(error_type: ErrorType, id_: object, errors: Errors) -> None:
         print(f"    {error}", file=sys.stderr)
 
 
+def report_validation_errors(errors: Sequence[ValidationError]) -> None:
+    for source, errors_group in itertools.groupby(errors, key=lambda x: x.source):
+        messages = [x.message for x in errors_group]
+        if source:
+            report_errors(*source, messages)
+        else:
+            for message in messages:
+                print(message, file=sys.stderr)
+
+
 def validate(comp: SRComp) -> int:
     """
     Validate a Compstate repo.
@@ -63,122 +133,137 @@ def validate(comp: SRComp) -> int:
     :return: The number of errors that have occurred.
     """
 
-    count = 0
-    count += validate_schedule(comp.schedule, comp.teams.keys(), comp.arenas.keys())
+    errors: List[ValidationError] = []
+
+    errors += validate_schedule(comp.schedule, comp.teams.keys(), comp.arenas.keys())
 
     all_matches = comp.schedule.matches
-    count += validate_team_matches(all_matches, comp.teams.keys())
+    errors += validate_team_matches(all_matches, comp.teams.keys())
 
-    count += validate_scores(MatchType.league, comp.scores.league, all_matches)
-    count += validate_scores(MatchType.knockout, comp.scores.knockout, all_matches)
-    count += validate_scores(MatchType.tiebreaker, comp.scores.tiebreaker, all_matches)
+    errors += validate_scores(MatchType.league, comp.scores.league, all_matches)
+    errors += validate_scores(MatchType.knockout, comp.scores.knockout, all_matches)
+    errors += validate_scores(MatchType.tiebreaker, comp.scores.tiebreaker, all_matches)
 
-    return count
+    report_validation_errors(errors)
+
+    return sum(1 for x in errors if x.level == 'error')
 
 
 def validate_schedule(
     schedule: MatchSchedule,
     possible_teams: Iterable[TLA],
     possible_arenas: Container[ArenaName],
-) -> int:
+) -> Iterator[ValidationError]:
     """Check that the schedule contains enough time for all the matches,
     and that the matches themselves are valid."""
-    count = 0
 
     # Check that each match features only valid teams
     for num, match in enumerate(schedule.matches):
-        errors = validate_match(match, possible_teams)
-        count += len(errors)
-        report_errors(ErrorType('Match'), num, errors)
+        match_errors = validate_match(match, possible_teams)
+        yield from with_source(match_errors, source=(ErrorType('Match'), num))
 
-    warnings = validate_schedule_count(schedule)
-    report_errors(ErrorType('Schedule'), '', warnings)
+    yield from validate_schedule_count(schedule)
 
-    errors = validate_schedule_timings(schedule.matches, schedule.match_duration)
-    count += len(errors)
+    errors = list(validate_schedule_timings(schedule.matches, schedule.match_duration))
     if len(errors):
         errors.append(
-            "This usually indicates that the scheduled periods overlap.",
+            ValidationError(
+                "This usually indicates that the scheduled periods overlap.",
+                code='hint-period-overlap',
+                source=(ErrorType('Schedule'), 'timing'),
+            ),
         )
-    report_errors(ErrorType('Schedule'), 'timing', errors)
+        yield from errors
 
-    errors = validate_schedule_arenas(schedule.matches, possible_arenas)
-    count += len(errors)
-    report_errors(ErrorType('Schedule'), 'arenas', errors)
-
-    return count
+    yield from validate_schedule_arenas(schedule.matches, possible_arenas)
 
 
-def validate_schedule_count(schedule: MatchSchedule) -> Errors:
+def validate_schedule_count(schedule: MatchSchedule) -> Iterator[ValidationError]:
     planned = schedule.n_planned_league_matches
     actual = schedule.n_league_matches
-    errors = []
-    if planned > actual:
-        msg = "Only contains enough time for {} matches, {} are planned".format(
-            actual,
-            planned,
-        )
-        errors.append(msg)
-    if planned == 0:
-        errors.append("Doesn't contain any matches")
 
-    return errors
+    if planned > actual:
+        yield ScheduleValidationError(
+            "Only contains enough time for {} matches, {} are planned".format(
+                actual,
+                planned,
+            ),
+            code='not-enough-time',
+            level='warning',
+        )
+
+    if planned == 0:
+        yield ScheduleValidationError(
+            "Doesn't contain any matches",
+            code='no-matches-scheduled',
+            level='warning',
+        )
 
 
 def validate_schedule_timings(
     scheduled_matches: Iterable[MatchSlot],
     match_duration: datetime.timedelta,
-) -> Errors:
+) -> Iterator[ValidationError]:
     timing_map = defaultdict(list)
     for match in scheduled_matches:
         game = list(match.values())[0]
         time = game.start_time
         timing_map[time].append(game.num)
 
-    errors = []
     last_time: datetime.datetime | None = None
     for time, match_numbers in sorted(timing_map.items()):
         if len(match_numbers) != 1:
-            errors.append("Multiple matches scheduled for {}: {}.".format(
-                time,
-                join_and(match_numbers),
-            ))
+            yield ValidationError(
+                "Multiple matches scheduled for {}: {}.".format(
+                    time,
+                    join_and(match_numbers),
+                ),
+                code='multiple-matches-at-time',
+                source=(ErrorType('Schedule'), 'timing'),
+            )
 
         if last_time is not None and time - last_time < match_duration:
-            errors.append("Matches {} start at {} before matches {} have finished.".format(
-                join_and(match_numbers),
-                time,
-                join_and(timing_map[last_time]),
-            ))
+            yield ValidationError(
+                "Matches {} start at {} before matches {} have finished.".format(
+                    join_and(match_numbers),
+                    time,
+                    join_and(timing_map[last_time]),
+                ),
+                code='matches-overlap',
+                source=(ErrorType('Schedule'), 'timing'),
+            )
 
         last_time = time
-
-    return errors
 
 
 def validate_schedule_arenas(
     matches: Iterable[MatchSlot],
     possible_arenas: Container[ArenaName],
-) -> Errors:
+) -> Iterator[ValidationError]:
     """Check that any arena referenced by a match actually exists."""
-    errors = []
+
     error_format_string = "Match {game.num} ({game.type}) references arena '{arena}'."
 
     for match in matches:
         for arena, game in match.items():
             if arena not in possible_arenas:
-                errors.append(error_format_string.format(
-                    arena=arena,
-                    game=game,
-                ))
+                yield ValidationError(
+                    error_format_string.format(
+                        arena=arena,
+                        game=game,
+                    ),
+                    code='nonexistent-arena',
+                    source=(ErrorType('Schedule'), 'arenas'),
+                )
 
-    return errors
 
-
-def validate_match(match: MatchSlot, possible_teams: Iterable[TLA]) -> Errors:
+def validate_match(
+    match: MatchSlot,
+    possible_teams: Iterable[TLA],
+) -> Iterator[NaiveValidationError]:
     """Check that the teams featuring in a match exist and are only
     required in one arena at a time."""
-    errors = []
+
     all_teams: list[TLA | None] = []
 
     for a in match.values():
@@ -193,85 +278,94 @@ def validate_match(match: MatchSlot, possible_teams: Iterable[TLA]) -> Errors:
     # See https://github.com/python/mypy/issues/8526.
     duplicates: set[TLA] = set(all_teams) - META_TEAMS  # type: ignore[assignment]
     if len(duplicates):
-        errors.append("Teams {} appear more than once.".format(
-            join_and(duplicates),
-        ))
+        yield NaiveValidationError(
+            "Teams {} appear more than once.".format(
+                join_and(duplicates),
+            ),
+            code='team-more-than-one-appearance-in-match',
+        )
 
     extras = teams - set(possible_teams)
 
     if len(extras):
-        errors.append("Teams {} do not exist.".format(
-            join_and(extras),
-        ))
-
-    return errors
+        yield NaiveValidationError(
+            "Teams {} do not exist.".format(
+                join_and(extras),
+            ),
+            'nonexistent-teams',
+        )
 
 
 def validate_scores(
     match_type: MatchType,
     scores: BaseScores,
     schedule: Sequence[MatchSlot],
-) -> int:
+) -> Iterator[ValidationError]:
     """Validate that the scores are sane."""
-    count = validate_scores_inner(match_type, scores, schedule)
-    warn_missing_scores(match_type, scores, schedule)
-    return count
+    yield from validate_scores_inner(match_type, scores, schedule)
+    yield from warn_missing_scores(match_type, scores, schedule)
 
 
 def validate_scores_inner(
     match_type: MatchType,
     scores: BaseScores,
     schedule: Sequence[MatchSlot],
-) -> int:
+) -> Iterator[ValidationError]:
     """Validate that scores are sane."""
     # NB: more specific validation is already done during the scoring,
     # so all we need to do is check that the right teams are being awarded
     # points
 
-    count = 0
     match_type_title = match_type.name.title()
 
-    def get_scheduled_match(match_id: MatchId, error_type: ErrorType) -> Match | None:
+    def get_scheduled_match(match_id: MatchId, error_type: ErrorType) -> Match:
         """Check that the requested match was scheduled, return it if so."""
         arena, num = match_id
 
         if num < 0 or num >= len(schedule):
-            msg = f"{match_type_title} Match not scheduled"
-            report_errors(error_type, match_id, [msg])
-            return None
+            raise ValidationError(
+                f"{match_type_title} Match not scheduled",
+                code='nonexistent-match',
+                source=(error_type, match_id),
+            )
 
         match = schedule[num]
         if arena not in match:
-            msg = f"Arena not in this {match_type_title} match"
-            report_errors(error_type, match_id, [msg])
-            return None
+            raise ValidationError(
+                f"Arena not in this {match_type_title} match",
+                code='arena-not-for-match',
+                source=(error_type, match_id),
+            )
 
         return match[arena]
 
-    def check(error_type: ErrorType, match_id: MatchId, match: Mapping[TLA, object]) -> int:
-        scheduled_match = get_scheduled_match(match_id, error_type)
-        if scheduled_match is None:
-            return 1
+    def check(
+        error_type: ErrorType,
+        match_id: MatchId,
+        match: Mapping[TLA, object],
+    ) -> Iterator[ValidationError]:
+        try:
+            scheduled_match = get_scheduled_match(match_id, error_type)
+        except ValidationError as error:
+            yield error
+            return
 
         errors = validate_match_score(match_type, match, scheduled_match)
-        report_errors(error_type, match_id, errors)
-        return len(errors)
+        yield from with_source(errors, source=(error_type, match_id))
 
     for match_id, game_points in scores.game_points.items():
-        count += check(ErrorType('Game Score'), match_id, game_points)
+        yield from check(ErrorType('Game Score'), match_id, game_points)
 
     if match_type == MatchType.league:
         for match_id, league_points in scores.ranked_points.items():
-            count += check(ErrorType('League Points'), match_id, league_points)
-
-    return count
+            yield from check(ErrorType('League Points'), match_id, league_points)
 
 
 def validate_match_score(
     match_type: MatchType,
     match_score: Mapping[TLA, object],
     scheduled_match: Match,
-) -> Errors:
+) -> Iterator[NaiveValidationError]:
     """Check that the match awards points to the right teams, by checking
     that the teams with points were scheduled to appear in the match."""
     # only remove the empty corner marker -- we shouldn't have unknowable
@@ -284,27 +378,30 @@ def validate_match_score(
     extra = actual_teams - expected_teams
     missing = expected_teams - actual_teams
 
-    errors = []
     if len(missing):
-        errors.append("Teams {} missing from this {} match.".format(
-            join_and(missing),
-            match_type.name,
-        ))
+        yield NaiveValidationError(
+            "Teams {} missing from this {} match.".format(
+                join_and(missing),
+                match_type.name,
+            ),
+            code='score-missing-teams',
+        )
 
     if len(extra):
-        errors.append("Teams {} not scheduled in this {} match.".format(
-            join_and(extra),
-            match_type.name,
-        ))
-
-    return errors
+        yield NaiveValidationError(
+            "Teams {} not scheduled in this {} match.".format(
+                join_and(extra),
+                match_type.name,
+            ),
+            code='score-unexpected-teams',
+        )
 
 
 def warn_missing_scores(
     match_type: MatchType,
     scores: BaseScores,
     schedule: Iterable[MatchSlot],
-) -> None:
+) -> Iterator[ValidationError]:
     """Check that the scores up to the most recent are all present."""
     match_ids = scores.ranked_points.keys()
     last_match = scores.last_scored_match
@@ -313,12 +410,19 @@ def warn_missing_scores(
     if len(missing) == 0:
         return
 
-    msg = f"The following {match_type.name} scores are missing:"
-    print(msg, file=sys.stderr)
-    print("Match   | Arena ", file=sys.stderr)
-    for match_num, arena_names in missing:
-        arenas = join_and(sorted(arena_names))
-        print(f" {match_num:>3}    | {arenas}", file=sys.stderr)
+    yield ValidationError(
+        "\n".join((
+            f"The following {match_type.name} scores are missing:",
+            "Match   | Arena",
+            *(
+                f" {match_num:>3}    | {join_and(sorted(arenas))}"
+                for match_num, arenas in missing
+            ),
+        )),
+        code='missing-scores',
+        source=None,
+        level='warning',
+    )
 
 
 def find_missing_scores(
@@ -361,7 +465,7 @@ def find_missing_scores(
 def validate_team_matches(
     matches: Iterable[MatchSlot],
     possible_teams: Iterable[TLA],
-) -> int:
+) -> Iterator[ValidationError]:
     """
     Check that all teams have been assigned league matches. We don't need (or
     want) to check the knockouts, since those are scheduled dynamically based
@@ -373,11 +477,13 @@ def validate_team_matches(
         possible_teams,
     )
     if teams_without_matches:
-        print("The following teams have no league matches: {}".format(
-            join_and(sorted(teams_without_matches)),
-        ))
-
-    return len(teams_without_matches)
+        yield ValidationError(
+            "The following teams have no league matches: {}".format(
+                join_and(sorted(teams_without_matches)),
+            ),
+            code='teams-without-league-matches',
+            source=None,
+        )
 
 
 def find_teams_without_league_matches(

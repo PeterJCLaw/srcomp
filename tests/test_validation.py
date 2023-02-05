@@ -43,7 +43,7 @@ class ValidateMatchTests(unittest.TestCase):
             ArenaName('B'): build_match(teams=teams_b),
         })
 
-        errors = validate_match(knockout_match, teams)
+        errors = list(validate_match(knockout_match, teams))
         self.assertEqual([], errors)
 
     def test_empty_corners(self) -> None:
@@ -56,7 +56,7 @@ class ValidateMatchTests(unittest.TestCase):
             ArenaName('B'): build_match(teams=teams_b),
         })
 
-        errors = validate_match(knockout_match, teams)
+        errors = list(validate_match(knockout_match, teams))
         self.assertEqual([], errors)
 
     def test_duplicate_entrant(self) -> None:
@@ -68,13 +68,17 @@ class ValidateMatchTests(unittest.TestCase):
             ArenaName('B'): build_match(teams=teams_b),
         })
 
-        errors = validate_match(bad_match, teams)
-        self.assertEqual(1, len(errors))
-        error = '\n'.join(errors)
+        errors = list(validate_match(bad_match, teams))
 
-        self.assertIn('more than once', error)
-        self.assertIn('GHI', error)
-        self.assertIn(TLA('JKL'), error)
+        self.assertEqual(
+            ['team-more-than-one-appearance-in-match'],
+            [x.code for x in errors],
+        )
+
+        error, = errors
+        self.assertIn('more than once', error.message)
+        self.assertIn('GHI', error.message)
+        self.assertIn(TLA('JKL'), error.message)
 
     def test_nonexistant_entrant(self) -> None:
         teams_a = [TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('JKL')]
@@ -84,13 +88,16 @@ class ValidateMatchTests(unittest.TestCase):
             ArenaName('B'): build_match(teams=teams_b),
         })
 
-        errors = validate_match(bad_match, teams_a)
-        self.assertEqual(1, len(errors))
-        error = '\n'.join(errors)
+        errors = list(validate_match(bad_match, teams_a))
 
-        self.assertIn('not exist', error)
+        self.assertEqual(
+            ['nonexistent-teams'],
+            [x.code for x in errors],
+        )
+
+        error, = errors
         for t in teams_b:
-            self.assertIn(t, error)
+            self.assertIn(t, error.message)
 
     def test_all(self) -> None:
         teams_a = [TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('JKL')]
@@ -100,12 +107,15 @@ class ValidateMatchTests(unittest.TestCase):
             ArenaName('B'): build_match(teams=teams_b),
         })
 
-        errors = validate_match(bad_match, teams_a)
-        self.assertEqual(2, len(errors))
-        error = '\n'.join(errors)
+        errors = list(validate_match(bad_match, teams_a))
 
-        self.assertIn('more than once', error)
-        self.assertIn('not exist', error)
+        self.assertEqual(
+            [
+                'team-more-than-one-appearance-in-match',
+                'nonexistent-teams',
+            ],
+            [x.code for x in errors],
+        )
 
 
 class ValidateMatchScoreTests(unittest.TestCase):
@@ -118,7 +128,7 @@ class ValidateMatchScoreTests(unittest.TestCase):
             TLA('GHI'): 1,
         }
 
-        errors = validate_match_score(MatchType.league, ok_score, match)
+        errors = list(validate_match_score(MatchType.league, ok_score, match))
         self.assertEqual([], errors)
 
     def test_empty_corner_2(self) -> None:
@@ -131,12 +141,16 @@ class ValidateMatchScoreTests(unittest.TestCase):
             TLA('NOP'): 1,
         }
 
-        errors = validate_match_score(MatchType.league, bad_score, match)
-        self.assertEqual(1, len(errors))
-        error = '\n'.join(errors)
+        errors = list(validate_match_score(MatchType.league, bad_score, match))
 
-        self.assertIn('not scheduled in this league match', error)
-        self.assertIn('NOP', error)
+        self.assertEqual(
+            ['score-unexpected-teams'],
+            [x.code for x in errors],
+        )
+
+        error, = errors
+        self.assertIn('not scheduled in this league match', error.message)
+        self.assertIn('NOP', error.message)
 
     def test_extra_team(self) -> None:
         match = build_match(teams=[TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('JKL')])
@@ -148,14 +162,21 @@ class ValidateMatchScoreTests(unittest.TestCase):
             TLA('NOP'): 1,
         }
 
-        errors = validate_match_score(MatchType.league, bad_score, match)
-        self.assertEqual(2, len(errors))
-        error = '\n'.join(errors)
+        errors = list(validate_match_score(MatchType.league, bad_score, match))
 
-        self.assertIn('not scheduled in this league match', error)
-        self.assertIn('NOP', error)
-        self.assertIn('missing from this league match', error)
-        self.assertIn(TLA('JKL'), error)
+        self.assertEqual(
+            [
+                'score-missing-teams',
+                'score-unexpected-teams',
+            ],
+            [x.code for x in errors],
+        )
+
+        message = '\n'.join(x.message for x in errors)
+        self.assertIn('not scheduled in this league match', message)
+        self.assertIn('NOP', message)
+        self.assertIn('missing from this league match', message)
+        self.assertIn(TLA('JKL'), message)
 
     def test_extra_team_2(self) -> None:
         match = build_match(teams=[TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('JKL')])
@@ -168,12 +189,16 @@ class ValidateMatchScoreTests(unittest.TestCase):
             TLA('NOP'): 1,
         }
 
-        errors = validate_match_score(MatchType.league, bad_score, match)
-        self.assertEqual(1, len(errors))
-        error = '\n'.join(errors)
+        errors = list(validate_match_score(MatchType.league, bad_score, match))
 
-        self.assertIn('not scheduled in this league match', error)
-        self.assertIn('NOP', error)
+        self.assertEqual(
+            ['score-unexpected-teams'],
+            [x.code for x in errors],
+        )
+
+        error, = errors
+        self.assertIn('not scheduled in this league match', error.message)
+        self.assertIn('NOP', error.message)
 
     def test_missing_team(self) -> None:
         match = build_match(teams=[TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('JKL')])
@@ -184,12 +209,16 @@ class ValidateMatchScoreTests(unittest.TestCase):
             TLA('GHI'): 1,
         }
 
-        errors = validate_match_score(MatchType.league, bad_score, match)
-        self.assertEqual(1, len(errors))
-        error = '\n'.join(errors)
+        errors = list(validate_match_score(MatchType.league, bad_score, match))
 
-        self.assertIn('missing from this league match', error)
-        self.assertIn(TLA('JKL'), error)
+        self.assertEqual(
+            ['score-missing-teams'],
+            [x.code for x in errors],
+        )
+
+        error, = errors
+        self.assertIn('missing from this league match', error.message)
+        self.assertIn(TLA('JKL'), error.message)
 
     def test_swapped_team(self) -> None:
         match = build_match(teams=[TLA('ABC'), TLA('DEF'), TLA('GHI'), TLA('JKL')])
@@ -201,14 +230,22 @@ class ValidateMatchScoreTests(unittest.TestCase):
             TLA('NOP'): 1,
         }
 
-        errors = validate_match_score(MatchType.league, bad_score, match)
-        self.assertEqual(2, len(errors))
-        error = '\n'.join(errors)
+        errors = list(validate_match_score(MatchType.league, bad_score, match))
 
-        self.assertIn('not scheduled in this league match', error)
-        self.assertIn('missing from this league match', error)
-        self.assertIn(TLA('JKL'), error)
-        self.assertIn('NOP', error)
+        self.assertEqual(
+            [
+                'score-missing-teams',
+                'score-unexpected-teams',
+            ],
+            [x.code for x in errors],
+        )
+
+        message = '\n'.join(x.message for x in errors)
+
+        self.assertIn('not scheduled in this league match', message)
+        self.assertIn('missing from this league match', message)
+        self.assertIn(TLA('JKL'), message)
+        self.assertIn('NOP', message)
 
 
 class FindMissingScoresTests(unittest.TestCase):
@@ -373,7 +410,7 @@ class ValidateScheduleTimingsTests(unittest.TestCase):
         ]
         match_duration = timedelta(minutes=5)
 
-        errors = validate_schedule_timings(matches, match_duration)
+        errors = list(validate_schedule_timings(matches, match_duration))
         self.assertEqual([], errors)
 
     def test_same_time(self) -> None:
@@ -386,14 +423,17 @@ class ValidateScheduleTimingsTests(unittest.TestCase):
             MatchSlot({ArenaName('A'): build_match(num=9, start_time=time)}),
         ]
 
-        errors = validate_schedule_timings(matches, match_duration)
+        errors = list(validate_schedule_timings(matches, match_duration))
 
-        self.assertEqual(1, len(errors))
+        self.assertEqual(
+            ['multiple-matches-at-time'],
+            [x.code for x in errors],
+        )
+
         error = errors[0]
-        self.assertIn("Multiple matches", error)
-        self.assertIn(str(time), error)
-        self.assertIn("8", error)
-        self.assertIn("9", error)
+        self.assertIn(str(time), error.message)
+        self.assertIn("8", error.message)
+        self.assertIn("9", error.message)
 
     def test_overlap(self) -> None:
         time_8 = datetime(2014, 4, 3, 12, 0, 0)
@@ -405,13 +445,16 @@ class ValidateScheduleTimingsTests(unittest.TestCase):
             MatchSlot({ArenaName('A'): build_match(num=9, start_time=time_9)}),
         ]
 
-        errors = validate_schedule_timings(matches, match_duration)
+        errors = list(validate_schedule_timings(matches, match_duration))
 
-        self.assertEqual(1, len(errors))
+        self.assertEqual(
+            ['matches-overlap'],
+            [x.code for x in errors],
+        )
+
         error = errors[0]
-        self.assertIn("Matches 9 start", error)
-        self.assertIn("before matches 8 have finished", error)
-        self.assertIn(str(time_9), error)
+        self.assertIn("before matches 8 have finished", error.message)
+        self.assertIn(str(time_9), error.message)
 
     def test_overlap_2(self) -> None:
         time_7 = datetime(2014, 4, 3, 12, 0, 0)
@@ -425,18 +468,22 @@ class ValidateScheduleTimingsTests(unittest.TestCase):
             MatchSlot({ArenaName('A'): build_match(num=9, start_time=time_9)}),
         ]
 
-        errors = validate_schedule_timings(matches, match_duration)
+        errors = list(validate_schedule_timings(matches, match_duration))
 
-        self.assertEqual(2, len(errors))
+        self.assertEqual(
+            ['matches-overlap'] * 2,
+            [x.code for x in errors],
+        )
+
         error = errors[0]
-        self.assertIn("Matches 8 start", error)
-        self.assertIn("before matches 7 have finished", error)
-        self.assertIn(str(time_8), error)
+        self.assertIn("Matches 8 start", error.message)
+        self.assertIn("before matches 7 have finished", error.message)
+        self.assertIn(str(time_8), error.message)
 
         error = errors[1]
-        self.assertIn("Matches 9 start", error)
-        self.assertIn("before matches 8 have finished", error)
-        self.assertIn(str(time_9), error)
+        self.assertIn("Matches 9 start", error.message)
+        self.assertIn("before matches 8 have finished", error.message)
+        self.assertIn(str(time_9), error.message)
 
 
 class ValidateScheduleArenaTests(unittest.TestCase):
@@ -450,20 +497,24 @@ class ValidateScheduleArenaTests(unittest.TestCase):
         ]
         arenas = [ArenaName('A')]
 
-        errors = validate_schedule_arenas(matches, arenas)
-        self.assertEqual(3, len(errors))
+        errors = list(validate_schedule_arenas(matches, arenas))
+
+        self.assertEqual(
+            ['nonexistent-arena'] * 3,
+            [x.code for x in errors],
+        )
 
         error = errors[0]
-        self.assertIn('1 (MatchType.league)', error)
-        self.assertIn("arena 'B'", error)
+        self.assertIn('1 (MatchType.league)', error.message)
+        self.assertIn("arena 'B'", error.message)
 
         error = errors[1]
-        self.assertIn('2 (MatchType.knockout)', error)
-        self.assertIn("arena 'C'", error)
+        self.assertIn('2 (MatchType.knockout)', error.message)
+        self.assertIn("arena 'C'", error.message)
 
         error = errors[2]
-        self.assertIn('3 (custom)', error)
-        self.assertIn("arena 'D'", error)
+        self.assertIn('3 (custom)', error.message)
+        self.assertIn("arena 'D'", error.message)
 
 
 class TeamsWithoutMatchesTests(unittest.TestCase):
