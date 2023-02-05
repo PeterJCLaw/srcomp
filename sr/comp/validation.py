@@ -7,17 +7,7 @@ import datetime
 import itertools
 import sys
 from collections import defaultdict
-from typing import (
-    Container,
-    Iterable,
-    Iterator,
-    List,
-    Mapping,
-    NewType,
-    Optional,
-    Sequence,
-    Tuple,
-)
+from typing import Container, Iterable, Iterator, Mapping, NewType, Sequence
 from typing_extensions import Literal
 
 from .comp import SRComp
@@ -38,7 +28,7 @@ META_TEAMS = {NO_TEAM, UNKNOWABLE_TEAM}
 class ValidationError(Exception):
     message: str
     code: str
-    source: Optional[Tuple[ErrorType, object]]
+    source: tuple[ErrorType, object] | None
     level: ErrorLevel = 'error'
 
 
@@ -75,7 +65,7 @@ class NaiveValidationError:
 
 def with_source(
     naive_errors: Iterable[NaiveValidationError],
-    source: Tuple[ErrorType, object],
+    source: tuple[ErrorType, object],
 ) -> Iterator[ValidationError]:
     for error in naive_errors:
         yield error.with_source(*source)
@@ -94,7 +84,7 @@ def join_and(items: Iterable[object]) -> str:
     return " and ".join((", ".join(rest), last))
 
 
-def report_errors(error_type: ErrorType, id_: object, errors: List[str]) -> None:
+def report_errors(error_type: ErrorType, id_: object, errors: list[str]) -> None:
     """
     Print out errors nicely formatted.
 
@@ -133,7 +123,7 @@ def validate(comp: SRComp) -> int:
     :return: The number of errors that have occurred.
     """
 
-    errors: List[ValidationError] = []
+    errors: list[ValidationError] = []
 
     errors += validate_schedule(comp.schedule, comp.teams.keys(), comp.arenas.keys())
 
