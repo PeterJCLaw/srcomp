@@ -323,10 +323,10 @@ class LeagueScores(BaseScores):
 
         # Sum the league scores for each team
         for match_id, match in self.ranked_points.items():
-            for tla, score in match.items():
+            for tla, points in match.items():
                 if tla not in self.teams:
                     raise InvalidTeam(tla, "ranked score for match {}{}".format(*match_id))
-                self.teams[tla].add_league_points(score)
+                self.teams[tla].add_league_points(points)
 
         self.positions = self.rank_league(self.teams)
         r"""
