@@ -144,8 +144,10 @@ def validate_schedule(
     possible_teams: Iterable[TLA],
     possible_arenas: Container[ArenaName],
 ) -> Iterator[ValidationError]:
-    """Check that the schedule contains enough time for all the matches,
-    and that the matches themselves are valid."""
+    """
+    Check that the schedule contains enough time for all the matches,
+    and that the matches themselves are valid.
+    """
 
     # Check that each match features only valid teams
     for num, match in enumerate(schedule.matches):
@@ -252,8 +254,10 @@ def validate_match(
     match: MatchSlot,
     possible_teams: Iterable[TLA],
 ) -> Iterator[NaiveValidationError]:
-    """Check that the teams featuring in a match exist and are only
-    required in one arena at a time."""
+    """
+    Check that the teams featuring in a match exist and are only
+    required in one arena at a time.
+    """
 
     all_teams: list[TLA | None] = []
 
@@ -357,8 +361,11 @@ def validate_match_score(
     match_score: Mapping[TLA, object],
     scheduled_match: Match,
 ) -> Iterator[NaiveValidationError]:
-    """Check that the match awards points to the right teams, by checking
-    that the teams with points were scheduled to appear in the match."""
+    """
+    Check that the match awards points to the right teams, by checking
+    that the teams with points were scheduled to appear in the match.
+    """
+
     # only remove the empty corner marker -- we shouldn't have unknowable
     # teams in the match schedule by the time there's a score for it.
     expected_teams = {x for x in scheduled_match.teams if x is not NO_TEAM}
