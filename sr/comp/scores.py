@@ -14,6 +14,7 @@ from league_ranker import LeaguePoints, RankedPosition
 from . import yaml_loader
 from .match_period import Match, MatchType
 from .types import (
+    ExternalScoreData,
     GamePoints,
     MatchId,
     MatchNumber,
@@ -168,6 +169,12 @@ def load_scores_data(result_dir: Path) -> Iterator[ScoreData]:
     # Find the scores for each match
     for result_file in results_finder(result_dir):
         yield yaml_loader.load(result_file)
+
+
+def load_external_scores_data(result_dir: Path) -> Iterator[ExternalScoreData]:
+    for result_file in result_dir.glob('*.yaml'):
+        raw = yaml_loader.load(result_file)
+        yield from raw['scores']
 
 
 # The scorer that these classes consume should be a class that is compatible
@@ -420,6 +427,34 @@ class TiebreakerScores(KnockoutScores):
     pass
 
 
+def load_external_scores(
+    scores_data: Iterable[ExternalScoreData],
+    teams: Iterable[TLA],
+) -> Mapping[TLA, TeamScore]:
+    """
+    Mechanism to import additional scores from an external source.
+
+    This provides flexibility in the sources of score data.
+    """
+
+    scores = {x: TeamScore() for x in teams}
+
+    for entry in scores_data:
+        tla = TLA(entry['team'])
+        try:
+            team_score = scores[tla]
+        except KeyError:
+            raise InvalidTeam(tla, "external scores data") from None
+
+        game_points = entry.get('game_points')
+        if game_points:
+            team_score.add_game_points(GamePoints(game_points))
+
+        team_score.add_league_points(LeaguePoints(entry['league_points']))
+
+    return scores
+
+
 class Scores:
     """
     A simple class which stores references to the league and knockout scores.
@@ -433,11 +468,17 @@ class Scores:
         scorer: ScorerType,
         num_teams_per_arena: int,
     ) -> Scores:
+        external_scores = load_external_scores(
+            load_external_scores_data(root / 'external'),
+            teams,
+        )
+
         league = LeagueScores(
             load_scores_data(root / 'league'),
             teams,
             scorer,
             num_teams_per_arena,
+            extra=external_scores,
         )
 
         knockout = KnockoutScores(
