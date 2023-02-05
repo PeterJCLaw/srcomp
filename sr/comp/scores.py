@@ -318,8 +318,19 @@ class LeagueScores(BaseScores):
         teams: Iterable[TLA],
         scorer: ScorerType,
         num_teams_per_arena: int,
+        extra: Mapping[TLA, TeamScore] | None = None,
     ):
         super().__init__(scores_data, teams, scorer, num_teams_per_arena)
+
+        if extra:
+            for tla, score in extra.items():
+                try:
+                    team_score = self.teams[tla]
+                except KeyError:
+                    raise InvalidTeam(tla, "extra league points data") from None
+
+                team_score.add_game_points(score.game_points)
+                team_score.add_league_points(score.league_points)
 
         # Sum the league scores for each team
         for match_id, match in self.ranked_points.items():
