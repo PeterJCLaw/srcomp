@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import unittest
-from typing import Iterable, List
+from typing import Iterable, List, Mapping
 
 from sr.comp.scores import LeagueScores, TeamScore
 from sr.comp.types import ScoreData, TLA
@@ -7,17 +9,25 @@ from sr.comp.types import ScoreData, TLA
 from .factories import build_score_data, FakeScorer
 
 
-def load_data(the_data: ScoreData) -> LeagueScores:
+def load_data(
+    the_data: ScoreData,
+    extra: Mapping[TLA, TeamScore] | None = None,
+) -> LeagueScores:
     teams = the_data['teams'].keys()
-    return load_datas([the_data], teams)
+    return load_datas([the_data], teams, extra)
 
 
-def load_datas(the_datas: List[ScoreData], teams: Iterable[TLA]) -> LeagueScores:
+def load_datas(
+    the_datas: List[ScoreData],
+    teams: Iterable[TLA],
+    extra: Mapping[TLA, TeamScore] | None = None,
+) -> LeagueScores:
     scores = LeagueScores(
         the_datas,
         teams,
         FakeScorer,
         num_teams_per_arena=4,
+        extra=extra,
     )
     return scores
 
@@ -61,7 +71,56 @@ class LeagueScoresTests(unittest.TestCase):
 
         league = leagues[id_]
 
-        self.assertEqual({'JMS': 0, 'PAS': 0, 'RUN': 8, 'ICE': 6}, league)
+        self.assertEqual(
+            {'JMS': 0, 'PAS': 0, 'RUN': 8, 'ICE': 6},
+            league,
+            "Wrong league scores for match {}{}".format(*id_),
+        )
+
+        self.assertEqual(
+            {
+                'JMS': TeamScore(0, 4),
+                'PAS': TeamScore(0, 0),
+                'RUN': TeamScore(8, 8),
+                'ICE': TeamScore(6, 2),
+            },
+            scores.teams,
+            "Wrong overall scores",
+        )
+
+    def test_league_points_with_extra(self):
+        scores = load_data(
+            get_score_data(),
+            extra={
+                TLA('JMS'): TeamScore(league=2),
+                TLA('RUN'): TeamScore(league=1, game=3),
+            },
+        )
+
+        leagues = scores.ranked_points
+        self.assertEqual(1, len(leagues))
+
+        id_ = ('A', 123)
+        self.assertIn(id_, leagues)
+
+        league = leagues[id_]
+
+        self.assertEqual(
+            {'JMS': 0, 'PAS': 0, 'RUN': 8, 'ICE': 6},
+            league,
+            "Wrong league scores for match {}{}".format(*id_),
+        )
+
+        self.assertEqual(
+            {
+                'JMS': TeamScore(league=2, game=4),
+                'PAS': TeamScore(league=0, game=0),
+                'RUN': TeamScore(league=9, game=11),
+                'ICE': TeamScore(league=6, game=2),
+            },
+            scores.teams,
+            "Wrong overall scores",
+        )
 
     def test_team_points(self):
         scores = load_basic_data()

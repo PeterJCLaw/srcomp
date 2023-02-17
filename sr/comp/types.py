@@ -64,6 +64,17 @@ Scorer = Union[ValidatingScorer, SimpleScorer]
 ScorerType = Type[Union[ValidatingScorer, SimpleScorer]]
 
 
+class ExternalScoreData(TypedDict):
+    """
+    The expected YAML data format in "external" scores files is a single root
+    key 'scores' whose value is a list of mappings compatible with this type.
+    """
+
+    team: str
+    game_points: NotRequired[int]
+    league_points: int
+
+
 # Locations within the Venue
 
 RegionName = NewType('RegionName', str)
