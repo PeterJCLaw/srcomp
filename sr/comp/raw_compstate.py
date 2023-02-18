@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
-from typing import Any, cast, Iterable, List, overload
+from typing import Any, cast, Collection, Iterable, List, overload
 from typing_extensions import Literal, TypedDict
 
 import yaml
@@ -291,8 +291,13 @@ class RawCompstate:
         """
         self.git(['add', file_path])
 
-    def fetch(self, where: str = 'origin', quiet: bool = False) -> None:
-        self.git(['fetch', where], return_output=quiet)
+    def fetch(
+        self,
+        where: str = 'origin',
+        refspecs: Collection[Commitish] = (),
+        quiet: bool = False,
+    ) -> None:
+        self.git(['fetch', where, *refspecs], return_output=quiet)
 
     def checkout(self, what: str) -> None:
         self.git(['checkout', what])
