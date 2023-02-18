@@ -10,6 +10,15 @@ from .factories import build_match
 
 DUMMY_PATH = os.path.dirname(os.path.abspath(__file__)) + '/dummy'
 
+OLDER_COMMIT = '87565f988ed62b3b16653c656df351d5b7eb2515'  # 2015-02-15
+YOUNGER_COMMIT = 'c0456cb956b006ef3f57b398f2799e769cf5c74e'  # 2016-03-31
+
+# Merged by 6926b13646a543a7ec59c1c707ffa7c889139678, 2014-03-16
+SIBLING_COMMITS = (
+    'a63ed0110120b7c204f0c5a4666007b90facabe9',
+    'ce08e951d53e860eedc5db19bb54321b13b2e977',
+)
+
 
 class RawCompstateTests(unittest.TestCase):
     def test_load(self) -> None:
@@ -82,6 +91,63 @@ class RawCompstateTests(unittest.TestCase):
 
         has_HEAD = state.has_commit('HEAD')
         self.assertTrue(has_HEAD, "Should have HEAD commit!")
+
+    def test_is_parent(self) -> None:
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+
+        with self.subTest(name="Parent of child (linear)"):
+            self.assertTrue(
+                state.is_parent(OLDER_COMMIT, YOUNGER_COMMIT),
+                f"{OLDER_COMMIT} should be found as a parent of {YOUNGER_COMMIT}",
+            )
+
+        with self.subTest(name="Child of parent (linear)"):
+            self.assertFalse(
+                state.is_parent(YOUNGER_COMMIT, OLDER_COMMIT),
+                f"{YOUNGER_COMMIT} should not be found as a parent of {OLDER_COMMIT} "
+                "(which is in fact its parent)",
+            )
+
+        with self.subTest(name="Siblings"):
+            a, b = SIBLING_COMMITS
+            self.assertFalse(
+                state.is_parent(a, b),
+                f"{a} should not be found as a parent of sibling {b}",
+            )
+            self.assertFalse(
+                state.is_parent(b, a),
+                f"{b} should not be found as a parent of sibling {a}",
+            )
+
+        with self.subTest(name="Parent on one side of merge"):
+            a, b = SIBLING_COMMITS
+            self.assertTrue(
+                state.is_parent(a, YOUNGER_COMMIT),
+                f"{a} should be found as a parent of {YOUNGER_COMMIT}",
+            )
+            self.assertTrue(
+                state.is_parent(b, YOUNGER_COMMIT),
+                f"{b} should be found as a parent of {YOUNGER_COMMIT}",
+            )
+
+        with self.subTest(name="Parent on one side of merge (inverted)"):
+            a, b = SIBLING_COMMITS
+            self.assertFalse(
+                state.is_parent(YOUNGER_COMMIT, b),
+                f"{YOUNGER_COMMIT} should not be found as a parent of {b}",
+            )
+            self.assertFalse(
+                state.is_parent(YOUNGER_COMMIT, a),
+                f"{YOUNGER_COMMIT} should not be found as a parent of {a}",
+            )
+
+    def test_has_ancestor(self) -> None:
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        self.assertTrue(state.has_ancestor(OLDER_COMMIT))
+
+    def test_has_descendant(self) -> None:
+        state = RawCompstate(DUMMY_PATH, local_only=True)
+        self.assertFalse(state.has_descendant(OLDER_COMMIT))
 
     def test_git_return_output(self) -> None:
         state = RawCompstate(DUMMY_PATH, local_only=True)

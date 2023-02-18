@@ -223,26 +223,37 @@ class RawCompstate:
         except RuntimeError:
             return False
 
-    def _is_parent(self, parent: Commitish, child: Commitish) -> bool:
-        try:
-            revspec = f'{parent}..{child}'
+    def is_parent(self, parent: Commitish, child: Commitish) -> bool:
+        def any_reachable(by: Commitish, not_by: Commitish) -> bool:
             revs = self.git(
-                ['rev-list', '-n1', revspec, '--'],
+                ['rev-list', '-n1', by, '--not', not_by, '--'],
                 return_output=True,
             )
-            # rev-list prints the revisions which are parents of 'child',
-            # up to and including 'parent'; any output therefore tells us
-            # that they're related
+            # We use rev-list to find the revisions which are reachable by one
+            # commit but not by another commit (potentially including the
+            # commits in question). We actually only need to know if a single
+            # commit is reachable or not since we don't care how far apart the
+            # commits are, only the relation between them.
             return len(revs.strip()) != 0
+
+        try:
+            # There are essentially three possible cases we need to worry about:
+            # - `parent` is truly a parent of `child`
+            # - `child` is actually a parent of `parent`
+            # - the commits are siblings, either side of a fork in the history
+            return (
+                any_reachable(by=child, not_by=parent) and
+                not any_reachable(by=parent, not_by=child)
+            )
         except subprocess.CalledProcessError:
             # One or both revisions are unknown
             return False
 
     def has_ancestor(self, commit: Commitish) -> bool:
-        return self._is_parent(commit, 'HEAD')
+        return self.is_parent(commit, 'HEAD')
 
     def has_descendant(self, commit: Commitish) -> bool:
-        return self._is_parent('HEAD', commit)
+        return self.is_parent('HEAD', commit)
 
     def get_default_branch(self) -> str:
         # Assume the default upstream is called 'origin'
