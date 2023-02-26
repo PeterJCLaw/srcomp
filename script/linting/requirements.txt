@@ -1,7 +1,7 @@
 flake8>=5
 flake8-balanced-wrapping
-flake8-builtins
 flake8-bugbear
+flake8-builtins
 flake8-commas
 flake8-comprehensions
 flake8-debugger
