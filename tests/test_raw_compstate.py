@@ -56,7 +56,7 @@ class RawCompstateTests(unittest.TestCase):
                 'name': 'Blue',
                 'colour': '#A9A9F5',
                 'regions': ['a-group'],
-                'teams': ['BAY', 'BDF', 'BGS', 'BPV', 'BRK', 'BRN', 'BWS',
+                'teams': ['BAY', 'BDF', 'BGS', 'BPV', 'BRK', 'BRN', 'BWS',  # noqa: BWR001
                           'CCR', 'CGS', 'CLF', 'CLY', 'CPR', 'CRB', 'DSF',
                           'EMM', 'GRD', 'GRS', 'GYG', 'HRS', 'HSO', 'HYP',
                           'HZW', 'ICE', 'JMS', 'KDE', 'KES', 'KHS', 'LFG'],
@@ -65,7 +65,7 @@ class RawCompstateTests(unittest.TestCase):
                 'name': 'Green',
                 'colour': 'green',
                 'regions': ['b-group'],
-                'teams': ['LSS', 'MAI', 'MAI2', 'MEA', 'MFG', 'NHS', 'PAG',
+                'teams': ['LSS', 'MAI', 'MAI2', 'MEA', 'MFG', 'NHS', 'PAG',  # noqa: BWR001
                           'PAS', 'PSC', 'QEH', 'QMC', 'QMS', 'RED', 'RGS',
                           'RUN', 'RWD', 'SCC', 'SEN', 'SGS', 'STA', 'SWI',
                           'TBG', 'TTN', 'TWG', 'WYC'],
