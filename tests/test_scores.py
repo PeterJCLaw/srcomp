@@ -133,7 +133,9 @@ class GetScoresTests(unittest.TestCase):
         self.assertIsNotNone(actual, "Should have a valid score")
         self.assertEqual(
             dataclasses.asdict(expected),
-            dataclasses.asdict(actual),
+            # https://github.com/python/mypy/issues/4063
+            # https://github.com/python/typing/issues/930
+            dataclasses.asdict(actual),  # type: ignore[arg-type]
         )
 
     def setUp(self) -> None:
