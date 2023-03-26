@@ -81,7 +81,7 @@ def build_score_data(
             # TypedDicts don't have a way to allow for *extra* keys, which we do
             # want to have here -- these dictionaries are the actual scoring
             # data for the game and so contain arbitrary other keys.
-            TLA(tla): {  # type: ignore[typeddict-item]
+            TLA(tla): {  # type: ignore[typeddict-unknown-key]
                 'score': score,
                 'zone': idx,
             }
