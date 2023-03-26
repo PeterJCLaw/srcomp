@@ -1,4 +1,4 @@
 #!/bin/bash -e
 
-VERSION=$(python setup.py --version)
+VERSION=$(python3 setup.py --version)
 git tag v${VERSION} "$@"
