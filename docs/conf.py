@@ -14,7 +14,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = 'sr.comp'
-copyright = '2015, Student Robotics'  # noqa: A001
+copyright = "2015-2023, SRComp contributors"  # noqa: A001
 
 release = '1.0.0'
 version = '1.0.0'
