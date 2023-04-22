@@ -3,8 +3,8 @@ SRComp
 
 |Build Status| |Docs Status|
 
-Yet Another attempt at some Competition Software for `Student
-Robotics <http://srobo.org>`__.
+Reliable software for running robotics competitions, primarily used by
+`Student Robotics <https://studentrobotics.org>`__.
 
 The `SRComp wiki <https://github.com/PeterJCLaw/srcomp/wiki>`__ provides
 an overview of the suite as a whole.
@@ -58,4 +58,4 @@ Development
    :target: https://circleci.com/gh/PeterJCLaw/srcomp/tree/main
 
 .. |Docs Status| image:: https://readthedocs.org/projects/srcomp/badge/?version=latest
-   :target: http://srcomp.readthedocs.org/
+   :target: https://srcomp.readthedocs.org/
