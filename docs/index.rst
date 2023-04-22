@@ -1,5 +1,5 @@
-Student Robotics Competition
-============================
+Student Robotics Competition Software
+=====================================
 
 User Guide
 ----------
