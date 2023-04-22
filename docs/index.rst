@@ -11,8 +11,6 @@ User Guide
    history
    compstate
    schedule
-   league
-   knockout
 
 API Reference
 -------------
