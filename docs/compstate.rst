@@ -10,6 +10,9 @@ Their directory structure looks something like this:
 
    ├── arenas.yaml
    ├── awards.yaml
+   ├── [deployments.yaml]
+   ├── [external]
+   │   └── [any].yaml
    ├── league
    │   └── [arena]
    │       └── [match].yaml
@@ -22,4 +25,5 @@ Their directory structure looks something like this:
    │   ├── score.py
    │   ├── [converter.py]
    │   └── [update.html]
+   ├── shepherding.yaml
    └── teams.yaml
