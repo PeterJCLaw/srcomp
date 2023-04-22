@@ -19,5 +19,7 @@ Their directory structure looks something like this:
    ├── league.yaml
    ├── schedule.yaml
    ├── scoring
-   │   └── [score.py]
+   │   ├── score.py
+   │   ├── [converter.py]
+   │   └── [update.html]
    └── teams.yaml
