@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import dataclasses
 from collections import OrderedDict
 from pathlib import Path
-from typing import NamedTuple, NewType
+from typing import NewType
 
 from . import yaml_loader
 from .types import ArenaName, Colour
@@ -12,13 +13,15 @@ from .types import ArenaName, Colour
 CornerNumber = NewType('CornerNumber', int)
 
 
-class Arena(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class Arena:
     name: ArenaName
     display_name: str
     colour: Colour
 
 
-class Corner(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class Corner:
     number: CornerNumber
     colour: Colour
 

@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
-from typing import NamedTuple
 
 from . import yaml_loader
 from .types import MatchNumber, TLA
 
 
-class Team(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class Team:
     tla: TLA
     name: str
     rookie: bool

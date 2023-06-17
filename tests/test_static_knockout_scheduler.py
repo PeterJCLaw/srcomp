@@ -1,3 +1,4 @@
+import dataclasses
 import unittest
 from collections import OrderedDict
 from datetime import datetime, timedelta
@@ -188,7 +189,7 @@ def build_5_matches(places, *, first_match_number=0):
     ]
 
     # Final has different resolution expectations
-    matches[-1] = matches[-1]._replace(use_resolved_ranking=False)
+    matches[-1] = dataclasses.replace(matches[-1], use_resolved_ranking=False)
 
     return [{'A': match} for match in matches]
 

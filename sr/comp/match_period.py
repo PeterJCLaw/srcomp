@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+import dataclasses
 import datetime
 from enum import Enum, unique
-from typing import Mapping, NamedTuple, NewType
+from typing import Mapping, NewType
 
 from .types import ArenaName, MatchNumber, TLA
 
 
-class Delay(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class Delay:
     delay: datetime.timedelta
     time: datetime.datetime
 
@@ -21,7 +23,8 @@ class MatchType(Enum):
     tiebreaker = 'tiebreaker'
 
 
-class Match(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class Match:
     num: MatchNumber
     display_name: str
     arena: ArenaName
@@ -35,7 +38,8 @@ class Match(NamedTuple):
 MatchSlot = NewType('MatchSlot', Mapping[ArenaName, Match])
 
 
-class MatchPeriod(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class MatchPeriod:
     start_time: datetime.datetime
     end_time: datetime.datetime
     max_end_time: datetime.datetime
