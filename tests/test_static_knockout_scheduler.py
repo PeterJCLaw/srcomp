@@ -203,7 +203,7 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
         for i, e in enumerate(expected_matches):
             a = period.matches[i]
 
-            self.assertEqual(e, a, "Match {0} in the knockouts".format(i))
+            self.assertEqual(e, a, f"Match {i} in the knockouts")
 
     def test_four_teams_before(self):
         # Add an un-scored league match so that we don't appear to have played them all

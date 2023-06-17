@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import unittest
 from collections import OrderedDict
-from typing import cast, Dict, Mapping
+from typing import cast, Mapping
 
 from league_ranker import LeaguePoints, RankedPosition
 
@@ -13,7 +15,7 @@ class KnockoutScoresTests(unittest.TestCase):
         self,
         match_points: Mapping[str, float],
         league_positions: Mapping[str, int],
-    ) -> Dict[TLA, RankedPosition]:
+    ) -> dict[TLA, RankedPosition]:
         return KnockoutScores.calculate_ranking(
             {TLA(k): cast(LeaguePoints, v) for k, v in match_points.items()},
             {TLA(k): LeaguePosition(v) for k, v in league_positions.items()},

@@ -363,7 +363,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
     def test_timings_no_delays(self):
         positions = OrderedDict()
         for i in range(16):
-            positions['team-{}'.format(i)] = i
+            positions[f'team-{i}'] = i
 
         scheduler = get_scheduler(positions=positions)
         scheduler.add_knockouts()
@@ -400,7 +400,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
     def test_timings_with_delays(self):
         positions = OrderedDict()
         for i in range(16):
-            positions['team-{}'.format(i)] = i
+            positions[f'team-{i}'] = i
 
         delays = [
             Delay(
@@ -448,7 +448,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
     def test_timings_with_delays_during_gaps(self):
         positions = OrderedDict()
         for i in range(16):
-            positions['team-{}'.format(i)] = i
+            positions[f'team-{i}'] = i
 
         delays = [
             Delay(

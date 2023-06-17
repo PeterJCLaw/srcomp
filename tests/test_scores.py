@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import collections
 import dataclasses
 import unittest
-from typing import List, Mapping, Optional, Tuple
+from typing import Mapping
 from unittest import mock
 
 from league_ranker import LeaguePoints, RankedPosition
@@ -22,10 +24,10 @@ from .factories import build_match, build_score_data, FakeScorer
 class LastScoredMatchTests(unittest.TestCase):
     def assertLastScoredMatch(
         self,
-        league_lsm: Optional[int],
-        knockout_lsm: Optional[int],
-        tiebreaker_lsm: Optional[int],
-        expected: Optional[int],
+        league_lsm: int | None,
+        knockout_lsm: int | None,
+        tiebreaker_lsm: int | None,
+        expected: int | None,
     ) -> None:
         league = mock.Mock(last_scored_match=league_lsm)
         knockout = mock.Mock(last_scored_match=knockout_lsm)
@@ -66,7 +68,7 @@ class GetScoresTests(unittest.TestCase):
     def as_normalised_points(self, data: Mapping[str, int]) -> Mapping[TLA, LeaguePoints]:
         return {TLA(x): LeaguePoints(y) for x, y in data.items()}
 
-    def as_ranked_position(self, data: List[Tuple[str, int]]) -> Mapping[TLA, RankedPosition]:
+    def as_ranked_position(self, data: list[tuple[str, int]]) -> Mapping[TLA, RankedPosition]:
         return collections.OrderedDict(
             (TLA(x), RankedPosition(y))
             for x, y in data
@@ -120,7 +122,7 @@ class GetScoresTests(unittest.TestCase):
         arena: str,
         type_: MatchType,
         use_resolved_ranking: bool = False,
-    ) -> Optional[MatchScore]:
+    ) -> MatchScore | None:
         scores = self.build_scores()
         return scores.get_scores(build_match(
             num=num,
@@ -129,7 +131,7 @@ class GetScoresTests(unittest.TestCase):
             use_resolved_ranking=use_resolved_ranking,
         ))
 
-    def assertMatchScore(self, expected: MatchScore, actual: Optional[MatchScore]) -> None:
+    def assertMatchScore(self, expected: MatchScore, actual: MatchScore | None) -> None:
         self.assertIsNotNone(actual, "Should have a valid score")
         self.assertEqual(
             dataclasses.asdict(expected),

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import unittest
-from typing import Iterable, List, Mapping
+from typing import Iterable, Mapping
 
 from sr.comp.scores import LeagueScores, TeamScore
 from sr.comp.types import ScoreData, TLA
@@ -18,7 +18,7 @@ def load_data(
 
 
 def load_datas(
-    the_datas: List[ScoreData],
+    the_datas: list[ScoreData],
     teams: Iterable[TLA],
     extra: Mapping[TLA, TeamScore] | None = None,
 ) -> LeagueScores:

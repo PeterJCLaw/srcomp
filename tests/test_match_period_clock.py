@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import datetime
 import unittest
-from typing import List, Optional
 
 from sr.comp.match_period import MatchPeriod, MatchSlot, MatchType
 from sr.comp.match_period_clock import MatchPeriodClock, OutOfTimeException
@@ -12,9 +13,9 @@ class MatchPeriodClockTestsBase(unittest.TestCase):
         self,
         start: datetime.datetime,
         end: datetime.datetime,
-        max_end: Optional[datetime.datetime] = None,
+        max_end: datetime.datetime | None = None,
         desc: str = '',
-        matches: Optional[List[MatchSlot]] = None,
+        matches: list[MatchSlot] | None = None,
         type_: MatchType = MatchType.league,
     ) -> MatchPeriod:
         return MatchPeriod(start, end, max_end or end, desc, matches or [], type_)

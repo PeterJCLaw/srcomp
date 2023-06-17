@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import datetime
 import random
-from typing import Dict, Iterable, Mapping, Optional, Sequence, TypeVar
+from typing import Iterable, Mapping, Sequence, TypeVar
 
 from dateutil.tz import UTC
 
@@ -20,7 +22,7 @@ T = TypeVar('T')
 def build_match(
     num: int = 0,
     arena: str = 'main',
-    teams: Sequence[Optional[TLA]] = (),
+    teams: Sequence[TLA | None] = (),
     start_time: datetime.datetime = datetime.datetime(2020, 1, 25, 11, 0, tzinfo=UTC),
     end_time: datetime.datetime = datetime.datetime(2020, 1, 25, 11, 5, tzinfo=UTC),
     type_: MatchType = MatchType.league,
@@ -28,7 +30,7 @@ def build_match(
 ) -> Match:
     return Match(
         MatchNumber(num),
-        "Match {n}".format(n=num),
+        f"Match {num}",
         ArenaName(arena),
         list(teams),
         start_time,
@@ -44,11 +46,11 @@ class FakeScorer:
     def __init__(
         self,
         score_data: Mapping[TLA, ScoreTeamData],
-        arena_data_unused: Optional[object] = None,
+        arena_data_unused: object | None = None,
     ) -> None:
         self.score_data = score_data
 
-    def calculate_scores(self) -> Dict[TLA, GamePoints]:
+    def calculate_scores(self) -> dict[TLA, GamePoints]:
         scores = {}
         for team, info in self.score_data.items():
             scores[team] = info['score']  # type: ignore[typeddict-item]
@@ -64,7 +66,7 @@ def shuffled(items: Iterable[T]) -> Iterable[T]:
 def build_score_data(
     num: int = 123,
     arena: str = 'A',
-    scores: Optional[Mapping[str, int]] = None,
+    scores: Mapping[str, int] | None = None,
 ) -> ScoreData:
     if not scores:
         scores = {

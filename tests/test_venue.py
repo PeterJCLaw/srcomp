@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import datetime
 import unittest
 from pathlib import Path
-from typing import cast, Iterable, overload, Union
+from typing import cast, Iterable, overload
 from typing_extensions import Literal
 from unittest import mock
 
@@ -82,13 +84,13 @@ def mock_loader(name: Literal['SHPD']) -> ShepherdingData:
 
 def mock_loader(
     name: Literal['LYT', 'SHPD'],
-) -> Union[LayoutData, ShepherdingData]:
+) -> LayoutData | ShepherdingData:
     if name == 'LYT':
         return mock_layout_loader()
     elif name == 'SHPD':
         return mock_shepherding_loader()
     else:
-        raise ValueError("Unexpected file name passed '{0}'".format(name))
+        raise ValueError(f"Unexpected file name passed '{name}'")
 
 
 class VenueTests(unittest.TestCase):
@@ -98,7 +100,7 @@ class VenueTests(unittest.TestCase):
         return Venue(teams, cast(Path, 'LYT'), cast(Path, 'SHPD'))
 
     def test_invalid_region(self) -> None:
-        def my_mock_loader(name: Literal['LYT', 'SHPD']) -> Union[LayoutData, ShepherdingData]:
+        def my_mock_loader(name: Literal['LYT', 'SHPD']) -> LayoutData | ShepherdingData:
             if name == 'SHPD':
                 res = mock_loader(name)
                 res['shepherds'][0]['regions'].append(RegionName('invalid-region'))
@@ -134,7 +136,7 @@ class VenueTests(unittest.TestCase):
             self.assertEqual(set(), lte.missing)
 
     def test_duplicate_teams(self) -> None:
-        def my_mock_loader(name: Literal['LYT', 'SHPD']) -> Union[LayoutData, ShepherdingData]:
+        def my_mock_loader(name: Literal['LYT', 'SHPD']) -> LayoutData | ShepherdingData:
             if name == 'LYT':
                 res = mock_loader(name)
                 res['teams'][1]['teams'].append(TLA('ABC'))

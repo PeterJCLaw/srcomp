@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import os
 import unittest
 from datetime import datetime, timedelta
 from io import StringIO
-from typing import cast, Sequence, Set, Tuple
+from typing import cast, Sequence
 from unittest import mock
 
 from sr.comp.comp import SRComp
@@ -37,7 +39,7 @@ class ValidateMatchTests(unittest.TestCase):
     def test_unknowable_entrants(self) -> None:
         teams_a = [UNKNOWABLE_TEAM] * 4
         teams_b = [UNKNOWABLE_TEAM] * 4
-        teams: Set[TLA] = set()
+        teams: set[TLA] = set()
         knockout_match = MatchSlot({
             ArenaName('A'): build_match(teams=teams_a),
             ArenaName('B'): build_match(teams=teams_b),
@@ -273,7 +275,7 @@ class FindMissingScoresTests(unittest.TestCase):
 
         missing = find_missing_scores(MatchType.knockout, match_ids, last_match, schedule)
 
-        expected: Sequence[Tuple[MatchNumber, Set[ArenaName]]] = []
+        expected: Sequence[tuple[MatchNumber, set[ArenaName]]] = []
         self.assertEqual(expected, missing)
 
     def test_knockouts_missing(self) -> None:
