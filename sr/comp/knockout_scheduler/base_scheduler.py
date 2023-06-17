@@ -86,8 +86,7 @@ class BaseKnockoutScheduler:
                 if match.type != MatchType.league:
                     continue
 
-                if (match.arena, match.num) not in \
-                        self.scores.league.game_points:
+                if (match.arena, match.num) not in self.scores.league.game_points:
                     return False
 
         return True
