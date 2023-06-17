@@ -26,8 +26,8 @@ class TeamScoreTests(unittest.TestCase):
 
     def test_not_equal_none(self) -> None:
         ts = TeamScore(game=GamePoints(5), league=LeaguePoints(4))
-        self.assertFalse(ts == None)  # noqa:E711  # intentional None equality check
-        self.assertTrue(ts != None)  # noqa:E711  # intentional None equality check
+        self.assertFalse(ts == None)  # noqa: E711  # intentional None equality check
+        self.assertTrue(ts != None)  # noqa: E711  # intentional None equality check
 
     def test_not_equal_empty(self) -> None:
         ts1 = TeamScore()
