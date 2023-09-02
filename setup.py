@@ -12,7 +12,7 @@ setup(
         'Code': 'https://github.com/PeterJCLaw/srcomp',
         'Issue tracker': 'https://github.com/PeterJCLaw/srcomp/issues',
     },
-    packages=find_namespace_packages(exclude=('tests',)),
+    packages=find_namespace_packages(include=['sr.*']),
     package_data={'sr.comp': ['py.typed']},
     namespace_packages=['sr', 'sr.comp'],
     description="Reliable software for running robotics competitions",
