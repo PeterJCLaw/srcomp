@@ -106,6 +106,7 @@ def report_errors(error_type: ErrorType, id_: object, errors: list[str]) -> None
 
 
 def report_validation_errors(errors: Sequence[ValidationError]) -> None:
+    source: tuple[ErrorType, object] | None
     for source, errors_group in itertools.groupby(errors, key=lambda x: x.source):
         messages = [x.message for x in errors_group]
         if source:
