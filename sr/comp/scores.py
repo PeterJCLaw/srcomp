@@ -246,7 +246,13 @@ class BaseScores:
         if match_id in self.game_points:
             raise DuplicateScoresheet(match_id)
 
-        game_points = get_validated_scores(self._scorer, score_data)
+        try:
+            game_points = get_validated_scores(self._scorer, score_data)
+        except Exception as e:
+            raise RuntimeError(
+                "Error processing score for match {}{}".format(*match_id),
+            ) from e
+
         self.game_points[match_id] = game_points
 
         # Build the disqualification dict
