@@ -32,22 +32,6 @@ class ValidationError(Exception):
     level: ErrorLevel = 'error'
 
 
-class ScheduleValidationError(ValidationError):
-    def __init__(
-        self,
-        message: str,
-        code: str,
-        source: str = '',
-        level: ErrorLevel = 'error',
-    ) -> None:
-        super().__init__(
-            message=message,
-            code=code,
-            source=(ErrorType('Schedule'), source),
-            level=level,
-        )
-
-
 @dataclasses.dataclass(frozen=True)
 class NaiveValidationError:
     message: str
@@ -177,19 +161,21 @@ def validate_schedule_count(schedule: MatchSchedule) -> Iterator[ValidationError
     actual = schedule.n_league_matches
 
     if planned > actual:
-        yield ScheduleValidationError(
+        yield ValidationError(
             "Only contains enough time for {} matches, {} are planned".format(
                 actual,
                 planned,
             ),
             code='not-enough-time',
+            source=(ErrorType('Schedule'), None),
             level='warning',
         )
 
     if planned == 0:
-        yield ScheduleValidationError(
+        yield ValidationError(
             "Doesn't contain any matches",
             code='no-matches-scheduled',
+            source=(ErrorType('Schedule'), None),
             level='warning',
         )
 
