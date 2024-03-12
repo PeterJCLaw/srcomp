@@ -1,3 +1,1 @@
-# Need a version <4.4 so sphinx's dependency on importlib-metadata doesn't
-# conflict with flake8's.
-Sphinx==4.3.2
+Sphinx
