@@ -1,10 +1,1 @@
-# Need a version <4.4 so sphinx's dependency on importlib-metadata doesn't
-# conflict with flake8's.
-Sphinx==4.3.2
-
-# Pins for contrib versions which supports the Sphinx version we have pinned:
-sphinxcontrib.applehelp<1.0.8
-sphinxcontrib.devhelp<1.0.6
-sphinxcontrib.htmlhelp<2.0.5
-sphinxcontrib.serializinghtml<1.1.10
-sphinxcontrib.qthelp<1.0.7
+Sphinx
