@@ -57,7 +57,10 @@ class StaticScheduler(BaseKnockoutScheduler):
         if team_ref.startswith('S'):
             # get a seeded position
             pos = int(team_ref[1:])
-            pos -= 1  # seed numbers are 1 based
+            # seed numbers are 1 based
+            if pos < 1:
+                raise ValueError(f"Invalid seed {team_ref!r} (seed numbers start at 1)")
+            pos -= 1
             try:
                 return self._knockout_seeds[pos]
             except IndexError:
