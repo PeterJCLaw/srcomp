@@ -112,7 +112,7 @@ class StaticScheduler(BaseKnockoutScheduler):
             raise ValueError(
                 f"Unexpected number of teams in match {num} (round {round_num}); "
                 f"got {len(teams)}, expecting {self.num_teams_per_arena}." + (
-                    "Fill any expected empty places with `null`"
+                    " Fill any expected empty places with `null`."
                     if len(teams) < self.num_teams_per_arena
                     else ""
                 ),
