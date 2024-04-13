@@ -108,9 +108,15 @@ class StaticScheduler(BaseKnockoutScheduler):
             for team_ref in match_info['teams']
         ]
 
-        if len(teams) < self.num_teams_per_arena:
-            # Fill empty zones with None
-            teams += [None] * (self.num_teams_per_arena - len(teams))
+        if len(teams) != self.num_teams_per_arena:
+            raise ValueError(
+                f"Unexpected number of teams in match {num} (round {round_num}); "
+                f"got {len(teams)}, expecting {self.num_teams_per_arena}." + (
+                    "Fill any expected empty places with `null`"
+                    if len(teams) < self.num_teams_per_arena
+                    else ""
+                ),
+            )
 
         display_name = self.get_match_display_name(
             rounds_remaining,
