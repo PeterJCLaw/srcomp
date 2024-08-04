@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, Iterable, Iterator, Mapping, Sequence, TypeVar
+from typing import Any, TypeVar
 from typing_extensions import TypedDict
 
 import dateutil.tz

@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import datetime
 import unittest
+from collections.abc import Iterable
 from pathlib import Path
-from typing import cast, Iterable, overload
+from typing import cast, overload
 from typing_extensions import Literal
 from unittest import mock
 

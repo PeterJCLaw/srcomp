@@ -3,7 +3,7 @@ from __future__ import annotations
 import collections
 import dataclasses
 import unittest
-from typing import Mapping
+from collections.abc import Mapping
 from unittest import mock
 
 from league_ranker import LeaguePoints, RankedPosition

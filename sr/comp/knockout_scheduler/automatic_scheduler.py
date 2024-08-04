@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable, Mapping, Sized
 from datetime import timedelta
-from typing import Iterable, Mapping, Sized, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from ..match_period import Match, MatchSlot, MatchType
 from ..match_period_clock import MatchPeriodClock, OutOfTimeException

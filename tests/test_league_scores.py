@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import unittest
-from typing import Iterable, Mapping
+from collections.abc import Iterable, Mapping
 
 from sr.comp.scores import LeagueScores, TeamScore
 from sr.comp.types import ScoreData, TLA

@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import dataclasses
 from collections import OrderedDict
+from collections.abc import Iterable, Iterator, Mapping
 from functools import total_ordering
 from pathlib import Path
-from typing import Iterable, Iterator, Mapping, NewType, TypeVar
+from typing import NewType, TypeVar
 
 import league_ranker as ranker
 from league_ranker import LeaguePoints, RankedPosition

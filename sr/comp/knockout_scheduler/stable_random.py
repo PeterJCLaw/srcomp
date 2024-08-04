@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import hashlib
-from typing import MutableSequence, TypeVar
+from collections.abc import MutableSequence
+from typing import TypeVar
 
 T = TypeVar('T')
 

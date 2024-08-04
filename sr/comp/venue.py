@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Iterable, Mapping
 from itertools import chain
 from pathlib import Path
-from typing import Generic, Iterable, Mapping, TypeVar
+from typing import Generic, TypeVar
 
 from . import yaml_loader
 from .matches import StagingOffsets

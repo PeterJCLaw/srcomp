@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Mapping
 from enum import Enum, unique
-from typing import Mapping, NamedTuple, NewType
+from typing import NamedTuple, NewType
 
 from .types import ArenaName, MatchNumber, TLA
 

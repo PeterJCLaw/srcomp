@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import datetime
 import random
-from typing import Iterable, Mapping, Sequence, TypeVar
+from collections.abc import Iterable, Mapping, Sequence
+from typing import TypeVar
 
 from dateutil.tz import UTC
 

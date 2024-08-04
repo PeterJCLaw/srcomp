@@ -1,17 +1,8 @@
 from __future__ import annotations
 
 import datetime
-from typing import (
-    Any,
-    Dict,
-    List,
-    Mapping,
-    NewType,
-    runtime_checkable,
-    Tuple,
-    Type,
-    Union,
-)
+from collections.abc import Mapping
+from typing import Any, NewType, runtime_checkable, Union
 from typing_extensions import NotRequired, Protocol, TypedDict
 
 TLA = NewType('TLA', str)
@@ -22,7 +13,7 @@ Colour = NewType('Colour', str)
 ArenaName = NewType('ArenaName', str)
 
 MatchNumber = NewType('MatchNumber', int)
-MatchId = Tuple[ArenaName, MatchNumber]
+MatchId = tuple[ArenaName, MatchNumber]
 
 YAMLData = Any
 
@@ -73,7 +64,7 @@ class ValidatingScorer(SimpleScorer, Protocol):
 
 
 Scorer = Union[ValidatingScorer, SimpleScorer]
-ScorerType = Type[Union[ValidatingScorer, SimpleScorer]]
+ScorerType = type[Union[ValidatingScorer, SimpleScorer]]
 
 
 class ExternalScoreData(TypedDict):
@@ -134,7 +125,7 @@ class Region(TypedDict):
     shepherds: ShepherdingArea
 
 
-LeagueMatches = NewType('LeagueMatches', Dict[int, Dict[ArenaName, List[TLA]]])
+LeagueMatches = NewType('LeagueMatches', dict[int, dict[ArenaName, list[TLA]]])
 
 
 class LeagueData(TypedDict):
@@ -151,4 +142,4 @@ class DelayData(TypedDict):
     time: datetime.datetime
 
 
-AwardsData = NewType('AwardsData', Dict[str, Union[TLA, List[TLA]]])
+AwardsData = NewType('AwardsData', dict[str, Union[TLA, list[TLA]]])

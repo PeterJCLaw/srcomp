@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Mapping, TYPE_CHECKING
+from collections.abc import Iterable, Mapping
+from typing import TYPE_CHECKING
 
 from ..match_period import Match, MatchPeriod, MatchType
 from ..scores import Scores

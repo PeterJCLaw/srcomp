@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Iterable, Iterator
+from collections.abc import Iterable, Iterator
 
 from .match_period import Delay, MatchPeriod
 

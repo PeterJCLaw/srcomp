@@ -7,7 +7,8 @@ import datetime
 import itertools
 import sys
 from collections import defaultdict
-from typing import Container, Iterable, Iterator, Mapping, NewType, Sequence
+from collections.abc import Container, Iterable, Iterator, Mapping, Sequence
+from typing import NewType
 from typing_extensions import Literal
 
 from .comp import SRComp

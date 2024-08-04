@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import os
 import unittest
+from collections.abc import Sequence
 from datetime import datetime, timedelta
 from io import StringIO
-from typing import cast, Sequence
+from typing import cast
 from unittest import mock
 
 from sr.comp.comp import SRComp

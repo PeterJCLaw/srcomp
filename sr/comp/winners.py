@@ -11,9 +11,9 @@ The awards calculated are:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from enum import Enum, unique
 from pathlib import Path
-from typing import List, Mapping
 
 from league_ranker import RankedPosition
 
@@ -42,7 +42,7 @@ class Award(Enum):
     web = 'web'              # Online Presence award
 
 
-Winners = Mapping[Award, List[TLA]]
+Winners = Mapping[Award, list[TLA]]
 
 
 def _compute_main_awards(scores: Scores, final_match_info: Match) -> Winners:

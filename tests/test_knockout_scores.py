@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import unittest
 from collections import OrderedDict
-from typing import cast, Mapping
+from collections.abc import Mapping
+from typing import cast
 
 from league_ranker import LeaguePoints, RankedPosition
 

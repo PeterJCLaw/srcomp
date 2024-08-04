@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Collection, Iterable
 from pathlib import Path
-from typing import Any, cast, Collection, Iterable, List, overload
+from typing import Any, cast, overload
 from typing_extensions import Literal, TypedDict
 
 import yaml
@@ -57,7 +58,7 @@ class RawCompstate:
 
         layout = self.layout['teams']
         layout_map = {r['name']: r for r in layout}
-        shepherds = cast(List[ShepherdInfo], self.shepherding['shepherds'])
+        shepherds = cast(list[ShepherdInfo], self.shepherding['shepherds'])
 
         for s in shepherds:
             regions = s['regions']
