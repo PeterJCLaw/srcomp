@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 import dateutil.parser
-import dateutil.tz
 import yaml
 
 from .types import YAMLData

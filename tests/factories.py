@@ -5,8 +5,6 @@ import random
 from collections.abc import Iterable, Mapping, Sequence
 from typing import TypeVar
 
-from dateutil.tz import UTC
-
 from sr.comp.match_period import Match, MatchType
 from sr.comp.types import (
     ArenaName,
@@ -16,6 +14,8 @@ from sr.comp.types import (
     ScoreTeamData,
     TLA,
 )
+
+UTC = datetime.timezone.utc
 
 T = TypeVar('T')
 
