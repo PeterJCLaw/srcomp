@@ -1,7 +1,17 @@
 from __future__ import annotations
 
 import datetime
-from typing import Any, Dict, List, Mapping, NewType, Tuple, Type, Union
+from typing import (
+    Any,
+    Dict,
+    List,
+    Mapping,
+    NewType,
+    runtime_checkable,
+    Tuple,
+    Type,
+    Union,
+)
 from typing_extensions import NotRequired, Protocol, TypedDict
 
 TLA = NewType('TLA', str)
@@ -43,6 +53,7 @@ class ScoreData(_ScoreData, total=False):
     other: ScoreOtherData
 
 
+@runtime_checkable
 class SimpleScorer(Protocol):
     def __init__(
         self,
@@ -55,6 +66,7 @@ class SimpleScorer(Protocol):
         ...
 
 
+@runtime_checkable
 class ValidatingScorer(SimpleScorer, Protocol):
     def validate(self, extra_data: ScoreOtherData | None) -> None:
         ...

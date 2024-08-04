@@ -6,7 +6,7 @@ import dataclasses
 from collections import OrderedDict
 from functools import total_ordering
 from pathlib import Path
-from typing import cast, Iterable, Iterator, Mapping, NewType, TypeVar
+from typing import Iterable, Iterator, Mapping, NewType, TypeVar
 
 import league_ranker as ranker
 from league_ranker import LeaguePoints, RankedPosition
@@ -141,9 +141,7 @@ def get_validated_scores(
     # Also check the validation, if supported. Explicit pre-check so
     # that we don't accidentally hide any AttributeErrors (or similar)
     # which come from inside the method.
-    if hasattr(scorer, 'validate'):
-        # TODO(python-upgrade): move to using runtime_checkable once we're Python 3.8+ only.
-        scorer = cast(ValidatingScorer, scorer)
+    if isinstance(scorer, ValidatingScorer):
         scorer.validate(extra_data)
 
     return scores

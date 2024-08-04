@@ -99,11 +99,11 @@ references:
   python-full-version-matrix: &python-full-version-matrix
     matrix:
       parameters:
-        version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        version: ["3.9", "3.10", "3.11"]
   python-top-and-bottom-version-matrix: &python-top-and-bottom-version-matrix
     matrix:
       parameters:
-        version: ["3.7", "3.11"]
+        version: ["3.9", "3.11"]
   filter-tags: &filter-tags
     filters:
       branches:
@@ -199,7 +199,7 @@ jobs:
 
   release:
     docker:
-      - image: cimg/python:3.7
+      - image: cimg/python:3.11
     steps:
       - checkout
 
