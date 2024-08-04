@@ -180,6 +180,48 @@ jobs:
             source venv/bin/activate
             ./run-tests
 
+  test-min-deps:
+    <<: *parametrised-python-executor
+
+    steps:
+      - checkout
+
+      - run:
+          name: Checkout submodules
+          command: |
+            git submodule update --init --recursive
+
+      - *build-checksum-file
+
+      - restore_cache:
+          keys:
+            - deps-min-2-py<< parameters.version >>-{{ checksum ".checksum" }}
+      - run:
+          name: Install Dependencies
+          command: |
+            set -x
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install uv
+            uv pip install --resolution lowest-direct -r all-requirements.txt
+            pip list
+      - save_cache:
+          key: deps-min-2-py<< parameters.version >>-{{ checksum ".checksum" }}
+          paths:
+            - venv
+
+      - run:
+          name: Run Tests
+          command: |
+            source venv/bin/activate
+            ./run-tests
+
+      - run:
+          name: Run Tests
+          command: |
+            source venv/bin/activate
+            ./run-tests
+
   typecheck:
     <<: *parametrised-python-executor
 
@@ -229,6 +271,8 @@ workflows:
           <<: *python-top-and-bottom-version-matrix
       - test:
           <<: *python-full-version-matrix
+      - test-min-deps:
+          <<: *python-full-version-matrix
       - typecheck:
           <<: *python-top-and-bottom-version-matrix
 
@@ -243,6 +287,9 @@ workflows:
       - test:
           <<: *python-full-version-matrix
           <<: *filter-tags
+      - test-min-deps:
+          <<: *python-full-version-matrix
+          <<: *filter-tags
       - typecheck:
           <<: *python-top-and-bottom-version-matrix
           <<: *filter-tags
@@ -250,6 +297,7 @@ workflows:
           <<: *filter-tags
           requires:
             - docs
-            - test
             - lint
+            - test
+            - test-min-deps
             - typecheck
