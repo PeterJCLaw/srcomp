@@ -51,8 +51,8 @@ Development
 **Install**:
 ``pip install -e . -r dev-requirements.txt``
 
-**Test**:
-``./run-tests``
+**Checks**:
+``./script/check``
 
 .. |Build Status| image:: https://circleci.com/gh/PeterJCLaw/srcomp/tree/main.svg?style=svg
    :target: https://circleci.com/gh/PeterJCLaw/srcomp/tree/main

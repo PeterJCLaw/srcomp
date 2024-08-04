@@ -178,7 +178,7 @@ jobs:
           name: Run Tests
           command: |
             source venv/bin/activate
-            ./run-tests
+            ./script/testing/test
 
   test-min-deps:
     <<: *parametrised-python-executor
@@ -214,13 +214,13 @@ jobs:
           name: Run Tests
           command: |
             source venv/bin/activate
-            ./run-tests
+            ./script/testing/test
 
       - run:
           name: Run Tests
           command: |
             source venv/bin/activate
-            ./run-tests
+            ./script/testing/test
 
   typecheck:
     <<: *parametrised-python-executor
