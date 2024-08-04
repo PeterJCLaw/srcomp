@@ -2,4 +2,4 @@
 
 cd $(dirname $(dirname  $(dirname $0)))
 
-exec python setup.py build_sphinx "$@"
+exec sphinx-build -M html docs build/sphinx/ "$@"

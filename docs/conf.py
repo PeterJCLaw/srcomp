@@ -18,4 +18,6 @@ copyright = "2015-2023, SRComp contributors"  # noqa: A001
 
 html_theme = 'alabaster'
 
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+}
