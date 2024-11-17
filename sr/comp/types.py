@@ -25,9 +25,9 @@ ScoreArenaZonesData = NewType('ScoreArenaZonesData', object)
 ScoreOtherData = NewType('ScoreOtherData', object)
 
 
-class ScoreTeamData(TypedDict, total=False):
-    disqualified: bool
-    present: bool
+class ScoreTeamData(TypedDict):
+    disqualified: NotRequired[bool]
+    present: NotRequired[bool]
 
     # Unused by SRComp
     zone: int
