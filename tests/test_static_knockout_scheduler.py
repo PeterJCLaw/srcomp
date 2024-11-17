@@ -7,6 +7,7 @@ from sr.comp.knockout_scheduler import StaticScheduler, UNKNOWABLE_TEAM
 from sr.comp.knockout_scheduler.static_scheduler import (
     InvalidReferenceError,
     InvalidSeedError,
+    WrongNumberOfTeamsError,
 )
 from sr.comp.match_period import Match, MatchType
 from sr.comp.teams import Team
@@ -520,3 +521,45 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
         # Add an un-scored league match so that we don't appear to have played them all
         league_matches = [{'A': build_match(arena='A')}]
         self.assertInvalidSeed('S9999', matches=league_matches)
+
+    def test_too_few_teams_first_round(self):
+        config = get_four_team_config()
+
+        config['matches'][0][0]['teams'].pop()
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
+
+    def test_too_few_teams_second_round(self):
+        config = get_four_team_config()
+
+        config['matches'][1][0]['teams'].pop()
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
+
+    def test_too_few_teams_third_round(self):
+        config = get_four_team_config()
+
+        config['matches'][2][0]['teams'].pop()
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
+
+    def test_too_many_teams_first_round(self):
+        config = get_four_team_config()
+
+        config['matches'][0][0]['teams'].append('S1')
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
+
+    def test_too_many_teams_second_round(self):
+        config = get_four_team_config()
+
+        config['matches'][1][0]['teams'].append('S1')
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
+
+    def test_too_many_teams_third_round(self):
+        config = get_four_team_config()
+
+        config['matches'][2][0]['teams'].append('S1')
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
