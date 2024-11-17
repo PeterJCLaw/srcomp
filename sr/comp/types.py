@@ -36,7 +36,7 @@ class ScoreTeamData(TypedDict):
 class ScoreData(TypedDict):
     arena_id: ArenaName
     match_number: MatchNumber
-    teams: dict[TLA, ScoreTeamData]
+    teams: Mapping[TLA, ScoreTeamData]
 
     arena_zones: NotRequired[ScoreArenaZonesData]
     other: NotRequired[ScoreOtherData]
@@ -46,7 +46,7 @@ class ScoreData(TypedDict):
 class SimpleScorer(Protocol):
     def __init__(
         self,
-        teams_data: dict[TLA, ScoreTeamData],
+        teams_data: Mapping[TLA, ScoreTeamData],
         arena_data: ScoreArenaZonesData | None,
     ) -> None:
         ...
