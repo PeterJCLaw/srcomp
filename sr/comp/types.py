@@ -33,15 +33,13 @@ class ScoreTeamData(TypedDict):
     zone: int
 
 
-class _ScoreData(TypedDict):
+class ScoreData(TypedDict):
     arena_id: ArenaName
     match_number: MatchNumber
     teams: dict[TLA, ScoreTeamData]
 
-
-class ScoreData(_ScoreData, total=False):
-    arena_zones: ScoreArenaZonesData
-    other: ScoreOtherData
+    arena_zones: NotRequired[ScoreArenaZonesData]
+    other: NotRequired[ScoreOtherData]
 
 
 @runtime_checkable
