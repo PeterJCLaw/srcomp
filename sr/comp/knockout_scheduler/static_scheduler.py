@@ -15,6 +15,18 @@ from .base_scheduler import BaseKnockoutScheduler, UNKNOWABLE_TEAM
 StaticMatchTeamReference = NewType('StaticMatchTeamReference', str)
 
 
+class InvalidSeedError(ValueError):
+    pass
+
+
+class InvalidReferenceError(ValueError):
+    pass
+
+
+class WrongNumberOfTeamsError(ValueError):
+    pass
+
+
 class StaticMatchInfo(TypedDict):
     arena: ArenaName
     start_time: datetime.datetime
@@ -60,12 +72,12 @@ class StaticScheduler(BaseKnockoutScheduler):
             pos = int(team_ref[1:])
             # seed numbers are 1 based
             if pos < 1:
-                raise ValueError(f"Invalid seed {team_ref!r} (seed numbers start at 1)")
+                raise InvalidSeedError(f"Invalid seed {team_ref!r} (seed numbers start at 1)")
             pos -= 1
             try:
                 return self._knockout_seeds[pos]
             except IndexError:
-                raise ValueError(
+                raise InvalidSeedError(
                     "Cannot reference seed {}, there are only {} eligible teams!".format(
                         team_ref,
                         len(self._knockout_seeds),
@@ -73,22 +85,26 @@ class StaticScheduler(BaseKnockoutScheduler):
                 ) from None
 
         # get a position from a match
-        assert len(team_ref) == 3
-        round_num, match_num, pos = (int(x) for x in team_ref)
+        try:
+            round_num, match_num, pos = (int(x) for x in team_ref)
+        except ValueError:
+            raise InvalidReferenceError(
+                f"Match references must be three digits, not {team_ref!r}",
+            ) from None
 
         try:
             match = self.knockout_rounds[round_num][match_num]
         except IndexError:
-            raise ValueError(
-                f"Reference '{team_ref}' to unscheduled match!",
+            raise InvalidReferenceError(
+                f"Reference {team_ref!r} to unscheduled match!",
             ) from None
 
         try:
             ranking = self.get_ranking(match)
             return ranking[pos]
         except IndexError:
-            raise ValueError(
-                f"Reference '{team_ref}' to invalid ranking!",
+            raise InvalidReferenceError(
+                f"Reference {team_ref!r} to invalid ranking!",
             ) from None
 
     def _add_match(
@@ -110,7 +126,7 @@ class StaticScheduler(BaseKnockoutScheduler):
         ]
 
         if len(teams) != self.num_teams_per_arena:
-            raise ValueError(
+            raise WrongNumberOfTeamsError(
                 f"Unexpected number of teams in match {num} (round {round_num}); "
                 f"got {len(teams)}, expecting {self.num_teams_per_arena}." + (
                     " Fill any expected empty places with `null`."

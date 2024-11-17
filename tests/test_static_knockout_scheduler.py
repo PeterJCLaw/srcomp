@@ -4,6 +4,10 @@ from datetime import datetime, timedelta
 from unittest import mock
 
 from sr.comp.knockout_scheduler import StaticScheduler, UNKNOWABLE_TEAM
+from sr.comp.knockout_scheduler.static_scheduler import (
+    InvalidReferenceError,
+    InvalidSeedError,
+)
 from sr.comp.match_period import Match, MatchType
 from sr.comp.teams import Team
 
@@ -212,7 +216,17 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
 
         config['matches'][1][0]['teams'][0] = value
 
-        with self.assertRaises(ValueError):
+        self.assertInvalidSchedule(config, InvalidReferenceError, matches)
+
+    def assertInvalidSeed(self, value, matches=()):
+        config = get_four_team_config()
+
+        config['matches'][1][0]['teams'][0] = value
+
+        self.assertInvalidSchedule(config, InvalidSeedError, matches)
+
+    def assertInvalidSchedule(self, config, exception_type, matches=()):
+        with self.assertRaises(exception_type):
             scheduler = get_scheduler(
                 matches_config=config,
                 matches=matches,
@@ -464,6 +478,9 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
             },
         )
 
+    def test_improper_position_reference(self):
+        self.assertInvalidReference('00')
+
     def test_invalid_position_reference(self):
         self.assertInvalidReference('005')
 
@@ -474,10 +491,10 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
         self.assertInvalidReference('500')
 
     def test_invalid_seed_reference_low(self):
-        self.assertInvalidReference('S0')
+        self.assertInvalidSeed('S0')
 
     def test_invalid_seed_reference_high(self):
-        self.assertInvalidReference('S9999')
+        self.assertInvalidSeed('S9999')
 
     def test_invalid_position_reference_incomplete_league(self):
         # Add an un-scored league match so that we don't appear to have played them all
@@ -497,9 +514,9 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
     def test_invalid_seed_reference_low_incomplete_league(self):
         # Add an un-scored league match so that we don't appear to have played them all
         league_matches = [{'A': build_match(arena='A')}]
-        self.assertInvalidReference('S0', matches=league_matches)
+        self.assertInvalidSeed('S0', matches=league_matches)
 
     def test_invalid_seed_reference_high_incomplete_league(self):
         # Add an un-scored league match so that we don't appear to have played them all
         league_matches = [{'A': build_match(arena='A')}]
-        self.assertInvalidReference('S9999', matches=league_matches)
+        self.assertInvalidSeed('S9999', matches=league_matches)
