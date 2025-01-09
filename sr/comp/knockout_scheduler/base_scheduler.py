@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from ..match_period import Match, MatchPeriod, MatchType
 from ..scores import Scores
 from ..teams import Team
-from ..types import ArenaName, MatchNumber, TLA, YAMLData
+from ..types import ArenaName, MatchId, MatchNumber, TLA, YAMLData
 
 if TYPE_CHECKING:
     # Circular
@@ -125,10 +125,10 @@ class BaseKnockoutScheduler:
 
         :param game: A game.
         """
-        desc = (game.arena, game.num)
+        match_id: MatchId = (game.arena, game.num)
 
         # Get the resolved positions if present (will be a tla -> position map)
-        positions = self.scores.knockout.resolved_positions.get(desc, None)
+        positions = self.scores.knockout.resolved_positions.get(match_id, None)
 
         if positions is None:
             # Given match hasn't been scored yet
