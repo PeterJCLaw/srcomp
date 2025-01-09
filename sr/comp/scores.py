@@ -393,12 +393,12 @@ class KnockoutScores(BaseScores):
     ):
         super().__init__(scores_data, teams, scorer, num_teams_per_arena)
 
+        self.resolved_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]]
         self.resolved_positions = {}
         r"""
         Position data for each match which includes adjustment for ties.
-        Keys are tuples of the form ``(arena_id, match_num)``, values are
-        :class:`.OrderedDict`\s mapping TLAs to the ranked position (i.e:
-        first is `1`, etc.) of that team, with the winning team in the
+
+        Position data are :class:`.OrderedDict`\s with the winning team in the
         start of the list of keys. Tie resolution is done by league position.
         """
 
