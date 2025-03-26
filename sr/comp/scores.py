@@ -63,7 +63,7 @@ class TeamScore:
 
     def __init__(
         self,
-        league: ranker.LeaguePoints = ranker.LeaguePoints(0),
+        league: LeaguePoints = LeaguePoints(0),
         game: GamePoints = GamePoints(0),
     ):
         self.league_points = league
@@ -78,8 +78,8 @@ class TeamScore:
         self.game_points = GamePoints(self.game_points + score)
         return self.game_points
 
-    def add_league_points(self, points: ranker.LeaguePoints) -> ranker.LeaguePoints:
-        self.league_points = ranker.LeaguePoints(self.league_points + points)
+    def add_league_points(self, points: LeaguePoints) -> LeaguePoints:
+        self.league_points = LeaguePoints(self.league_points + points)
         return self.league_points
 
     def __eq__(self, other: object) -> bool:
@@ -215,7 +215,7 @@ class BaseScores:
         which have that position. Based solely on teams' game points.
         """
 
-        self.ranked_points: dict[MatchId, dict[TLA, ranker.LeaguePoints]] = {}
+        self.ranked_points: dict[MatchId, dict[TLA, LeaguePoints]] = {}
         r"""
         Normalised (aka 'league') points earned in each match. Keys are
         tuples of the form ``(arena_id, match_num)``, values are
@@ -356,7 +356,7 @@ class KnockoutScores(BaseScores):
 
     @staticmethod
     def calculate_ranking(
-        match_points: Mapping[TLA, ranker.LeaguePoints],
+        match_points: Mapping[TLA, LeaguePoints],
         league_positions: LeaguePositions,
     ) -> dict[TLA, RankedPosition]:
         """
@@ -366,7 +366,7 @@ class KnockoutScores(BaseScores):
         :param league_positions: A map of TLAs to league positions.
         """
 
-        def key(tla: TLA, points: ranker.LeaguePoints) -> tuple[ranker.LeaguePoints, int]:
+        def key(tla: TLA, points: LeaguePoints) -> tuple[LeaguePoints, int]:
             # Lexicographically sort by game result, then by league position
             # League positions are sorted in the opposite direction
             return points, -league_positions.get(tla, 0)
