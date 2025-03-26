@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import runpy
 import sys
+import warnings
 from copy import copy
 from pathlib import Path
 from subprocess import check_output
 from typing import cast
 
-from . import arenas, matches, scores, teams, venue
-from .types import ScorerType
+from . import arenas, matches, ranker, scores, teams, venue
+from .types import RankerType, ScorerType
 from .winners import compute_awards
 
 
@@ -34,6 +35,46 @@ def load_scorer(root: Path) -> ScorerType:
         sys.path = saved_path
 
     return cast(ScorerType, score['Scorer'])
+
+
+def load_ranker(root: Path) -> RankerType:
+    """
+    Load the ranker module from Compstate repo.
+
+    :param Path root: The path to the compstate repo.
+    """
+
+    # Deep path hacks
+    score_directory = root / 'scoring'
+    ranker_source = score_directory / 'ranker.py'
+
+    if not ranker_source.exists():
+        # By default we support using the `league-ranker` package without
+        # modifications.
+        return ranker.LeagueRanker
+
+    saved_path = copy(sys.path)
+    sys.path.insert(0, str(score_directory))
+
+    try:
+        score = runpy.run_path(str(ranker_source))
+    finally:
+        sys.path = saved_path
+
+    ranker_class = cast(RankerType, score['Ranker'])
+
+    if hasattr(ranker_class, 'calc_positions'):
+        warnings.warn(
+            (
+                f"{ranker_source}:{ranker_class.__name__} has unexpected attribute "
+                "'calc_positions'. This attribute may become part of the API in "
+                "future. Consider using a different attribute name."
+            ),
+            FutureWarning,
+            stacklevel=3,
+        )
+
+    return ranker_class
 
 
 class SRComp:
@@ -67,10 +108,12 @@ class SRComp:
         self.num_teams_per_arena = len(self.corners)
 
         scorer = load_scorer(self.root)
+        ranker = load_ranker(self.root)
         self.scores = scores.Scores.load(
             self.root,
             self.teams.keys(),
             scorer,
+            ranker,
             self.num_teams_per_arena,
         )
         """A :class:`sr.comp.scores.Scores` instance."""
