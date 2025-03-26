@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 from collections.abc import Iterable, Mapping
 
+from sr.comp.ranker import LeagueRanker
 from sr.comp.scores import LeagueScores, TeamScore
 from sr.comp.types import ScoreData, TLA
 
@@ -26,6 +27,7 @@ def load_datas(
         the_datas,
         teams,
         FakeScorer,
+        LeagueRanker,
         num_teams_per_arena=4,
         extra=extra,
     )
