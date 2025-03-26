@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import Any, NewType, runtime_checkable, Union
-from typing_extensions import NotRequired, Protocol, TypedDict
+from typing import Any, NewType, Protocol, runtime_checkable, TypedDict, Union
+from typing_extensions import NotRequired
 
 TLA = NewType('TLA', str)
 
