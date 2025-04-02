@@ -5,7 +5,7 @@ with open('README.rst') as f:
 
 setup(
     name='sr.comp',
-    version='1.9.0',
+    version='1.10.0',
     url='https://github.com/PeterJCLaw/srcomp/wiki',
     project_urls={
         'Documentation': 'https://srcomp.readthedocs.org/',
