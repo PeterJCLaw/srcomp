@@ -15,6 +15,18 @@ from .base_scheduler import BaseKnockoutScheduler, UNKNOWABLE_TEAM
 StaticMatchTeamReference = NewType('StaticMatchTeamReference', str)
 
 
+class InvalidSeedError(ValueError):
+    pass
+
+
+class InvalidReferenceError(ValueError):
+    pass
+
+
+class WrongNumberOfTeamsError(ValueError):
+    pass
+
+
 class StaticMatchInfo(TypedDict):
     arena: ArenaName
     start_time: datetime.datetime
@@ -42,15 +54,16 @@ class StaticScheduler(BaseKnockoutScheduler):
         super().__init__(*args, **kwargs)
 
         # Collect a list of the teams eligible for the knockouts, in seeded order.
+        # TODO: deduplicate this vs similar logic in the automated scheduler.
         last_league_match_num = self.schedule.n_matches()
-        self._knockout_seeds = self._get_non_dropped_out_teams(
+        teams = self._get_non_dropped_out_teams(
             MatchNumber(last_league_match_num),
         )
+        if not self._played_all_league_matches():
+            teams = [UNKNOWABLE_TEAM] * len(teams)
+        self._knockout_seeds = teams
 
     def get_team(self, team_ref: StaticMatchTeamReference | None) -> TLA | None:
-        if not self._played_all_league_matches():
-            return UNKNOWABLE_TEAM
-
         if team_ref is None:
             return None
 
@@ -59,12 +72,12 @@ class StaticScheduler(BaseKnockoutScheduler):
             pos = int(team_ref[1:])
             # seed numbers are 1 based
             if pos < 1:
-                raise ValueError(f"Invalid seed {team_ref!r} (seed numbers start at 1)")
+                raise InvalidSeedError(f"Invalid seed {team_ref!r} (seed numbers start at 1)")
             pos -= 1
             try:
                 return self._knockout_seeds[pos]
             except IndexError:
-                raise ValueError(
+                raise InvalidSeedError(
                     "Cannot reference seed {}, there are only {} eligible teams!".format(
                         team_ref,
                         len(self._knockout_seeds),
@@ -72,22 +85,40 @@ class StaticScheduler(BaseKnockoutScheduler):
                 ) from None
 
         # get a position from a match
-        assert len(team_ref) == 3
-        round_num, match_num, pos = (int(x) for x in team_ref)
+        try:
+            round_num, match_num, pos = (int(x) for x in team_ref)
+        except ValueError:
+            raise InvalidReferenceError(
+                f"Match references must be three digits, not {team_ref!r}",
+            ) from None
 
         try:
-            match = self.knockout_rounds[round_num][match_num]
+            knockout_round = self.knockout_rounds[round_num]
         except IndexError:
-            raise ValueError(
-                f"Reference '{team_ref}' to unscheduled match!",
+            raise InvalidReferenceError(
+                f"Reference {team_ref!r} to unknown match round! "
+                f"(Cannot refer to round {round_num} when there are only "
+                f"{len(self.knockout_rounds)} rounds; note that round numbers "
+                "are 0-indexed)",
+            ) from None
+
+        try:
+            match = knockout_round[match_num]
+        except IndexError:
+            raise InvalidReferenceError(
+                f"Reference {team_ref!r} to unknown match! "
+                f"(Cannot refer to round {match_num} when there are only "
+                f"{len(knockout_round)} matches in round {round_num}; note that "
+                "match numbers are 0-indexed)",
             ) from None
 
         try:
             ranking = self.get_ranking(match)
             return ranking[pos]
         except IndexError:
-            raise ValueError(
-                f"Reference '{team_ref}' to invalid ranking!",
+            raise InvalidReferenceError(
+                f"Reference {team_ref!r} to invalid ranking! "
+                f"(Position {pos!r} does not exist in match \"{match.display_name}\")",
             ) from None
 
     def _add_match(
@@ -109,7 +140,7 @@ class StaticScheduler(BaseKnockoutScheduler):
         ]
 
         if len(teams) != self.num_teams_per_arena:
-            raise ValueError(
+            raise WrongNumberOfTeamsError(
                 f"Unexpected number of teams in match {num} (round {round_num}); "
                 f"got {len(teams)}, expecting {self.num_teams_per_arena}." + (
                     " Fill any expected empty places with `null`."

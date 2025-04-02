@@ -4,8 +4,15 @@ from datetime import datetime, timedelta
 from unittest import mock
 
 from sr.comp.knockout_scheduler import StaticScheduler, UNKNOWABLE_TEAM
+from sr.comp.knockout_scheduler.static_scheduler import (
+    InvalidReferenceError,
+    InvalidSeedError,
+    WrongNumberOfTeamsError,
+)
 from sr.comp.match_period import Match, MatchType
 from sr.comp.teams import Team
+
+from .factories import build_match
 
 TLAs = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF', 'GGG', 'HHH', 'III', 'JJJ']
 
@@ -204,6 +211,29 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
             a = period.matches[i]
 
             self.assertEqual(e, a, f"Match {i} in the knockouts")
+
+    def assertInvalidReference(self, value, matches=()):
+        config = get_four_team_config()
+
+        config['matches'][1][0]['teams'][0] = value
+
+        self.assertInvalidSchedule(config, InvalidReferenceError, matches)
+
+    def assertInvalidSeed(self, value, matches=()):
+        config = get_four_team_config()
+
+        config['matches'][1][0]['teams'][0] = value
+
+        self.assertInvalidSchedule(config, InvalidSeedError, matches)
+
+    def assertInvalidSchedule(self, config, exception_type, matches=()):
+        with self.assertRaises(exception_type):
+            scheduler = get_scheduler(
+                matches_config=config,
+                matches=matches,
+            )
+
+            scheduler.add_knockouts()
 
     def test_four_teams_before(self):
         # Add an un-scored league match so that we don't appear to have played them all
@@ -448,3 +478,88 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
                 ]),
             },
         )
+
+    def test_improper_position_reference(self):
+        self.assertInvalidReference('00')
+
+    def test_invalid_position_reference(self):
+        self.assertInvalidReference('005')
+
+    def test_invalid_match_reference(self):
+        self.assertInvalidReference('050')
+
+    def test_invalid_round_reference(self):
+        self.assertInvalidReference('500')
+
+    def test_invalid_seed_reference_low(self):
+        self.assertInvalidSeed('S0')
+
+    def test_invalid_seed_reference_high(self):
+        self.assertInvalidSeed('S9999')
+
+    def test_invalid_position_reference_incomplete_league(self):
+        # Add an un-scored league match so that we don't appear to have played them all
+        league_matches = [{'A': build_match(arena='A')}]
+        self.assertInvalidReference('005', matches=league_matches)
+
+    def test_invalid_match_reference_incomplete_league(self):
+        # Add an un-scored league match so that we don't appear to have played them all
+        league_matches = [{'A': build_match(arena='A')}]
+        self.assertInvalidReference('050', matches=league_matches)
+
+    def test_invalid_round_reference_incomplete_league(self):
+        # Add an un-scored league match so that we don't appear to have played them all
+        league_matches = [{'A': build_match(arena='A')}]
+        self.assertInvalidReference('500', matches=league_matches)
+
+    def test_invalid_seed_reference_low_incomplete_league(self):
+        # Add an un-scored league match so that we don't appear to have played them all
+        league_matches = [{'A': build_match(arena='A')}]
+        self.assertInvalidSeed('S0', matches=league_matches)
+
+    def test_invalid_seed_reference_high_incomplete_league(self):
+        # Add an un-scored league match so that we don't appear to have played them all
+        league_matches = [{'A': build_match(arena='A')}]
+        self.assertInvalidSeed('S9999', matches=league_matches)
+
+    def test_too_few_teams_first_round(self):
+        config = get_four_team_config()
+
+        config['matches'][0][0]['teams'].pop()
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
+
+    def test_too_few_teams_second_round(self):
+        config = get_four_team_config()
+
+        config['matches'][1][0]['teams'].pop()
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
+
+    def test_too_few_teams_third_round(self):
+        config = get_four_team_config()
+
+        config['matches'][2][0]['teams'].pop()
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
+
+    def test_too_many_teams_first_round(self):
+        config = get_four_team_config()
+
+        config['matches'][0][0]['teams'].append('S1')
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
+
+    def test_too_many_teams_second_round(self):
+        config = get_four_team_config()
+
+        config['matches'][1][0]['teams'].append('S1')
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
+
+    def test_too_many_teams_third_round(self):
+        config = get_four_team_config()
+
+        config['matches'][2][0]['teams'].append('S1')
+
+        self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
