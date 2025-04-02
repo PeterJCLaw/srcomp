@@ -93,10 +93,23 @@ class StaticScheduler(BaseKnockoutScheduler):
             ) from None
 
         try:
-            match = self.knockout_rounds[round_num][match_num]
+            knockout_round = self.knockout_rounds[round_num]
         except IndexError:
             raise InvalidReferenceError(
-                f"Reference {team_ref!r} to unscheduled match!",
+                f"Reference {team_ref!r} to unknown match round! "
+                f"(Cannot refer to round {round_num} when there are only "
+                f"{len(self.knockout_rounds)} rounds; note that round numbers "
+                "are 0-indexed)",
+            ) from None
+
+        try:
+            match = knockout_round[match_num]
+        except IndexError:
+            raise InvalidReferenceError(
+                f"Reference {team_ref!r} to unknown match! "
+                f"(Cannot refer to round {match_num} when there are only "
+                f"{len(knockout_round)} matches in round {round_num}; note that "
+                "match numbers are 0-indexed)",
             ) from None
 
         try:
@@ -104,7 +117,8 @@ class StaticScheduler(BaseKnockoutScheduler):
             return ranking[pos]
         except IndexError:
             raise InvalidReferenceError(
-                f"Reference {team_ref!r} to invalid ranking!",
+                f"Reference {team_ref!r} to invalid ranking! "
+                f"(Position {pos!r} does not exist in match \"{match.display_name}\")",
             ) from None
 
     def _add_match(
