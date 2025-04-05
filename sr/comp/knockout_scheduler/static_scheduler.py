@@ -13,6 +13,18 @@ from ..types import ArenaName, MatchNumber, TLA
 from .base_scheduler import BaseKnockoutScheduler, UNKNOWABLE_TEAM
 
 StaticMatchTeamReference = NewType('StaticMatchTeamReference', str)
+StaticMatchTeamReference.__doc__ = r"""
+A logical reference to a team for pulling into a knockout match.
+
+This supports the following formats:
+ - 'S\d+': A seeded team, pulled from the results of the league stage.
+ - '\d{3}': A reference to a tie-resolved rank in the results of another match
+   within the knockout. The first digit refers to the round number, the second
+   to the match number within that round and the last to the rank within the
+   results of that match to look for a team. All of these are 0-indexed, so
+   '000' is the winner of the first match from the first knockouts round. Ties
+   are resolved using the standard league position logic.
+"""
 
 
 class InvalidSeedError(ValueError):
