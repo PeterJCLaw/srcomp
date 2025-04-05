@@ -497,6 +497,9 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
     def test_invalid_seed_reference_high(self):
         self.assertInvalidSeed('S9999')
 
+    def test_invalid_reference_other_text(self):
+        self.assertInvalidReference('bees')
+
     def test_invalid_position_reference_incomplete_league(self):
         # Add an un-scored league match so that we don't appear to have played them all
         league_matches = [{'A': build_match(arena='A')}]
