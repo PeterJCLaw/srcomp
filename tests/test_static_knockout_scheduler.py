@@ -7,6 +7,7 @@ from sr.comp.knockout_scheduler import StaticScheduler, UNKNOWABLE_TEAM
 from sr.comp.knockout_scheduler.static_scheduler import (
     InvalidReferenceError,
     InvalidSeedError,
+    parse_team_ref,
     WrongNumberOfTeamsError,
 )
 from sr.comp.match_period import Match, MatchType
@@ -211,6 +212,17 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
             a = period.matches[i]
 
             self.assertEqual(e, a, f"Match {i} in the knockouts")
+
+    def assertParseInvalidReference(self, value: str) -> None:
+        with self.assertRaises(InvalidReferenceError):
+            parse_team_ref(value)
+
+    def assertParseReference(self, expected: tuple[int, int, int], value: str) -> None:
+        self.assertEqual(
+            expected,
+            parse_team_ref(value),
+            f"Wrong result from parsing {value!r}",
+        )
 
     def assertInvalidReference(self, value, matches=()):
         config = get_four_team_config()
@@ -477,6 +489,36 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
                     ('FFF', 2),
                 ]),
             },
+        )
+
+    def test_parse_team_ref_invalid_short(self):
+        self.assertParseInvalidReference('00')
+
+    def test_parse_team_ref_invalid_long(self):
+        self.assertParseInvalidReference('00')
+
+    def test_parse_team_ref_invalid_not_digits(self):
+        self.assertParseInvalidReference('bee')
+
+    def test_parse_team_ref_invalid_rmp_not_digits(self):
+        self.assertParseInvalidReference('R_M_P_')
+
+    def test_parse_team_ref_legacy(self):
+        self.assertParseReference(
+            (1, 2, 3),
+            '123',
+        )
+
+    def test_parse_team_ref_rmp(self):
+        self.assertParseReference(
+            (1, 2, 3),
+            'R1M2P3',
+        )
+
+    def test_parse_team_ref_rmp_long(self):
+        self.assertParseReference(
+            (10, 20, 30),
+            'R10M20P30',
         )
 
     def test_improper_position_reference(self):

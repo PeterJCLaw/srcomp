@@ -5,6 +5,7 @@ A static knockout schedule.
 from __future__ import annotations
 
 import datetime
+import re
 from typing import Any, NewType
 from typing_extensions import TypedDict
 
@@ -24,6 +25,8 @@ This supports the following formats:
    results of that match to look for a team. All of these are 0-indexed, so
    '000' is the winner of the first match from the first knockouts round. Ties
    are resolved using the standard league position logic.
+ - 'R\d+M\d+P\d+': Alternative spelling of round/match/position reference, this
+   supports indices containing more digits but otherwise behaves the same.
 """
 
 
@@ -44,6 +47,31 @@ class StaticMatchInfo(TypedDict):
     start_time: datetime.datetime
     teams: list[StaticMatchTeamReference]
     display_name: str | None
+
+
+def parse_team_ref(team_ref: str) -> tuple[int, int, int]:
+    """
+    Parse a string reference into round/match/position.
+
+    See docstring on `StaticMatchTeamReference` for further details -- this
+    function supports both the compressed and RMP formats.
+    """
+
+    if len(team_ref) == 3 and team_ref.isdecimal():
+        # Compressed format
+        r, m, p = (int(x) for x in team_ref)
+        return r, m, p
+
+    # Longer "RMP" format
+    match = re.match(r'^R(\d+)M(\d+)P(\d+)$', team_ref)
+    if not match:
+        raise InvalidReferenceError(
+            "Match references must be of the form 'R<num>M<num>P<num>' "
+            f"(or '<digit><digit><digit>'), not {team_ref!r}.",
+        )
+
+    r, m, p = (int(x) for x in match.groups())
+    return r, m, p
 
 
 class StaticScheduler(BaseKnockoutScheduler):
@@ -97,12 +125,7 @@ class StaticScheduler(BaseKnockoutScheduler):
                 ) from None
 
         # get a position from a match
-        try:
-            round_num, match_num, pos = (int(x) for x in team_ref)
-        except ValueError:
-            raise InvalidReferenceError(
-                f"Match references must be three digits, not {team_ref!r}",
-            ) from None
+        round_num, match_num, pos = parse_team_ref(team_ref)
 
         try:
             knockout_round = self.knockout_rounds[round_num]
