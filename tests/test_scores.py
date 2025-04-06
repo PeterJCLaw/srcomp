@@ -9,7 +9,7 @@ from unittest import mock
 from league_ranker import LeaguePoints, RankedPosition
 
 from sr.comp.match_period import MatchType
-from sr.comp.ranker import LeagueRanker
+from sr.comp.ranker import default_calc_ranked_points
 from sr.comp.scores import (
     KnockoutScores,
     LeagueScores,
@@ -98,14 +98,14 @@ class GetScoresTests(unittest.TestCase):
             [raw_league_score],
             teams,
             FakeScorer,
-            LeagueRanker,
+            default_calc_ranked_points,
             num_teams_per_arena=len(teams),
         )
         knockout = KnockoutScores(
             [raw_knockout_score],
             teams,
             FakeScorer,
-            LeagueRanker,
+            default_calc_ranked_points,
             num_teams_per_arena=len(teams),
             league_positions=league.positions,
         )
@@ -113,7 +113,7 @@ class GetScoresTests(unittest.TestCase):
             [raw_tiebreaker_score],
             teams,
             FakeScorer,
-            LeagueRanker,
+            default_calc_ranked_points,
             num_teams_per_arena=len(teams),
             league_positions=league.positions,
         )

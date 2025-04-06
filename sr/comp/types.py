@@ -86,18 +86,19 @@ class ExternalScoreData(TypedDict):
     league_points: int
 
 
-class Ranker(Protocol):
+class CalcRankedPointsHook(Protocol):
     """
     Computes ranking information related to the league.
 
-    This is part of providing a hook point for customising the league points
-    behaviour. Initially this only supports changing the behaviour of the points
+    This is a hook point for customising the league points behaviour.
+
+    Initially this hooking only supports changing the behaviour of the points
     returned, though we may extend this in future to support other functionality
     currently directly tied to the `league-ranker` package, such as position
     calculation.
     """
 
-    def calc_ranked_points(
+    def __call__(
         self,
         positions: Mapping[RankedPosition, Collection[TZone]],
         *,
@@ -111,8 +112,6 @@ class Ranker(Protocol):
         """
         ...
 
-
-RankerType = type[Ranker]
 
 # Locations within the Venue
 

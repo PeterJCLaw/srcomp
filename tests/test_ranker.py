@@ -8,13 +8,12 @@ from pathlib import Path
 from sr.comp.comp import load_ranker
 
 SIMPLE_RANKER = """
-class Ranker:
-    def calc_ranked_points(self, positions, disqualifications, num_zones, match_id):
-        raise NotImplementedError
+def calc_ranked_points(positions, disqualifications, num_zones, match_id):
+    raise NotImplementedError
 """
 
 ATTR_TEMPLATE = """
-    {attr} = {value}
+{attr} = {value}
 """
 
 
@@ -33,7 +32,7 @@ class RankerTests(unittest.TestCase):
         test_id = str(uuid.uuid4())
         ranker_py.write_text(
             SIMPLE_RANKER + ATTR_TEMPLATE.format(
-                attr='testing_attr',
+                attr='calc_ranked_points.testing_attr',
                 value=repr(test_id),
             ),
         )

@@ -5,24 +5,21 @@ from typing import Collection, Mapping
 import league_ranker
 from league_ranker import LeaguePoints, RankedPosition, TZone
 
-from .types import MatchId, Ranker
+from .types import MatchId
 
 
-class LeagueRanker(Ranker):
+def default_calc_ranked_points(
+    positions: Mapping[RankedPosition, Collection[TZone]],
+    *,
+    disqualifications: Collection[TZone],
+    num_zones: int,
+    match_id: MatchId,
+) -> dict[TZone, LeaguePoints]:
     """
-    Default implementation of a ranker class, wrapping `league-ranker`.
+    Default implementation of `CalcRankedPointsHook`, wrapping `league-ranker`.
     """
-
-    def calc_ranked_points(
-        self,
-        positions: Mapping[RankedPosition, Collection[TZone]],
-        *,
-        disqualifications: Collection[TZone],
-        num_zones: int,
-        match_id: MatchId,
-    ) -> dict[TZone, LeaguePoints]:
-        return league_ranker.calc_ranked_points(
-            positions,
-            disqualifications,
-            num_zones,
-        )
+    return league_ranker.calc_ranked_points(
+        positions,
+        disqualifications,
+        num_zones,
+    )

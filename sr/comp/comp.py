@@ -8,10 +8,10 @@ import warnings
 from copy import copy
 from pathlib import Path
 from subprocess import check_output
-from typing import cast
+from typing import Any, cast
 
 from . import arenas, matches, ranker, scores, teams, venue
-from .types import RankerType, ScorerType
+from .types import CalcRankedPointsHook, ScorerType
 from .winners import compute_awards
 
 
@@ -37,7 +37,7 @@ def load_scorer(root: Path) -> ScorerType:
     return cast(ScorerType, score['Scorer'])
 
 
-def load_ranker(root: Path) -> RankerType:
+def load_ranker(root: Path) -> CalcRankedPointsHook:
     """
     Load the ranker module from Compstate repo.
 
@@ -51,22 +51,21 @@ def load_ranker(root: Path) -> RankerType:
     if not ranker_source.exists():
         # By default we support using the `league-ranker` package without
         # modifications.
-        return ranker.LeagueRanker
+        return ranker.default_calc_ranked_points
 
     saved_path = copy(sys.path)
     sys.path.insert(0, str(score_directory))
 
     try:
-        score = runpy.run_path(str(ranker_source))
+        ranker_module_dict: dict[str, Any]
+        ranker_module_dict = runpy.run_path(str(ranker_source))
     finally:
         sys.path = saved_path
 
-    ranker_class = cast(RankerType, score['Ranker'])
-
-    if hasattr(ranker_class, 'calc_positions'):
+    if 'calc_positions' in ranker_module_dict:
         warnings.warn(
             (
-                f"{ranker_source}:{ranker_class.__name__} has unexpected attribute "
+                f"{ranker_source} has unexpected member "
                 "'calc_positions'. This attribute may become part of the API in "
                 "future. Consider using a different attribute name."
             ),
@@ -74,7 +73,9 @@ def load_ranker(root: Path) -> RankerType:
             stacklevel=3,
         )
 
-    return ranker_class
+    calc_ranked_points: CalcRankedPointsHook = ranker_module_dict['calc_ranked_points']
+
+    return calc_ranked_points
 
 
 class SRComp:
