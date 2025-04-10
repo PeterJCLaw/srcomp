@@ -19,6 +19,7 @@ from .types import (
     GamePoints,
     MatchId,
     MatchNumber,
+    RankerType,
     ScoreData,
     ScorerType,
     TLA,
@@ -195,9 +196,11 @@ class BaseScores:
         scores_data: Iterable[ScoreData],
         teams: Iterable[TLA],
         scorer: ScorerType,
+        ranker: RankerType,
         num_teams_per_arena: int,
     ) -> None:
         self._scorer = scorer
+        self._ranker = ranker
         self._num_corners = num_teams_per_arena
 
         self.game_points: dict[MatchId, Mapping[TLA, GamePoints]] = {}
@@ -261,8 +264,14 @@ class BaseScores:
 
         positions = ranker.calc_positions(game_points, dsq)
         self.game_positions[match_id] = positions
-        self.ranked_points[match_id] = \
-            ranker.calc_ranked_points(positions, dsq, self._num_corners)
+
+        points = self._ranker().calc_ranked_points(
+            positions,
+            disqualifications=dsq,
+            num_zones=self._num_corners,
+            match_id=match_id,
+        )
+        self.ranked_points[match_id] = points
 
     @property
     def last_scored_match(self) -> MatchNumber | None:
@@ -323,10 +332,11 @@ class LeagueScores(BaseScores):
         scores_data: Iterable[ScoreData],
         teams: Iterable[TLA],
         scorer: ScorerType,
+        ranker: RankerType,
         num_teams_per_arena: int,
         extra: Mapping[TLA, TeamScore] | None = None,
     ):
-        super().__init__(scores_data, teams, scorer, num_teams_per_arena)
+        super().__init__(scores_data, teams, scorer, ranker, num_teams_per_arena)
 
         if extra:
             for tla, score in extra.items():
@@ -388,10 +398,11 @@ class KnockoutScores(BaseScores):
         scores_data: Iterable[ScoreData],
         teams: Iterable[TLA],
         scorer: ScorerType,
+        ranker: RankerType,
         num_teams_per_arena: int,
         league_positions: LeaguePositions,
     ):
-        super().__init__(scores_data, teams, scorer, num_teams_per_arena)
+        super().__init__(scores_data, teams, scorer, ranker, num_teams_per_arena)
 
         self.resolved_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]]
         self.resolved_positions = {}
@@ -465,6 +476,7 @@ class Scores:
         root: Path,
         teams: Iterable[TLA],
         scorer: ScorerType,
+        ranker: RankerType,
         num_teams_per_arena: int,
     ) -> Scores:
         external_scores = load_external_scores(
@@ -476,6 +488,7 @@ class Scores:
             load_scores_data(root / 'league'),
             teams,
             scorer,
+            ranker,
             num_teams_per_arena,
             extra=external_scores,
         )
@@ -484,6 +497,7 @@ class Scores:
             load_scores_data(root / 'knockout'),
             teams,
             scorer,
+            ranker,
             num_teams_per_arena,
             league.positions,
         )
@@ -492,6 +506,7 @@ class Scores:
             load_scores_data(root / 'tiebreaker'),
             teams,
             scorer,
+            ranker,
             num_teams_per_arena,
             league.positions,
         )

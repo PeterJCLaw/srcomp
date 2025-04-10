@@ -2,8 +2,18 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import Any, NewType, Protocol, runtime_checkable, TypedDict, Union
+from typing import (
+    Any,
+    Collection,
+    NewType,
+    Protocol,
+    runtime_checkable,
+    TypedDict,
+    Union,
+)
 from typing_extensions import NotRequired
+
+from league_ranker import LeaguePoints, RankedPosition, TZone
 
 TLA = NewType('TLA', str)
 
@@ -75,6 +85,34 @@ class ExternalScoreData(TypedDict):
     game_points: NotRequired[int]
     league_points: int
 
+
+class Ranker(Protocol):
+    """
+    Computes ranking information related to the league.
+
+    This is part of providing a hook point for customising the league points
+    behaviour. Initially this only supports changing the behaviour of the points
+    returned, though we may extend this in future to support other functionality
+    currently directly tied to the `league-ranker` package, such as position
+    calculation.
+    """
+
+    def calc_ranked_points(
+        self,
+        positions: Mapping[RankedPosition, Collection[TZone]],
+        *,
+        disqualifications: Collection[TZone],
+        num_zones: int,
+        match_id: MatchId,
+    ) -> dict[TZone, LeaguePoints]:
+        """
+        Equivalent to `league_ranker.calc_ranked_points`, though with clearer
+        argument names and accepting a match id value to enable customisation.
+        """
+        ...
+
+
+RankerType = type[Ranker]
 
 # Locations within the Venue
 
