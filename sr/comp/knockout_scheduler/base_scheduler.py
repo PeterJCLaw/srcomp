@@ -132,7 +132,11 @@ class BaseKnockoutScheduler:
 
         if positions is None:
             # Given match hasn't been scored yet
-            return [UNKNOWABLE_TEAM] * self.num_teams_per_arena
+            return [
+                UNKNOWABLE_TEAM
+                for x in game.teams
+                if x is not None
+            ]
 
         # Extract just TLAs
         return list(positions.keys())

@@ -8,6 +8,8 @@ from sr.comp.match_period import Match, MatchType
 from sr.comp.matches import Delay
 from sr.comp.teams import Team
 
+from .factories import build_match
+
 
 def mock_first_round_seeding(side_effect):
     return mock.patch(
@@ -88,7 +90,7 @@ class KnockoutSchedulerTests(unittest.TestCase):
 
     def test_knockout_match_winners_empty(self):
         scheduler = get_scheduler()
-        game = Match(2, "Match 2", 'A', [], None, None, None, False)
+        game = build_match(2, 'A', ['ABC', 'DEF', None, None])
         winners = scheduler.get_winners(game)
         self.assertEqual([UNKNOWABLE_TEAM] * 2, winners)
 

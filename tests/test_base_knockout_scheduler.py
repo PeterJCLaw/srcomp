@@ -1,11 +1,23 @@
+from __future__ import annotations
+
 import datetime
+import random
 import unittest
 from collections import defaultdict, OrderedDict
 from datetime import timedelta
+from typing import Mapping
 from unittest import mock
 
-from sr.comp.knockout_scheduler.base_scheduler import BaseKnockoutScheduler
+from league_ranker import RankedPosition
+
+from sr.comp.knockout_scheduler.base_scheduler import (
+    BaseKnockoutScheduler,
+    UNKNOWABLE_TEAM,
+)
 from sr.comp.teams import Team
+from sr.comp.types import MatchId, TLA
+
+from .factories import build_match
 
 
 def get_scheduler(
@@ -65,6 +77,96 @@ def get_scheduler(
 
 
 class BaseKnockoutSchedulerTests(unittest.TestCase):
+    def test_get_ranking_unknowable(self) -> None:
+        resolved_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]]
+        resolved_positions = {}
+        scheduler = get_scheduler(  # type: ignore[no-untyped-call]
+            knockout_positions=resolved_positions,
+        )
+
+        for n_teams in range(1, 6):
+            with self.subTest(n_teams=n_teams):
+                teams = [TLA(f'ABC{x}') for x in range(n_teams)]
+                random.shuffle(teams)
+                self.assertEqual(
+                    [UNKNOWABLE_TEAM] * len(teams),
+                    scheduler.get_ranking(
+                        build_match(num=1, arena='main', teams=teams),
+                    ),
+                )
+
+    def test_get_ranking_unknowable_with_empty_zones(self) -> None:
+        resolved_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]]
+        resolved_positions = {}
+        scheduler = get_scheduler(  # type: ignore[no-untyped-call]
+            knockout_positions=resolved_positions,
+        )
+
+        for n_teams in range(1, 6):
+            with self.subTest(n_teams=n_teams):
+                teams: list[TLA | None]
+                teams = [TLA(f'ABC{x}') for x in range(n_teams)]
+                teams[0] = None
+                random.shuffle(teams)
+                self.assertEqual(
+                    # Rankings consist only of teams, no null placeholders
+                    [UNKNOWABLE_TEAM] * (n_teams - 1),
+                    scheduler.get_ranking(
+                        build_match(num=1, arena='main', teams=teams),
+                    ),
+                )
+
+    def test_get_ranking_match_played(self) -> None:
+        match = build_match(num=1, arena='main', teams=[
+            TLA('ABC'),
+            TLA('DEF'),
+            TLA('GHI'),
+            TLA('JKL'),
+        ])
+
+        resolved_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]]
+        resolved_positions = {
+            (match.arena, match.num): {
+                TLA('GHI'): RankedPosition(1),
+                TLA('DEF'): RankedPosition(2),
+                TLA('ABC'): RankedPosition(3),
+                TLA('JKL'): RankedPosition(4),
+            },
+        }
+        scheduler = get_scheduler(  # type: ignore[no-untyped-call]
+            knockout_positions=resolved_positions,
+        )
+
+        self.assertEqual(
+            ['GHI', 'DEF', 'ABC', 'JKL'],
+            scheduler.get_ranking(match),
+        )
+
+    def test_get_ranking_match_played_with_empty_zones(self) -> None:
+        match = build_match(num=1, arena='main', teams=[
+            TLA('ABC'),
+            None,
+            TLA('GHI'),
+            TLA('JKL'),
+        ])
+
+        resolved_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]]
+        resolved_positions = {
+            (match.arena, match.num): {
+                TLA('GHI'): RankedPosition(1),
+                TLA('JKL'): RankedPosition(2),
+                TLA('ABC'): RankedPosition(3),
+            },
+        }
+        scheduler = get_scheduler(  # type: ignore[no-untyped-call]
+            knockout_positions=resolved_positions,
+        )
+
+        self.assertEqual(
+            ['GHI', 'JKL', 'ABC'],
+            scheduler.get_ranking(match),
+        )
+
     def test_get_seeds_unknowable(self):
         scheduler = get_scheduler(matches=[
             # Fake an unplayed league match
