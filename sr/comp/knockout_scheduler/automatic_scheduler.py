@@ -13,7 +13,7 @@ from ..scores import Scores
 from ..teams import Team
 from ..types import ArenaName, MatchNumber, TLA, YAMLData
 from . import seeding, stable_random
-from .base_scheduler import BaseKnockoutScheduler, UNKNOWABLE_TEAM
+from .base_scheduler import BaseKnockoutScheduler
 
 if TYPE_CHECKING:
     # Circular
@@ -152,10 +152,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
         self._add_round_of_matches(matches, arenas, rounds_remaining)
 
     def _add_first_round(self, conf_arity: int | None = None) -> None:
-        next_match_num = len(self.schedule.matches)
-        teams = self._get_non_dropped_out_teams(MatchNumber(next_match_num))
-        if not self._played_all_league_matches():
-            teams = [UNKNOWABLE_TEAM] * len(teams)
+        teams = self._get_seeds()
 
         arity = len(teams)
         if conf_arity is not None and conf_arity < arity:

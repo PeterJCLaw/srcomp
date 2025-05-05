@@ -138,6 +138,7 @@ def get_scheduler(
         delays=delays,
         match_duration=match_duration,
         n_matches=mock_n_matches,
+        n_league_matches=mock_n_matches(),
     )
     league_scores = mock.Mock(positions=positions, game_points=league_game_points)
     knockout_scores = mock.Mock(resolved_positions=knockout_positions)

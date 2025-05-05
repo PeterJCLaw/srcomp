@@ -137,13 +137,30 @@ class BaseKnockoutScheduler:
         # Extract just TLAs
         return list(positions.keys())
 
-    def _get_non_dropped_out_teams(self, for_match: MatchNumber) -> list[TLA]:
+    def _get_seeds(self) -> list[TLA]:
+        """
+        Get a list of TLAs ordered by league position, for use in building a
+        knockout schedule.
+
+        This will not include any teams who have dropped out prior to the start
+        of the league. The top seed will be first in the list.
+
+        If the league has not completed (and thus a seeding is not yet
+        available) the list will contain an explicit placeholder TLA, though the
+        length of the list will be as correct based on the dropouts so far.
+        """
+        first_knockout_match_num = MatchNumber(self.schedule.n_league_matches)
+
         teams = list(self.scores.league.positions.keys())
         teams = [
             tla
             for tla in teams
-            if self.teams[tla].is_still_around(for_match)
+            if self.teams[tla].is_still_around(first_knockout_match_num)
         ]
+
+        if not self._played_all_league_matches():
+            teams = [UNKNOWABLE_TEAM] * len(teams)
+
         return teams
 
     def add_knockouts(self) -> None:

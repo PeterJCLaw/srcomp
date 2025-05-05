@@ -11,7 +11,7 @@ from typing_extensions import TypedDict
 
 from ..match_period import Match, MatchSlot, MatchType
 from ..types import ArenaName, MatchNumber, TLA
-from .base_scheduler import BaseKnockoutScheduler, UNKNOWABLE_TEAM
+from .base_scheduler import BaseKnockoutScheduler
 
 StaticMatchTeamReference = NewType('StaticMatchTeamReference', str)
 StaticMatchTeamReference.__doc__ = r"""
@@ -94,14 +94,7 @@ class StaticScheduler(BaseKnockoutScheduler):
         super().__init__(*args, **kwargs)
 
         # Collect a list of the teams eligible for the knockouts, in seeded order.
-        # TODO: deduplicate this vs similar logic in the automated scheduler.
-        last_league_match_num = self.schedule.n_matches()
-        teams = self._get_non_dropped_out_teams(
-            MatchNumber(last_league_match_num),
-        )
-        if not self._played_all_league_matches():
-            teams = [UNKNOWABLE_TEAM] * len(teams)
-        self._knockout_seeds = teams
+        self._knockout_seeds = self._get_seeds()
 
     def get_team(self, team_ref: StaticMatchTeamReference | None) -> TLA | None:
         if team_ref is None:
