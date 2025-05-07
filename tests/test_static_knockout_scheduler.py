@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import unittest
 from collections import OrderedDict
+from collections.abc import Collection, Mapping
 from datetime import datetime, timedelta
 from unittest import mock
+
+from league_ranker import RankedPosition
 
 from sr.comp.knockout_scheduler import StaticScheduler, UNKNOWABLE_TEAM
 from sr.comp.knockout_scheduler.static_scheduler import (
@@ -10,8 +15,10 @@ from sr.comp.knockout_scheduler.static_scheduler import (
     parse_team_ref,
     WrongNumberOfTeamsError,
 )
-from sr.comp.match_period import Match, MatchType
+from sr.comp.match_period import Delay, Match, MatchSlot, MatchType
+from sr.comp.scores import LeaguePosition, LeaguePositions
 from sr.comp.teams import Team
+from sr.comp.types import ArenaName, GamePoints, MatchId, TLA, YAMLData
 
 from .factories import build_match, FakeSchedule
 
@@ -99,14 +106,14 @@ def get_two_team_config():
 
 
 def get_scheduler(
-    matches_config,
-    matches=None,
-    positions=None,
-    knockout_positions=None,
-    league_game_points=None,
-    delays=None,
-    teams=None,
-):
+    matches_config: YAMLData,
+    matches: list[MatchSlot] | None = None,
+    positions: LeaguePositions | None = None,
+    knockout_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]] | None = None,
+    league_game_points: dict[MatchId, Mapping[TLA, GamePoints]] | None = None,
+    delays: Collection[Delay] | None = None,
+    teams: dict[TLA, Team] | None = None,
+) -> StaticScheduler:
     matches = matches or []
     delays = delays or []
     match_duration = timedelta(minutes=5)
@@ -115,16 +122,16 @@ def get_scheduler(
 
     if not positions:
         positions = OrderedDict()
-        positions['AAA'] = 1
-        positions['BBB'] = 2
-        positions['CCC'] = 3
-        positions['DDD'] = 4
-        positions['EEE'] = 5
-        positions['FFF'] = 6
-        positions['GGG'] = 7
-        positions['HHH'] = 8
-        positions['III'] = 9
-        positions['JJJ'] = 10
+        positions[TLA('AAA')] = LeaguePosition(1)
+        positions[TLA('BBB')] = LeaguePosition(2)
+        positions[TLA('CCC')] = LeaguePosition(3)
+        positions[TLA('DDD')] = LeaguePosition(4)
+        positions[TLA('EEE')] = LeaguePosition(5)
+        positions[TLA('FFF')] = LeaguePosition(6)
+        positions[TLA('GGG')] = LeaguePosition(7)
+        positions[TLA('HHH')] = LeaguePosition(8)
+        positions[TLA('III')] = LeaguePosition(9)
+        positions[TLA('JJJ')] = LeaguePosition(10)
 
     if sorted(positions.keys()) != TLAs:
         raise ValueError("Must use common TLAs")
@@ -152,7 +159,7 @@ def get_scheduler(
         'match_periods': {'knockout': [period_config]},
         'static_knockout': matches_config,
     }
-    arenas = ['A']
+    arenas = [ArenaName('A')]
 
     scheduler = StaticScheduler(
         league_schedule,

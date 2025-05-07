@@ -3,9 +3,8 @@ from __future__ import annotations
 import datetime
 import random
 import unittest
-from collections import defaultdict, OrderedDict
-from datetime import timedelta
-from typing import Mapping
+from collections import OrderedDict
+from collections.abc import Collection, Mapping
 from unittest import mock
 
 from league_ranker import RankedPosition
@@ -14,30 +13,36 @@ from sr.comp.knockout_scheduler.base_scheduler import (
     BaseKnockoutScheduler,
     UNKNOWABLE_TEAM,
 )
+from sr.comp.match_period import Delay, MatchSlot
+from sr.comp.scores import LeaguePosition, LeaguePositions
 from sr.comp.teams import Team
-from sr.comp.types import MatchId, TLA
+from sr.comp.types import ArenaName, GamePoints, MatchId, TLA
 
 from .factories import build_match, FakeSchedule
 
 
 def get_scheduler(
-    matches=None,
-    positions=None,
-    knockout_positions=None,
-    league_game_points=None,
-    delays=None,
-    teams=None,
-    num_teams_per_arena=4,
-):
+    matches: list[MatchSlot] | None = None,
+    positions: LeaguePositions | None = None,
+    knockout_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]] | None = None,
+    league_game_points: dict[MatchId, Mapping[TLA, GamePoints]] | None = None,
+    delays: Collection[Delay] | None = None,
+    teams: dict[TLA, Team] | None = None,
+    num_teams_per_arena: int = 4,
+) -> BaseKnockoutScheduler:
     matches = matches or []
     delays = delays or []
-    match_duration = timedelta(minutes=5)
+    match_duration = datetime.timedelta(minutes=5)
     league_game_points = league_game_points or {}
     knockout_positions = knockout_positions or {}
+
     if not positions:
         positions = OrderedDict()
-        positions['ABC'] = 1
-        positions['DEF'] = 2
+        positions[TLA('ABC')] = LeaguePosition(1)
+        positions[TLA('DEF')] = LeaguePosition(2)
+
+    if teams is None:
+        teams = {x: Team(x, x, False, None) for x in positions.keys()}
 
     league_schedule = FakeSchedule(
         matches=matches,
@@ -59,9 +64,8 @@ def get_scheduler(
     config = {
         'match_periods': {'knockout': [period_config]},
     }
-    arenas = ['A']
-    if teams is None:
-        teams = defaultdict(lambda: Team(None, None, False, None))
+    arenas = [ArenaName('A')]
+
     scheduler = BaseKnockoutScheduler(
         league_schedule,
         scores,
@@ -77,7 +81,7 @@ class BaseKnockoutSchedulerTests(unittest.TestCase):
     def test_get_ranking_unknowable(self) -> None:
         resolved_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]]
         resolved_positions = {}
-        scheduler = get_scheduler(  # type: ignore[no-untyped-call]
+        scheduler = get_scheduler(
             knockout_positions=resolved_positions,
         )
 
@@ -95,7 +99,7 @@ class BaseKnockoutSchedulerTests(unittest.TestCase):
     def test_get_ranking_unknowable_with_empty_zones(self) -> None:
         resolved_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]]
         resolved_positions = {}
-        scheduler = get_scheduler(  # type: ignore[no-untyped-call]
+        scheduler = get_scheduler(
             knockout_positions=resolved_positions,
         )
 
@@ -130,7 +134,7 @@ class BaseKnockoutSchedulerTests(unittest.TestCase):
                 TLA('JKL'): RankedPosition(4),
             },
         }
-        scheduler = get_scheduler(  # type: ignore[no-untyped-call]
+        scheduler = get_scheduler(
             knockout_positions=resolved_positions,
         )
 
@@ -155,7 +159,7 @@ class BaseKnockoutSchedulerTests(unittest.TestCase):
                 TLA('ABC'): RankedPosition(3),
             },
         }
-        scheduler = get_scheduler(  # type: ignore[no-untyped-call]
+        scheduler = get_scheduler(
             knockout_positions=resolved_positions,
         )
 
@@ -164,17 +168,17 @@ class BaseKnockoutSchedulerTests(unittest.TestCase):
             scheduler.get_ranking(match),
         )
 
-    def test_get_seeds_unknowable(self):
+    def test_get_seeds_unknowable(self) -> None:
         scheduler = get_scheduler(matches=[
             # Fake an unplayed league match
-            {},
+            MatchSlot({}),
         ])
         self.assertEqual(
             ['ABC', 'DEF'],
             scheduler._get_seeds(),
         )
 
-    def test_get_seeds_known(self):
+    def test_get_seeds_known(self) -> None:
         scheduler = get_scheduler()
         self.assertEqual(
             ['ABC', 'DEF'],
