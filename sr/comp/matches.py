@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Iterable, Iterator, Mapping, Sequence
-from datetime import timedelta
 from pathlib import Path
 from typing import Any, TypeVar
 from typing_extensions import TypedDict
@@ -267,7 +266,7 @@ class MatchSchedule:
 
         for info in yamldata:
             match_numbers = parse_ranges(info['match_numbers'])
-            duration = timedelta(seconds=info['duration'])
+            duration = datetime.timedelta(seconds=info['duration'])
             for num in match_numbers:
                 assert num not in spacing
                 spacing[MatchNumber(num)] = duration
@@ -282,7 +281,7 @@ class MatchSchedule:
             return
 
         for info in yamldata:
-            d = Delay(timedelta(seconds=info['delay']), info['time'])
+            d = Delay(datetime.timedelta(seconds=info['delay']), info['time'])
             delays.append(d)
 
         delays.sort(key=lambda x: x.time)
@@ -403,7 +402,7 @@ class MatchSchedule:
         :return: A :class:`datetime.timedelta` specifying the active delay.
         """
 
-        total = timedelta()
+        total = datetime.timedelta()
         period = self.period_at(date)
         if not period:
             # No current period, no delays active

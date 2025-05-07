@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import datetime
 import math
 from collections.abc import Iterable, Mapping, Sized
-from datetime import timedelta
 
 from ..match_period import Match, MatchSlot, MatchType
 from ..match_period_clock import MatchPeriodClock, OutOfTimeException
@@ -174,7 +174,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
     def _add_knockouts(self) -> None:
         knockout_conf = self.config['knockout']
-        round_spacing = timedelta(seconds=knockout_conf['round_spacing'])
+        round_spacing = datetime.timedelta(seconds=knockout_conf['round_spacing'])
 
         self._add_first_round(conf_arity=knockout_conf.get('arity'))
 
@@ -193,7 +193,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
             if len(self.knockout_rounds[-1]) == 2:
                 # Extra delay before the final match
-                final_delay = timedelta(seconds=knockout_conf['final_delay'])
+                final_delay = datetime.timedelta(seconds=knockout_conf['final_delay'])
                 self.clock.advance_time(final_delay)
 
             self._add_round(arenas, rounds_remaining - 1)
