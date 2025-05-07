@@ -3,16 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING
 
 from ..match_period import Match, MatchPeriod, MatchType
 from ..scores import Scores
 from ..teams import Team
 from ..types import ArenaName, MatchId, MatchNumber, TLA, YAMLData
-
-if TYPE_CHECKING:
-    # Circular
-    from ..matches import MatchSchedule
+from .types import ScheduleHost
 
 # Use '???' as the "we don't know yet" marker
 UNKNOWABLE_TEAM = TLA('???')
@@ -31,7 +27,7 @@ class BaseKnockoutScheduler:
 
     def __init__(
         self,
-        schedule: MatchSchedule,
+        schedule: ScheduleHost,
         scores: Scores,
         arenas: Iterable[ArenaName],
         num_teams_per_arena: int,

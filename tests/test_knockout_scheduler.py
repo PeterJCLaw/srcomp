@@ -8,7 +8,7 @@ from sr.comp.match_period import Match, MatchType
 from sr.comp.matches import Delay
 from sr.comp.teams import Team
 
-from .factories import build_match
+from .factories import build_match, FakeSchedule
 
 
 def mock_first_round_seeding(side_effect):
@@ -37,13 +37,10 @@ def get_scheduler(
         positions['ABC'] = 1
         positions['DEF'] = 2
 
-    mock_n_matches = mock.Mock(side_effect=lambda: len(matches))
-    league_schedule = mock.Mock(
+    league_schedule = FakeSchedule(
         matches=matches,
         delays=delays,
         match_duration=match_duration,
-        n_matches=mock_n_matches,
-        n_league_matches=mock_n_matches(),
     )
     league_scores = mock.Mock(
         positions=positions,

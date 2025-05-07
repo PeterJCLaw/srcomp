@@ -13,7 +13,7 @@ from sr.comp.knockout_scheduler.static_scheduler import (
 from sr.comp.match_period import Match, MatchType
 from sr.comp.teams import Team
 
-from .factories import build_match
+from .factories import build_match, FakeSchedule
 
 TLAs = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF', 'GGG', 'HHH', 'III', 'JJJ']
 
@@ -132,13 +132,10 @@ def get_scheduler(
     if teams is None:
         teams = {x: Team(x, x, False, None) for x in positions.keys()}
 
-    mock_n_matches = mock.Mock(side_effect=lambda: len(matches))
-    league_schedule = mock.Mock(
+    league_schedule = FakeSchedule(
         matches=matches,
         delays=delays,
         match_duration=match_duration,
-        n_matches=mock_n_matches,
-        n_league_matches=mock_n_matches(),
     )
     league_scores = mock.Mock(positions=positions, game_points=league_game_points)
     knockout_scores = mock.Mock(resolved_positions=knockout_positions)

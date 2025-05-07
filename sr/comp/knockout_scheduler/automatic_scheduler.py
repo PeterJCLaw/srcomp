@@ -5,7 +5,6 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable, Mapping, Sized
 from datetime import timedelta
-from typing import TYPE_CHECKING
 
 from ..match_period import Match, MatchSlot, MatchType
 from ..match_period_clock import MatchPeriodClock, OutOfTimeException
@@ -14,10 +13,7 @@ from ..teams import Team
 from ..types import ArenaName, MatchNumber, TLA, YAMLData
 from . import seeding, stable_random
 from .base_scheduler import BaseKnockoutScheduler
-
-if TYPE_CHECKING:
-    # Circular
-    from ..matches import MatchSchedule
+from .types import ScheduleHost
 
 
 class KnockoutScheduler(BaseKnockoutScheduler):
@@ -43,7 +39,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
 
     def __init__(
         self,
-        schedule: MatchSchedule,
+        schedule: ScheduleHost,
         scores: Scores,
         arenas: Iterable[ArenaName],
         num_teams_per_arena: int,

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import datetime
 import random
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Collection, Iterable, Mapping, Sequence
 from typing import TypeVar
 
-from sr.comp.match_period import Match, MatchType
+from sr.comp.match_period import Delay, Match, MatchSlot, MatchType
 from sr.comp.types import (
     ArenaName,
     GamePoints,
@@ -91,3 +91,22 @@ def build_score_data(
             for idx, (tla, score) in enumerate(shuffled(scores.items()))
         },
     })
+
+
+class FakeSchedule:
+    """
+    Minimal `MatchSchedule` drop-in, sufficient to meet the `ScheduleHost`
+    protocol used by the knockout schedulers.
+    """
+
+    def __init__(
+        self,
+        *,
+        delays: Collection[Delay],
+        matches: list[MatchSlot],
+        match_duration: datetime.timedelta,
+    ):
+        self.delays = delays
+        self.matches = matches
+        self.match_duration = match_duration
+        self.n_league_matches = len(matches)
