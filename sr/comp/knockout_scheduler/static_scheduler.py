@@ -146,7 +146,8 @@ class StaticScheduler(BaseKnockoutScheduler):
         except IndexError:
             raise InvalidReferenceError(
                 f"Reference {team_ref!r} to invalid ranking! "
-                f"(Position {pos!r} does not exist in match \"{match.display_name}\")",
+                f"Position {pos!r} does not exist in match \"{match.display_name}\". "
+                f"Available positions: {tuple(range(len(ranking)))}.",
             ) from None
 
     def _add_match(
