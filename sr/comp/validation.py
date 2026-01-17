@@ -95,6 +95,7 @@ def report_validation_errors(errors: Sequence[ValidationError]) -> None:
     for source, errors_group in itertools.groupby(errors, key=lambda x: x.source):
         messages = [x.message for x in errors_group]
         if source:
+            assert isinstance(source, tuple)  # Work around https://github.com/python/mypy/issues/19034
             report_errors(*source, messages)
         else:
             for message in messages:
