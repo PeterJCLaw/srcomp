@@ -95,7 +95,7 @@ class TeamScore:
 
     def __lt__(self, other: TeamScore) -> bool:
         if not isinstance(other, TeamScore):
-            return NotImplemented  # type: ignore[unreachable]
+            return NotImplemented
 
         return self._ordering_key < other._ordering_key
 
