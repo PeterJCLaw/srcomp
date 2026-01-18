@@ -6,7 +6,7 @@ import datetime
 from collections.abc import Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any, TypeVar
-from typing_extensions import TypedDict
+from typing_extensions import deprecated, TypedDict
 
 import dateutil.tz
 from league_ranker import RankedPosition
@@ -423,12 +423,19 @@ class MatchSchedule:
 
         return total
 
+    @deprecated("Use SRComp.operations.get_matches_at instead.")
     def matches_at(self, date: datetime.datetime) -> Iterator[Match]:
         """
-        Get all the matches that occur around a specific ``date``.
+        Deprecated in favour of ``MatchOperations.get_matches_at``.
 
-        :param datetime date: The date at which matches occur.
-        :return: An iterable list of matches.
+        Get all the matches scheduled to occur around a specific ``date``.
+
+        This accounts for delays committed to the schedule, but does not account
+        for ongoing operational changes such as non-released matches.
+
+        All known consumers want the latter to be included and should use
+        ``MatchOperations.get_matches_at`` instead. If usages which need
+        this behaviour are found, please report them.
         """
 
         for slot in self.matches:

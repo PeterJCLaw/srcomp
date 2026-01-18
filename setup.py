@@ -23,7 +23,7 @@ setup(
         'PyYAML >=5.1.2, <7',
         'league-ranker >=0.1, <2',
         'python-dateutil >=2.7, <3',
-        'typing-extensions >=4, <5',
+        'typing-extensions >=4.5, <5',
     ],
     python_requires='>=3.10',
     classifiers=[
