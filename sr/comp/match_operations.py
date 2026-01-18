@@ -35,7 +35,7 @@ class ArenaTimes:
 
 
 @dataclasses.dataclass(frozen=True)
-class CurrentMatches:
+class OperationsMatches:
     time: datetime.datetime
     matches: Collection[Match]
     staging_matches: Collection[Match]
@@ -187,16 +187,12 @@ class MatchOperations:
         # threshold time
         return times.release_threshold
 
-    def get_current_matches(self, when: datetime.datetime) -> CurrentMatches:
+    def get_matches_at(self, when: datetime.datetime) -> OperationsMatches:
         """
-        Get all the matches with a useful relation to the current time.
+        Get all the matches with a useful relation to a given time.
 
         This accounts for both delays committed to the schedule and ongoing
         operational changes such as non-released matches.
-
-        The time being passed in should always be the current time, however a
-        specific value may be passed to support cases where a single timestamp
-        is used for several separate queries against the compstate.
         """
 
         real_when = when
@@ -226,7 +222,7 @@ class MatchOperations:
                     if first_signal <= when:
                         shepherding_matches.append(match)
 
-        return CurrentMatches(
+        return OperationsMatches(
             time=real_when,
             matches=matches,
             staging_matches=staging_matches,
