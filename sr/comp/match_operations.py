@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import datetime
 import enum
+from collections.abc import Collection
 from pathlib import Path
 
 from . import yaml_loader
@@ -31,6 +32,14 @@ class ArenaTimes:
     release_threshold: datetime.datetime
     start: datetime.datetime
     end: datetime.datetime
+
+
+@dataclasses.dataclass(frozen=True)
+class CurrentMatches:
+    time: datetime.datetime
+    matches: Collection[Match]
+    staging_matches: Collection[Match]
+    shepherding_matches: Collection[Match]
 
 
 class InvalidResetDurationError(ValueError):
@@ -145,3 +154,43 @@ class MatchOperations:
             return MatchState.HELD
 
         return MatchState.FUTURE
+
+    def get_current_matches(self, when: datetime.datetime) -> CurrentMatches:
+        """
+        Get all the matches with a useful relation to the current time.
+
+        The time being passed in should always be the current time, however a
+        specific value may be passed to support cases where a single timestamp
+        is used for several separate queries against the compstate.
+        """
+
+        matches = []
+        staging_matches = []
+        shepherding_matches = []
+
+        for slot in self.schedule.matches:
+            for match in slot.values():
+                if match.start_time <= when < match.end_time:
+                    matches.append(match)
+
+                staging_times = self.schedule.get_staging_times(match)
+
+                if when > staging_times['closes']:
+                    # Already done staging
+                    continue
+
+                if staging_times['opens'] <= when:
+                    staging_matches.append(match)
+
+                signal_shepherds = staging_times['signal_shepherds']
+                if signal_shepherds:
+                    first_signal = min(signal_shepherds.values())
+                    if first_signal <= when:
+                        shepherding_matches.append(match)
+
+        return CurrentMatches(
+            time=when,
+            matches=matches,
+            staging_matches=staging_matches,
+            shepherding_matches=shepherding_matches,
+        )
