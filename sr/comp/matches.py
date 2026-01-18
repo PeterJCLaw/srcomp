@@ -57,13 +57,19 @@ class WrongNumberOfTeams(Exception):
         teams: Sequence[TLA | None],
         num_teams_per_arena: int,
     ) -> None:
-        message = "Match {}{} has {} teams but must have {}".format(
-            arena_name,
-            match_n,
-            len(teams),
-            num_teams_per_arena,
+        super().__init__(match_n, arena_name, teams, num_teams_per_arena)
+        self.match_n = match_n
+        self.arena_name = arena_name
+        self.teams = teams
+        self.num_teams_per_arena = num_teams_per_arena
+
+    def __str__(self) -> str:
+        return "Match {}{} has {} teams but must have {}".format(
+            self.arena_name,
+            self.match_n,
+            len(self.teams),
+            self.num_teams_per_arena,
         )
-        super().__init__(message)
 
 
 def parse_ranges(ranges: str) -> set[int]:

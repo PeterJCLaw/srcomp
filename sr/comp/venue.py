@@ -33,11 +33,12 @@ class InvalidRegionException(Exception):
     """
 
     def __init__(self, region: RegionName, area: str) -> None:
-        tpl = "Invalid region '{0}' found in shepherding area '{1}'"
-        super().__init__(tpl.format(region, area))
-
+        super().__init__(region, area)
         self.region = region
         self.area = area
+
+    def __str__(self) -> str:
+        return f"Invalid region '{self.region}' found in shepherding area '{self.area}'"
 
 
 class MismatchException(Exception, Generic[T_str]):
@@ -45,7 +46,7 @@ class MismatchException(Exception, Generic[T_str]):
     An exception that occurs when there are duplicate, extra or missing items.
     """
 
-    def __init__(
+    def __init__(  # noqa: B042  # too hard to fix right now
         self,
         tpl: str,
         duplicates: Iterable[T_str],
@@ -78,7 +79,7 @@ class LayoutTeamsException(MismatchException[TLA]):
     teams in a layout.
     """
 
-    def __init__(
+    def __init__(  # noqa: B042  # too hard to fix right now
         self,
         duplicate_teams: Iterable[TLA],
         extra_teams: Iterable[TLA],
