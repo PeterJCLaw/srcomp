@@ -133,7 +133,7 @@ class MatchOperations:
         self.schedule = schedule
         self.release_threshold = release_threshold
         self.reset_duration = reset_duration
-        self.released_match = released_match
+        self.released_match_data = released_match
 
     def get_arena_times(self, match: Match) -> ArenaTimes:
         match_start = match.start_time + self.schedule.match_slot_lengths['pre']
@@ -144,7 +144,7 @@ class MatchOperations:
         )
 
     def get_match_state(self, match: Match) -> MatchState:
-        if self.released_match and match.num <= self.released_match['number']:
+        if self.released_match_data and match.num <= self.released_match_data['number']:
             # TODO: emit a warning if a released match slot hasn't started yet?
             # Perhaps a "validation" warning?
             return MatchState.RELEASED
