@@ -10,7 +10,7 @@ from pathlib import Path
 from subprocess import check_output
 from typing import cast
 
-from . import arenas, matches, ranker, scores, teams, venue
+from . import arenas, match_operations, matches, ranker, scores, teams, venue
 from .types import RankerType, ScorerType
 from .winners import compute_awards
 
@@ -127,6 +127,12 @@ class SRComp:
             self.teams,
         )
         """A :class:`sr.comp.matches.MatchSchedule` instance."""
+
+        self.operations = match_operations.MatchOperations.create(
+            self.root / 'operations.yaml',
+            self.schedule,
+        )
+        """A :class:`sr.comp.match_operations.MatchOperations` instance."""
 
         self.timezone = self.schedule.timezone
         """The timezone of the competition."""

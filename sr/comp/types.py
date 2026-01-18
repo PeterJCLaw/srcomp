@@ -179,3 +179,40 @@ class DelayData(TypedDict):
 
 
 AwardsData = NewType('AwardsData', dict[str, Union[TLA, list[TLA]]])
+
+
+class ReleasedMatchData(TypedDict):
+    number: MatchNumber
+    time: datetime.datetime
+
+
+class OperationsData(TypedDict):
+    """
+    Information relating to the operation of matches.
+    """
+
+    release_threshold: int
+    """
+    Duration prior to the start of a match to pause if the match has not been
+    "released". In seconds relative to the start of the game (not the slot).
+    """
+
+    reset_duration: int
+    """
+    Duration prior to the start of a match to reset to if the match is "reset".
+    In seconds relative to the start of the game (not the slot). Must be greater
+    than or equal to `release_threshold`.
+    """
+
+    released_match: ReleasedMatchData | None
+    """
+    Information about the currently released match.
+
+    Either:
+      - None, meaning that no matches have been released, or
+      - the most recently released match & when it was released
+
+    History is not recorded. Delays are used to correct for "late" releases.
+    Resets are performed by changing this to a suitable value for the previous
+    match and (if needed) adding a delay.
+    """
