@@ -145,8 +145,6 @@ class MatchOperations:
 
     def get_match_state(self, match: Match, when: datetime.datetime) -> MatchState:
         if self.released_match_data and match.num <= self.released_match_data['number']:
-            # TODO: emit a warning if a released match slot hasn't started yet?
-            # Perhaps a "validation" warning?
             return MatchState.RELEASED
 
         times = self.get_arena_times(match)
