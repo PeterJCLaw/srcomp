@@ -155,14 +155,52 @@ class MatchOperations:
 
         return MatchState.FUTURE
 
+    def _get_effective_time(self, when: datetime.datetime) -> datetime.datetime:
+        """
+        Get the "effective" time for a given wall-clock time.
+
+        The returned value accounts for any unreleased matches and can be safely
+        used with queries against the schedule (which is otherwise unaware of
+        operationally driven changes).
+        """
+
+        # For the next, yet to be released match
+        num = (
+            self.released_match_data['number'] + 1
+            if self.released_match_data
+            else 0
+        )
+
+        if num >= self.schedule.n_matches():
+            # All matches have been released
+            return when
+
+        slot = self.schedule.matches[num]
+        match = next(iter(slot.values()))
+
+        times = self.get_arena_times(match)
+        if times.release_threshold > when:
+            # Haven't reached the threshold yet -- all is well
+            return when
+
+        # In a held state, things are effectively paused at the release
+        # threshold time
+        return times.release_threshold
+
     def get_current_matches(self, when: datetime.datetime) -> CurrentMatches:
         """
         Get all the matches with a useful relation to the current time.
+
+        This accounts for both delays committed to the schedule and ongoing
+        operational changes such as non-released matches.
 
         The time being passed in should always be the current time, however a
         specific value may be passed to support cases where a single timestamp
         is used for several separate queries against the compstate.
         """
+
+        real_when = when
+        when = self._get_effective_time(when)
 
         matches = []
         staging_matches = []
@@ -189,7 +227,7 @@ class MatchOperations:
                         shepherding_matches.append(match)
 
         return CurrentMatches(
-            time=when,
+            time=real_when,
             matches=matches,
             staging_matches=staging_matches,
             shepherding_matches=shepherding_matches,
