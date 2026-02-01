@@ -135,6 +135,13 @@ class MatchOperations:
         self.reset_duration = reset_duration
         self.released_match_data = released_match_data
 
+    @property
+    def last_released_match(self) -> MatchNumber | None:
+        """The most recently released match."""
+        if not self.released_match_data:
+            return None
+        return self.released_match_data['number']
+
     def get_arena_times(self, match: Match) -> ArenaTimes:
         match_start = match.start_time + self.schedule.match_slot_lengths['pre']
         return ArenaTimes(
@@ -144,7 +151,8 @@ class MatchOperations:
         )
 
     def get_match_state(self, match: Match, when: datetime.datetime) -> MatchState:
-        if self.released_match_data and match.num <= self.released_match_data['number']:
+        last_released_match = self.last_released_match
+        if last_released_match is not None and match.num <= last_released_match:
             return MatchState.RELEASED
 
         times = self.get_arena_times(match)
