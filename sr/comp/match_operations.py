@@ -96,7 +96,7 @@ class MatchOperations:
                 schedule,
                 release_threshold=release_threshold,
                 reset_duration=reset_duration,
-                released_match=released_match,
+                released_match_data=released_match,
             )
         except FileNotFoundError:
             final_match = schedule.final_match
@@ -104,7 +104,7 @@ class MatchOperations:
                 schedule,
                 release_threshold=datetime.timedelta(0),
                 reset_duration=datetime.timedelta(0),
-                released_match={
+                released_match_data={
                     'number': final_match.num,
                     'time': final_match.start_time,
                 },
@@ -115,7 +115,7 @@ class MatchOperations:
         schedule: MatchSchedule,
         release_threshold: datetime.timedelta,
         reset_duration: datetime.timedelta,
-        released_match: ReleasedMatchData | None,
+        released_match_data: ReleasedMatchData | None,
     ) -> None:
         if reset_duration < release_threshold:
             raise InvalidResetDurationError(
@@ -123,17 +123,17 @@ class MatchOperations:
                 reset_duration=reset_duration,
             )
 
-        if released_match:
-            if released_match['number'] not in range(schedule.n_matches()):
+        if released_match_data:
+            if released_match_data['number'] not in range(schedule.n_matches()):
                 raise InvalidReleasedMatchNumberError(
-                    number=released_match['number'],
+                    number=released_match_data['number'],
                     final_number=schedule.final_match.num,
                 )
 
         self.schedule = schedule
         self.release_threshold = release_threshold
         self.reset_duration = reset_duration
-        self.released_match_data = released_match
+        self.released_match_data = released_match_data
 
     def get_arena_times(self, match: Match) -> ArenaTimes:
         match_start = match.start_time + self.schedule.match_slot_lengths['pre']
