@@ -1,0 +1,45 @@
+[project]
+name = 'sr.comp'
+version = '1.12.0'
+description = "Reliable software for running robotics competitions"
+authors = [
+    { name = "Student Robotics Competition Software SIG", email = 'srobo-devel@googlegroups.com' },
+]
+readme = 'README.rst'
+license-files = ["LICENSE"]
+classifiers = [
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
+    'Programming Language :: Python :: 3 :: Only',
+    'Topic :: Software Development :: Libraries',
+]
+
+requires-python = '>=3.10'
+dependencies = [
+    'PyYAML >=5.1.2, <7',
+    'league-ranker >=0.1, <2',
+    'python-dateutil >=2.7, <3',
+    'typing-extensions >=4, <5',
+]
+
+[project.urls]
+Homepage = 'https://github.com/PeterJCLaw/srcomp/wiki'
+Documentation = 'https://srcomp.readthedocs.org/'
+'Issue tracker' = 'https://github.com/PeterJCLaw/srcomp/issues'
+Repository = 'https://github.com/PeterJCLaw/srcomp'
+
+[build-system]
+requires = ['uv_build>=0.10.0,<0.11.0']
+build-backend = 'uv_build'
+
+[tool.uv.build-backend]
+module-name = "sr"
+module-root = ""
+namespace = true
