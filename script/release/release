@@ -1,13 +1,13 @@
 #!/bin/bash -e
 
 TAG=$(git describe --tags --exact-match)
-VERSION=$(python setup.py --version)
+VERSION=$(uv version --short)
 
 test "$TAG" == "v$VERSION"
 
 echo "Building $TAG"
 
-python setup.py sdist bdist_wheel
+uv build
 
 echo "Uploading $TAG"
 
