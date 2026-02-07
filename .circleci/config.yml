@@ -31,17 +31,17 @@ references:
   restore-docs-dependencies-cache: &restore-docs-dependencies-cache
     restore_cache:
       keys:
-        - deps-docs-4-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
+        - deps-docs-5-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
   install-docs-dependencies: &install-docs-dependencies
     run:
       name: Install Dependencies
       command: |
         python3 -m venv venv
         venv/bin/pip install -r .circleci/requirements.txt
-        venv/bin/pip install -r docs-requirements.txt
+        venv/bin/uv pip install -r docs-requirements.txt
   save-docs-dependencies-cache: &save-docs-dependencies-cache
     save_cache:
-      key: deps-docs-4-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
+      key: deps-docs-5-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
       paths:
         - venv
   build-checksum-file: &build-checksum-file
@@ -76,17 +76,17 @@ references:
   restore-dependencies-cache: &restore-dependencies-cache
     restore_cache:
       keys:
-        - deps-4-py<< parameters.version >>-{{ checksum ".checksum" }}
+        - deps-5-py<< parameters.version >>-{{ checksum ".checksum" }}
   install-dependencies: &install-dependencies
     run:
       name: Install Dependencies
       command: |
         python3 -m venv venv
         venv/bin/pip install -r .circleci/requirements.txt
-        venv/bin/pip install -r all-requirements.txt
+        venv/bin/uv pip install -r all-requirements.txt
   save-dependencies-cache: &save-dependencies-cache
     save_cache:
-      key: deps-4-py<< parameters.version >>-{{ checksum ".checksum" }}
+      key: deps-5-py<< parameters.version >>-{{ checksum ".checksum" }}
       paths:
         - venv
   parametrised-python-executor: &parametrised-python-executor
@@ -193,7 +193,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - deps-min-2-py<< parameters.version >>-{{ checksum ".checksum" }}
+            - deps-min-5-py<< parameters.version >>-{{ checksum ".checksum" }}
       - run:
           name: Install Dependencies
           command: |
@@ -204,7 +204,7 @@ jobs:
             uv pip install --resolution lowest-direct -r all-requirements.txt
             pip list
       - save_cache:
-          key: deps-min-2-py<< parameters.version >>-{{ checksum ".checksum" }}
+          key: deps-min-5-py<< parameters.version >>-{{ checksum ".checksum" }}
           paths:
             - venv
 
@@ -241,7 +241,7 @@ jobs:
           name: Setup virtualenv
           command: |
             python3 -m venv venv
-            venv/bin/pip install -r script/release/requirements.txt
+            venv/bin/uv pip install -r script/release/requirements.txt
 
       - run:
           name: Push to PyPI
