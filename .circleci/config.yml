@@ -36,7 +36,7 @@ references:
     run:
       name: Install Dependencies
       command: |
-        uv venv
+        UV_VENV_CLEAR=0 uv venv
         uv pip install -r docs-requirements.txt
   save-docs-dependencies-cache: &save-docs-dependencies-cache
     save_cache:
@@ -80,7 +80,7 @@ references:
     run:
       name: Install Dependencies
       command: |
-        uv venv
+        UV_VENV_CLEAR=0 uv venv
         uv pip install -r all-requirements.txt
   save-dependencies-cache: &save-dependencies-cache
     save_cache:
@@ -193,7 +193,7 @@ jobs:
           name: Install Dependencies
           command: |
             set -x
-            uv venv
+            UV_VENV_CLEAR=0 uv venv
             uv pip install --resolution lowest-direct -r all-requirements.txt
             uv pip list
       - save_cache:
@@ -231,7 +231,7 @@ jobs:
       - run:
           name: Setup virtualenv
           command: |
-            uv venv
+            UV_VENV_CLEAR=0 uv venv
             uv pip install -r script/release/requirements.txt
 
       - run:
