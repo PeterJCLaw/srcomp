@@ -15,47 +15,18 @@ references:
       key: deps-docs-5-py<< parameters.version >>-{{ checksum "uv.lock" }}
       paths:
         - .venv
-  build-checksum-file: &build-checksum-file
-    run:
-      name: Build checksum file
-      command: |
-        declare -a FILES=(
-          "script/linting/requirements.txt"
-          "script/typing/requirements.txt"
-        )
-        for f in ${FILES[@]}
-        do
-          echo "# $f" >> all-requirements.txt
-          cat $f >> all-requirements.txt
-        done
-
-        echo "# self" >> all-requirements.txt
-        echo "." >> all-requirements.txt
-
-        declare -a FILES=(
-          "pyproject.toml"
-          ".circleci/requirements.txt"
-          "all-requirements.txt"
-        )
-        python3 --version >> .checksum
-        for f in ${FILES[@]}
-        do
-          echo "# $f" >> .checksum
-          cat $f >> .checksum
-        done
   restore-dependencies-cache: &restore-dependencies-cache
     restore_cache:
       keys:
-        - deps-5-py<< parameters.version >>-{{ checksum ".checksum" }}
+        - deps-5-py<< parameters.version >>-{{ checksum "uv.lock" }}
   install-dependencies: &install-dependencies
     run:
       name: Install Dependencies
       command: |
-        UV_VENV_CLEAR=0 uv venv
-        uv pip install -r all-requirements.txt
+        uv sync
   save-dependencies-cache: &save-dependencies-cache
     save_cache:
-      key: deps-5-py<< parameters.version >>-{{ checksum ".checksum" }}
+      key: deps-5-py<< parameters.version >>-{{ checksum "uv.lock" }}
       paths:
         - .venv
   parametrised-python-executor: &parametrised-python-executor
@@ -112,7 +83,6 @@ jobs:
     steps:
       - checkout
 
-      - *build-checksum-file
       - *restore-dependencies-cache
       - *install-dependencies
       - *save-dependencies-cache
@@ -133,7 +103,6 @@ jobs:
           command: |
             git submodule update --init --recursive
 
-      - *build-checksum-file
       - *restore-dependencies-cache
       - *install-dependencies
       - *save-dependencies-cache
@@ -154,20 +123,17 @@ jobs:
           command: |
             git submodule update --init --recursive
 
-      - *build-checksum-file
-
       - restore_cache:
           keys:
-            - deps-min-5-py<< parameters.version >>-{{ checksum ".checksum" }}
+            - deps-min-5-py<< parameters.version >>-{{ checksum "pyproject.toml" }}
       - run:
           name: Install Dependencies
           command: |
             set -x
-            UV_VENV_CLEAR=0 uv venv
-            uv pip install --resolution lowest-direct -r all-requirements.txt
+            uv sync --resolution lowest-direct --no-default-groups
             uv pip list
       - save_cache:
-          key: deps-min-5-py<< parameters.version >>-{{ checksum ".checksum" }}
+          key: deps-min-5-py<< parameters.version >>-{{ checksum "pyproject.toml" }}
           paths:
             - .venv
 
@@ -182,7 +148,6 @@ jobs:
     steps:
       - checkout
 
-      - *build-checksum-file
       - *restore-dependencies-cache
       - *install-dependencies
       - *save-dependencies-cache
