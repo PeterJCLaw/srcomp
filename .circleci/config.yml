@@ -1,46 +1,18 @@
 version: 2.1
 
 references:
-  build-docs-checksum-file: &build-docs-checksum-file
-    run:
-      name: Build docs checksum file
-      command: |
-        declare -a FILES=(
-          "docs/requirements.txt"
-        )
-        for f in ${FILES[@]}
-        do
-          echo "# $f" >> docs-requirements.txt
-          cat $f >> docs-requirements.txt
-        done
-
-        echo "# self" >> docs-requirements.txt
-        echo "." >> docs-requirements.txt
-
-        declare -a FILES=(
-          "pyproject.toml"
-          ".circleci/requirements.txt"
-          "docs-requirements.txt"
-        )
-        python3 --version >> .docs-checksum
-        for f in ${FILES[@]}
-        do
-          echo "# $f" >> .docs-checksum
-          cat $f >> .docs-checksum
-        done
   restore-docs-dependencies-cache: &restore-docs-dependencies-cache
     restore_cache:
       keys:
-        - deps-docs-5-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
+        - deps-docs-5-py<< parameters.version >>-{{ checksum "uv.lock" }}
   install-docs-dependencies: &install-docs-dependencies
     run:
       name: Install Dependencies
       command: |
-        UV_VENV_CLEAR=0 uv venv
-        uv pip install -r docs-requirements.txt
+        uv sync --group docs
   save-docs-dependencies-cache: &save-docs-dependencies-cache
     save_cache:
-      key: deps-docs-5-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
+      key: deps-docs-5-py<< parameters.version >>-{{ checksum "uv.lock" }}
       paths:
         - .venv
   build-checksum-file: &build-checksum-file
@@ -48,7 +20,6 @@ references:
       name: Build checksum file
       command: |
         declare -a FILES=(
-          "script/docs/requirements.txt"
           "script/linting/requirements.txt"
           "script/typing/requirements.txt"
         )
@@ -126,7 +97,6 @@ jobs:
     steps:
       - checkout
 
-      - *build-docs-checksum-file
       - *restore-docs-dependencies-cache
       - *install-docs-dependencies
       - *save-docs-dependencies-cache

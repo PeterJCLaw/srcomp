@@ -43,3 +43,8 @@ build-backend = 'uv_build'
 module-name = "sr"
 module-root = ""
 namespace = true
+
+[dependency-groups]
+docs = [
+    "sphinx>6",
+]
