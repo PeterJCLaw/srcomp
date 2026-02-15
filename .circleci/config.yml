@@ -36,14 +36,13 @@ references:
     run:
       name: Install Dependencies
       command: |
-        python3 -m venv venv
-        venv/bin/pip install -r .circleci/requirements.txt
-        venv/bin/uv pip install -r docs-requirements.txt
+        uv venv
+        uv pip install -r docs-requirements.txt
   save-docs-dependencies-cache: &save-docs-dependencies-cache
     save_cache:
       key: deps-docs-5-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
       paths:
-        - venv
+        - .venv
   build-checksum-file: &build-checksum-file
     run:
       name: Build checksum file
@@ -81,14 +80,13 @@ references:
     run:
       name: Install Dependencies
       command: |
-        python3 -m venv venv
-        venv/bin/pip install -r .circleci/requirements.txt
-        venv/bin/uv pip install -r all-requirements.txt
+        uv venv
+        uv pip install -r all-requirements.txt
   save-dependencies-cache: &save-dependencies-cache
     save_cache:
       key: deps-5-py<< parameters.version >>-{{ checksum ".checksum" }}
       paths:
-        - venv
+        - .venv
   parametrised-python-executor: &parametrised-python-executor
     parameters:
       version:
@@ -136,8 +134,7 @@ jobs:
       - run:
           name: Build the docs
           command: |
-            source venv/bin/activate
-            ./script/docs/build.sh
+            uv run ./script/docs/build.sh
 
   lint:
     <<: *parametrised-python-executor
@@ -153,8 +150,7 @@ jobs:
       - run:
           name: Run Flake8
           command: |
-            source venv/bin/activate
-            ./script/linting/lint
+            uv run ./script/linting/lint
 
   test:
     <<: *parametrised-python-executor
@@ -175,8 +171,7 @@ jobs:
       - run:
           name: Run Tests
           command: |
-            source venv/bin/activate
-            ./script/testing/test
+            uv run ./script/testing/test
 
   test-min-deps:
     <<: *parametrised-python-executor
@@ -198,21 +193,18 @@ jobs:
           name: Install Dependencies
           command: |
             set -x
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install uv
+            uv venv
             uv pip install --resolution lowest-direct -r all-requirements.txt
-            pip list
+            uv pip list
       - save_cache:
           key: deps-min-5-py<< parameters.version >>-{{ checksum ".checksum" }}
           paths:
-            - venv
+            - .venv
 
       - run:
           name: Run Tests
           command: |
-            source venv/bin/activate
-            ./script/testing/test
+            uv run ./script/testing/test
 
   typecheck:
     <<: *parametrised-python-executor
@@ -228,8 +220,7 @@ jobs:
       - run:
           name: Run Mypy
           command: |
-            source venv/bin/activate
-            ./script/typing/check
+            uv run ./script/typing/check
 
   release:
     docker:
@@ -240,16 +231,15 @@ jobs:
       - run:
           name: Setup virtualenv
           command: |
-            python3 -m venv venv
-            venv/bin/uv pip install -r script/release/requirements.txt
+            uv venv
+            uv pip install -r script/release/requirements.txt
 
       - run:
           name: Push to PyPI
           command: |
-            source venv/bin/activate
             export TWINE_USERNAME=__token__
             export TWINE_PASSWORD=$PYPI_TOKEN
-            ./script/release/release
+            uv run ./script/release/release
 
 
 workflows:
