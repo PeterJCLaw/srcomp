@@ -172,6 +172,9 @@ jobs:
           command: |
             uv run ./script/release/build.sh
 
+      - store_artifacts:
+          path: dist
+
   release:
     docker:
       - image: cimg/python:3.11
@@ -186,6 +189,9 @@ jobs:
             export UV_PUBLISH_USERNAME=__token__
             export UV_PUBLISH_PASSWORD=$PYPI_TOKEN
             uv run ./script/release/release
+
+      - store_artifacts:
+          path: dist
 
 
 workflows:
