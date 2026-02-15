@@ -7,8 +7,8 @@ test "$TAG" == "v$VERSION"
 
 echo "Building $TAG"
 
-uv build
+./script/release/build.sh
 
 echo "Uploading $TAG"
 
-twine upload dist/*
+uv publish

@@ -1,2 +1,1 @@
 # Changing this? Also update the CI config which builds an equivalent expanded version.
--r script/release/requirements.txt

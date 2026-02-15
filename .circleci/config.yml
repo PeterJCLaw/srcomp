@@ -157,23 +157,34 @@ jobs:
           command: |
             uv run ./script/typing/check
 
+  build:
+    <<: *parametrised-python-executor
+
+    steps:
+      - checkout
+
+      - *restore-dependencies-cache
+      - *install-dependencies
+      - *save-dependencies-cache
+
+      - run:
+          name: Build only
+          command: |
+            uv run ./script/release/build.sh
+
   release:
     docker:
       - image: cimg/python:3.11
     steps:
       - checkout
 
-      - run:
-          name: Setup virtualenv
-          command: |
-            UV_VENV_CLEAR=0 uv venv
-            uv pip install -r script/release/requirements.txt
+      - *install-dependencies
 
       - run:
           name: Push to PyPI
           command: |
-            export TWINE_USERNAME=__token__
-            export TWINE_PASSWORD=$PYPI_TOKEN
+            export UV_PUBLISH_USERNAME=__token__
+            export UV_PUBLISH_PASSWORD=$PYPI_TOKEN
             uv run ./script/release/release
 
 
@@ -182,6 +193,8 @@ workflows:
 
   validate:
     jobs:
+      - build:
+          <<: *python-full-version-matrix
       - docs:
           <<: *python-top-and-bottom-version-matrix
       - lint:
@@ -195,6 +208,9 @@ workflows:
 
   release:
     jobs:
+      - build:
+          <<: *python-full-version-matrix
+          <<: *filter-tags
       - docs:
           <<: *python-top-and-bottom-version-matrix
           <<: *filter-tags
@@ -213,6 +229,7 @@ workflows:
       - release:
           <<: *filter-tags
           requires:
+            - build
             - docs
             - lint
             - test
