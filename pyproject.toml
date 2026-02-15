@@ -1,0 +1,76 @@
+[project]
+name = 'sr.comp'
+version = '1.12.0'
+description = "Reliable software for running robotics competitions"
+authors = [
+    { name = "Student Robotics Competition Software SIG", email = 'srobo-devel@googlegroups.com' },
+]
+readme = 'README.rst'
+license-files = ["LICENSE"]
+classifiers = [
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
+    'Programming Language :: Python :: 3 :: Only',
+    'Topic :: Software Development :: Libraries',
+]
+
+requires-python = '>=3.10'
+dependencies = [
+    'PyYAML >=5.1.2, <7',
+    'league-ranker >=0.1, <2',
+    'python-dateutil >=2.7, <3',
+    'typing-extensions >=4, <5',
+]
+
+[project.urls]
+Homepage = 'https://github.com/PeterJCLaw/srcomp/wiki'
+Documentation = 'https://srcomp.readthedocs.org/'
+'Issue tracker' = 'https://github.com/PeterJCLaw/srcomp/issues'
+Repository = 'https://github.com/PeterJCLaw/srcomp'
+
+[build-system]
+requires = ['uv_build>=0.10.0,<0.11.0']
+build-backend = 'uv_build'
+
+[tool.uv.build-backend]
+module-name = "sr"
+module-root = ""
+namespace = true
+
+[dependency-groups]
+dev = [
+    { include-group = "docs" },
+    { include-group = "linting" },
+    { include-group = "typing" },
+]
+docs = [
+    "sphinx>6",
+]
+linting = [
+    "flake8>=5",
+    "flake8-balanced-wrapping>=0.1.7",
+    "flake8-bugbear>=25.11.29",
+    "flake8-builtins>=3.1.0",
+    "flake8-commas>=4.0.0",
+    "flake8-comprehensions>=3.17.0",
+    "flake8-debugger>=4.1.2",
+    "flake8-future-annotations>=1.1.0",
+    "flake8-isort>=7.0.0",
+    "flake8-leading-blank-lines>=1.0.4",
+    "flake8-noqa>=1.5.0",
+    "flake8-todo>=0.7",
+    "flake8-tuple>=0.4.1",
+    "isort>=7.0.0",
+]
+typing = [
+    "mypy>=0.940",
+    "types-python-dateutil>=2.9.0.20260124",
+    "types-pyyaml>=6.0.12.20250915",
+]
