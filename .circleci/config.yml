@@ -214,12 +214,6 @@ jobs:
             source venv/bin/activate
             ./script/testing/test
 
-      - run:
-          name: Run Tests
-          command: |
-            source venv/bin/activate
-            ./script/testing/test
-
   typecheck:
     <<: *parametrised-python-executor
 
