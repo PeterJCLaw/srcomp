@@ -6,7 +6,7 @@ authors = [
     { name = "Student Robotics Competition Software SIG", email = 'srobo-devel@googlegroups.com' },
 ]
 readme = 'README.rst'
-license-files = ["LICENSE"]
+license-files = ["AUTHORS.rst", "LICENSE"]
 classifiers = [
     'Intended Audience :: Developers',
     'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
