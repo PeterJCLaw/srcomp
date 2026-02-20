@@ -1,94 +1,34 @@
 version: 2.1
 
 references:
-  build-docs-checksum-file: &build-docs-checksum-file
-    run:
-      name: Build docs checksum file
-      command: |
-        declare -a FILES=(
-          "docs/requirements.txt"
-        )
-        for f in ${FILES[@]}
-        do
-          echo "# $f" >> docs-requirements.txt
-          cat $f >> docs-requirements.txt
-        done
-
-        echo "# self" >> docs-requirements.txt
-        echo "." >> docs-requirements.txt
-
-        declare -a FILES=(
-          "setup.py"
-          ".circleci/requirements.txt"
-          "docs-requirements.txt"
-        )
-        python3 --version >> .docs-checksum
-        for f in ${FILES[@]}
-        do
-          echo "# $f" >> .docs-checksum
-          cat $f >> .docs-checksum
-        done
   restore-docs-dependencies-cache: &restore-docs-dependencies-cache
     restore_cache:
       keys:
-        - deps-docs-4-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
+        - deps-docs-5-py<< parameters.version >>-{{ checksum "uv.lock" }}
   install-docs-dependencies: &install-docs-dependencies
     run:
       name: Install Dependencies
       command: |
-        python3 -m venv venv
-        venv/bin/pip install -r .circleci/requirements.txt
-        venv/bin/pip install -r docs-requirements.txt
+        uv sync --group docs
   save-docs-dependencies-cache: &save-docs-dependencies-cache
     save_cache:
-      key: deps-docs-4-py<< parameters.version >>-{{ checksum ".docs-checksum" }}
+      key: deps-docs-5-py<< parameters.version >>-{{ checksum "uv.lock" }}
       paths:
-        - venv
-  build-checksum-file: &build-checksum-file
-    run:
-      name: Build checksum file
-      command: |
-        declare -a FILES=(
-          "script/docs/requirements.txt"
-          "script/linting/requirements.txt"
-          "script/typing/requirements.txt"
-        )
-        for f in ${FILES[@]}
-        do
-          echo "# $f" >> all-requirements.txt
-          cat $f >> all-requirements.txt
-        done
-
-        echo "# self" >> all-requirements.txt
-        echo "." >> all-requirements.txt
-
-        declare -a FILES=(
-          "setup.py"
-          ".circleci/requirements.txt"
-          "all-requirements.txt"
-        )
-        python3 --version >> .checksum
-        for f in ${FILES[@]}
-        do
-          echo "# $f" >> .checksum
-          cat $f >> .checksum
-        done
+        - .venv
   restore-dependencies-cache: &restore-dependencies-cache
     restore_cache:
       keys:
-        - deps-4-py<< parameters.version >>-{{ checksum ".checksum" }}
+        - deps-5-py<< parameters.version >>-{{ checksum "uv.lock" }}
   install-dependencies: &install-dependencies
     run:
       name: Install Dependencies
       command: |
-        python3 -m venv venv
-        venv/bin/pip install -r .circleci/requirements.txt
-        venv/bin/pip install -r all-requirements.txt
+        uv sync
   save-dependencies-cache: &save-dependencies-cache
     save_cache:
-      key: deps-4-py<< parameters.version >>-{{ checksum ".checksum" }}
+      key: deps-5-py<< parameters.version >>-{{ checksum "uv.lock" }}
       paths:
-        - venv
+        - .venv
   parametrised-python-executor: &parametrised-python-executor
     parameters:
       version:
@@ -128,7 +68,6 @@ jobs:
     steps:
       - checkout
 
-      - *build-docs-checksum-file
       - *restore-docs-dependencies-cache
       - *install-docs-dependencies
       - *save-docs-dependencies-cache
@@ -136,8 +75,7 @@ jobs:
       - run:
           name: Build the docs
           command: |
-            source venv/bin/activate
-            ./script/docs/build.sh
+            uv run ./script/docs/build.sh
 
   lint:
     <<: *parametrised-python-executor
@@ -145,7 +83,6 @@ jobs:
     steps:
       - checkout
 
-      - *build-checksum-file
       - *restore-dependencies-cache
       - *install-dependencies
       - *save-dependencies-cache
@@ -153,8 +90,7 @@ jobs:
       - run:
           name: Run Flake8
           command: |
-            source venv/bin/activate
-            ./script/linting/lint
+            uv run ./script/linting/lint
 
   test:
     <<: *parametrised-python-executor
@@ -167,7 +103,6 @@ jobs:
           command: |
             git submodule update --init --recursive
 
-      - *build-checksum-file
       - *restore-dependencies-cache
       - *install-dependencies
       - *save-dependencies-cache
@@ -175,8 +110,7 @@ jobs:
       - run:
           name: Run Tests
           command: |
-            source venv/bin/activate
-            ./script/testing/test
+            uv run ./script/testing/test
 
   test-min-deps:
     <<: *parametrised-python-executor
@@ -189,30 +123,24 @@ jobs:
           command: |
             git submodule update --init --recursive
 
-      - *build-checksum-file
-
       - restore_cache:
           keys:
-            - deps-min-2-py<< parameters.version >>-{{ checksum ".checksum" }}
+            - deps-min-5-py<< parameters.version >>-{{ checksum "pyproject.toml" }}
       - run:
           name: Install Dependencies
           command: |
             set -x
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install uv
-            uv pip install --resolution lowest-direct -r all-requirements.txt
-            pip list
+            uv sync --resolution lowest-direct --no-default-groups
+            uv pip list
       - save_cache:
-          key: deps-min-2-py<< parameters.version >>-{{ checksum ".checksum" }}
+          key: deps-min-5-py<< parameters.version >>-{{ checksum "pyproject.toml" }}
           paths:
-            - venv
+            - .venv
 
       - run:
           name: Run Tests
           command: |
-            source venv/bin/activate
-            ./script/testing/test
+            uv run ./script/testing/test
 
   typecheck:
     <<: *parametrised-python-executor
@@ -220,7 +148,6 @@ jobs:
     steps:
       - checkout
 
-      - *build-checksum-file
       - *restore-dependencies-cache
       - *install-dependencies
       - *save-dependencies-cache
@@ -228,8 +155,25 @@ jobs:
       - run:
           name: Run Mypy
           command: |
-            source venv/bin/activate
-            ./script/typing/check
+            uv run ./script/typing/check
+
+  build:
+    <<: *parametrised-python-executor
+
+    steps:
+      - checkout
+
+      - *restore-dependencies-cache
+      - *install-dependencies
+      - *save-dependencies-cache
+
+      - run:
+          name: Build only
+          command: |
+            uv run ./script/release/build.sh
+
+      - store_artifacts:
+          path: dist
 
   release:
     docker:
@@ -237,19 +181,17 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: Setup virtualenv
-          command: |
-            python3 -m venv venv
-            venv/bin/pip install -r script/release/requirements.txt
+      - *install-dependencies
 
       - run:
           name: Push to PyPI
           command: |
-            source venv/bin/activate
-            export TWINE_USERNAME=__token__
-            export TWINE_PASSWORD=$PYPI_TOKEN
-            ./script/release/release
+            export UV_PUBLISH_USERNAME=__token__
+            export UV_PUBLISH_PASSWORD=$PYPI_TOKEN
+            uv run ./script/release/release
+
+      - store_artifacts:
+          path: dist
 
 
 workflows:
@@ -257,6 +199,8 @@ workflows:
 
   validate:
     jobs:
+      - build:
+          <<: *python-full-version-matrix
       - docs:
           <<: *python-top-and-bottom-version-matrix
       - lint:
@@ -270,6 +214,9 @@ workflows:
 
   release:
     jobs:
+      - build:
+          <<: *python-full-version-matrix
+          <<: *filter-tags
       - docs:
           <<: *python-top-and-bottom-version-matrix
           <<: *filter-tags
@@ -288,6 +235,7 @@ workflows:
       - release:
           <<: *filter-tags
           requires:
+            - build
             - docs
             - lint
             - test

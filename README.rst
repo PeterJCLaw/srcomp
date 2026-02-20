@@ -49,10 +49,10 @@ Development
 -----------
 
 **Install**:
-``pip install -e . -r dev-requirements.txt``
+``uv sync``
 
 **Checks**:
-``./script/check``
+``uv run ./script/check``
 
 .. |Build Status| image:: https://circleci.com/gh/PeterJCLaw/srcomp/tree/main.svg?style=svg
    :target: https://circleci.com/gh/PeterJCLaw/srcomp/tree/main
