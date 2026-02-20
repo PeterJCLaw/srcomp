@@ -36,13 +36,15 @@ Documentation = 'https://srcomp.readthedocs.org/'
 Repository = 'https://github.com/PeterJCLaw/srcomp'
 
 [build-system]
-requires = ['uv_build>=0.10.0,<0.11.0']
-build-backend = 'uv_build'
+requires = ['hatchling>=1.28,<2']
+build-backend = 'hatchling.build'
 
-[tool.uv.build-backend]
-module-name = "sr"
-module-root = ""
-namespace = true
+[tool.hatch.build.targets.sdist]
+exclude = ["tests/dummy"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["sr"]
+
 
 [dependency-groups]
 dev = [
