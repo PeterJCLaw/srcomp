@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 from . import yaml_loader
-from .types import MatchNumber, TLA
+from .types import MatchNumber, TeamsData, TLA
 
 
 class Team(NamedTuple):
@@ -37,11 +37,11 @@ def load_teams(filename: Path) -> dict[TLA, Team]:
     :return: A dictionary mapping TLAs to :class:`Team` objects.
     """
 
-    data = yaml_loader.load(filename)
+    data: TeamsData = yaml_loader.load(filename)
 
     teams = {}
     for tla, info in data['teams'].items():
-        tla = tla.upper()
+        tla = TLA(tla.upper())
         teams[tla] = Team(
             tla=tla,
             name=info['name'],

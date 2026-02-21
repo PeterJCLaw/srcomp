@@ -179,3 +179,13 @@ class DelayData(TypedDict):
 
 
 AwardsData = NewType('AwardsData', dict[str, Union[TLA, list[TLA]]])
+
+
+class TeamData(TypedDict):
+    name: str
+    rookie: NotRequired[bool]
+    dropped_out_after: NotRequired[MatchNumber]
+
+
+class TeamsData(TypedDict):
+    teams: Mapping[TLA, TeamData]
