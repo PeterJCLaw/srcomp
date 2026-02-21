@@ -9,10 +9,20 @@ from unittest import mock
 from league_ranker import RankedPosition
 
 from sr.comp.knockout_scheduler import KnockoutScheduler, UNKNOWABLE_TEAM
+from sr.comp.knockout_scheduler.automatic_scheduler import (
+    AutoKnockoutScheduleData,
+)
 from sr.comp.match_period import Delay, Match, MatchSlot, MatchType
 from sr.comp.scores import LeaguePosition, LeaguePositions
 from sr.comp.teams import Team
-from sr.comp.types import ArenaName, GamePoints, MatchId, TLA
+from sr.comp.types import (
+    ArenaName,
+    GamePoints,
+    KnockoutConfigData,
+    MatchId,
+    MatchPeriodData,
+    TLA,
+)
 
 from .factories import build_match, FakeSchedule
 
@@ -58,20 +68,20 @@ def get_scheduler(
     knockout_scores = mock.Mock(resolved_positions=knockout_positions)
     scores = mock.Mock(league=league_scores, knockout=knockout_scores)
 
-    period_config = {
+    period_config: MatchPeriodData = {
         'description': "A description of the period",
         'start_time': datetime(2014, 3, 27, 13),
         'end_time':   datetime(2014, 3, 27, 17, 30),  # noqa:E241
     }
-    knockout_config = {
+    knockout_config: KnockoutConfigData = {
         'round_spacing': 30,
         'final_delay': 12,
         'single_arena': {
             'rounds': 3,
-            'arenas': ['A'],
+            'arenas': [ArenaName('A')],
         },
     }
-    config = {
+    config: AutoKnockoutScheduleData = {
         'match_periods': {'knockout': [period_config]},
         'knockout': knockout_config,
     }

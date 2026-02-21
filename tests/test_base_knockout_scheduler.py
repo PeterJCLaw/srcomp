@@ -10,13 +10,14 @@ from unittest import mock
 from league_ranker import RankedPosition
 
 from sr.comp.knockout_scheduler.base_scheduler import (
+    BaseKnockoutScheduleData,
     BaseKnockoutScheduler,
     UNKNOWABLE_TEAM,
 )
 from sr.comp.match_period import Delay, MatchSlot
 from sr.comp.scores import LeaguePosition, LeaguePositions
 from sr.comp.teams import Team
-from sr.comp.types import ArenaName, GamePoints, MatchId, TLA
+from sr.comp.types import ArenaName, GamePoints, MatchId, MatchPeriodData, TLA
 
 from .factories import build_match, FakeSchedule
 
@@ -29,7 +30,7 @@ def get_scheduler(
     delays: Collection[Delay] | None = None,
     teams: dict[TLA, Team] | None = None,
     num_teams_per_arena: int = 4,
-) -> BaseKnockoutScheduler:
+) -> BaseKnockoutScheduler[BaseKnockoutScheduleData]:
     matches = matches or []
     delays = delays or []
     match_duration = datetime.timedelta(minutes=5)
@@ -56,12 +57,12 @@ def get_scheduler(
     knockout_scores = mock.Mock(resolved_positions=knockout_positions)
     scores = mock.Mock(league=league_scores, knockout=knockout_scores)
 
-    period_config = {
+    period_config: MatchPeriodData = {
         'description': "A description of the period",
         'start_time': datetime.datetime(2014, 3, 27, 13),
         'end_time':   datetime.datetime(2014, 3, 27, 17, 30),  # noqa:E241
     }
-    config = {
+    config: BaseKnockoutScheduleData = {
         'match_periods': {'knockout': [period_config]},
     }
     arenas = [ArenaName('A')]

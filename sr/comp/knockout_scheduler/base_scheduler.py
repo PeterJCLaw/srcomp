@@ -3,18 +3,26 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
+from typing import Generic, TypedDict, TypeVar
 
 from ..match_period import Match, MatchPeriod, MatchType
 from ..scores import Scores
 from ..teams import Team
-from ..types import ArenaName, MatchId, MatchNumber, TLA, YAMLData
-from .types import ScheduleHost
+from ..types import ArenaName, MatchId, MatchNumber, TLA
+from .types import KnockoutPeriodData, ScheduleHost
 
 # Use '???' as the "we don't know yet" marker
 UNKNOWABLE_TEAM = TLA('???')
 
 
-class BaseKnockoutScheduler:
+class BaseKnockoutScheduleData(TypedDict):
+    match_periods: KnockoutPeriodData
+
+
+TConfig = TypeVar('TConfig', bound=BaseKnockoutScheduleData)
+
+
+class BaseKnockoutScheduler(Generic[TConfig]):
     """
     Base class for knockout schedulers offering common functionality.
 
@@ -32,7 +40,7 @@ class BaseKnockoutScheduler:
         arenas: Iterable[ArenaName],
         num_teams_per_arena: int,
         teams: Mapping[TLA, Team],
-        config: YAMLData,
+        config: TConfig,
     ) -> None:
         self.schedule = schedule
         self.scores = scores

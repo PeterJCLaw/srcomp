@@ -4,30 +4,26 @@ A static knockout schedule.
 
 from __future__ import annotations
 
-import datetime
 import re
-from typing import Any, NewType
-from typing_extensions import TypedDict
+from collections.abc import Iterable, Mapping
 
 from ..match_period import Match, MatchSlot, MatchType
-from ..types import ArenaName, MatchNumber, TLA
-from .base_scheduler import BaseKnockoutScheduler
+from ..scores import Scores
+from ..teams import Team
+from ..types import (
+    ArenaName,
+    MatchNumber,
+    StaticKnockoutData,
+    StaticMatchInfo,
+    StaticMatchTeamReference,
+    TLA,
+)
+from .base_scheduler import BaseKnockoutScheduleData, BaseKnockoutScheduler
+from .types import ScheduleHost
 
-StaticMatchTeamReference = NewType('StaticMatchTeamReference', str)
-StaticMatchTeamReference.__doc__ = r"""
-A logical reference to a team for pulling into a knockout match.
 
-This supports the following formats:
- - 'S\d+': A seeded team, pulled from the results of the league stage.
- - '\d{3}': A reference to a tie-resolved rank in the results of another match
-   within the knockout. The first digit refers to the round number, the second
-   to the match number within that round and the last to the rank within the
-   results of that match to look for a team. All of these are 0-indexed, so
-   '000' is the winner of the first match from the first knockouts round. Ties
-   are resolved using the standard league position logic.
- - 'R\d+M\d+P\d+': Alternative spelling of round/match/position reference, this
-   supports indices containing more digits but otherwise behaves the same.
-"""
+class StaticKnockoutScheduleData(BaseKnockoutScheduleData):
+    static_knockout: StaticKnockoutData
 
 
 class InvalidSeedError(ValueError):
@@ -40,13 +36,6 @@ class InvalidReferenceError(ValueError):
 
 class WrongNumberOfTeamsError(ValueError):
     pass
-
-
-class StaticMatchInfo(TypedDict):
-    arena: ArenaName
-    start_time: datetime.datetime
-    teams: list[StaticMatchTeamReference]
-    display_name: str | None
 
 
 def parse_team_ref(team_ref: str) -> tuple[int, int, int]:
@@ -74,7 +63,7 @@ def parse_team_ref(team_ref: str) -> tuple[int, int, int]:
     return r, m, p
 
 
-class StaticScheduler(BaseKnockoutScheduler):
+class StaticScheduler(BaseKnockoutScheduler[StaticKnockoutScheduleData]):
     """
     A knockout scheduler which loads almost fixed data from the config. Assumes
     only a single arena.
@@ -90,8 +79,23 @@ class StaticScheduler(BaseKnockoutScheduler):
         manual changes to the schedule to remove the seeds which cannot be filled
     """
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        schedule: ScheduleHost,
+        scores: Scores,
+        arenas: Iterable[ArenaName],
+        num_teams_per_arena: int,
+        teams: Mapping[TLA, Team],
+        config: StaticKnockoutScheduleData,
+    ) -> None:
+        super().__init__(
+            schedule=schedule,
+            scores=scores,
+            arenas=arenas,
+            num_teams_per_arena=num_teams_per_arena,
+            teams=teams,
+            config=config,
+        )
 
         # Collect a list of the teams eligible for the knockouts, in seeded order.
         self._knockout_seeds = self._get_seeds()

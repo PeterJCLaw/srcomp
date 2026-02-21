@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 from collections.abc import Mapping
 from typing import (
-    Any,
     Collection,
     NewType,
     Protocol,
@@ -24,8 +23,6 @@ ArenaName = NewType('ArenaName', str)
 
 MatchNumber = NewType('MatchNumber', int)
 MatchId = tuple[ArenaName, MatchNumber]
-
-YAMLData = Any
 
 # Proton protocol types
 
@@ -171,11 +168,138 @@ class LeagueData(TypedDict):
 class ExtraSpacingData(TypedDict):
     match_numbers: str
     duration: int
+    """
+    Duration of the spacing, in seconds.
+    """
 
 
 class DelayData(TypedDict):
     delay: int
     time: datetime.datetime
+
+
+class MatchSlotLengthsData(TypedDict):
+    """Lengths of matches in seconds"""
+    pre: int
+    match: int
+    post: int
+    total: int
+
+
+class StagingTimingsData(TypedDict):
+    """
+    Staging times. Measured in seconds _before_ the _actual_ start
+    of the match (rather than its slot).
+    """
+
+    opens: int
+    """The earliest teams can present themselves for a match"""
+    closes: int
+    """The time by which teams _must_ be in staging"""
+    duration: int
+    """How long staging is open for; equal to `opens - closes`"""
+
+    signal_shepherds: Mapping[RegionName, int]
+    """
+    How long before the start of the match to signal to shepherds they
+    should start looking for teams. A mapping of shepherding zones to
+    offset values.
+    """
+
+    signal_teams: int
+    """
+    How long before the start of the match to signal to teams they should
+    go to staging.
+    """
+
+
+class MatchPeriodData(TypedDict):
+    start_time: datetime.datetime
+    end_time: datetime.datetime
+    max_end_time: NotRequired[datetime.datetime]
+    description: str
+
+
+class MatchPeriodsData(TypedDict):
+    league: list[MatchPeriodData]
+    knockout: list[MatchPeriodData]
+
+
+class ScheduleLeagueData(TypedDict):
+    extra_spacing: list[ExtraSpacingData]
+    """
+    Extra spacing before an arbitrary set of matches
+    This value is ignored for matches which occur at the start of a period
+    since no additional time is needed there. While it might seem nicer
+    to require the user to change the values in here, delays can push matches
+    from one period to the next which would make it hard for the user to
+    keep this up to date.
+    """
+
+
+class KnockoutSingleArenaData(TypedDict):
+    """Options for putting last few rounds in one arena"""
+
+    rounds: int
+    """Number of final rounds to put in a single arena"""
+
+    arenas: list[ArenaName]
+
+
+class KnockoutConfigData(TypedDict):
+    round_spacing: int
+    """Time delay between rounds (in seconds)"""
+    final_delay: int
+    """Extra delay before the final (for build-up and rotating, in seconds)"""
+    arity: NotRequired[int]
+    """Number of teams taking part"""
+    single_arena: KnockoutSingleArenaData
+
+    static: NotRequired[bool]
+    """Whether or not to use the static knockout scheduler (rather than the automatic one)"""
+
+
+StaticMatchTeamReference = NewType('StaticMatchTeamReference', str)
+StaticMatchTeamReference.__doc__ = r"""
+A logical reference to a team for pulling into a knockout match.
+
+This supports the following formats:
+ - 'S\d+': A seeded team, pulled from the results of the league stage.
+ - '\d{3}': A reference to a tie-resolved rank in the results of another match
+   within the knockout. The first digit refers to the round number, the second
+   to the match number within that round and the last to the rank within the
+   results of that match to look for a team. All of these are 0-indexed, so
+   '000' is the winner of the first match from the first knockouts round. Ties
+   are resolved using the standard league position logic.
+ - 'R\d+M\d+P\d+': Alternative spelling of round/match/position reference, this
+   supports indices containing more digits but otherwise behaves the same.
+"""
+
+
+class StaticMatchInfo(TypedDict):
+    arena: ArenaName
+    start_time: datetime.datetime
+    teams: list[StaticMatchTeamReference]
+    display_name: NotRequired[str]
+
+
+class StaticKnockoutData(TypedDict):
+    matches: Mapping[int, Mapping[int, StaticMatchInfo]]
+
+
+class ScheduleData(TypedDict):
+    match_slot_lengths: MatchSlotLengthsData
+    staging: StagingTimingsData
+    timezone: str
+    delays: list[DelayData]
+
+    match_periods: MatchPeriodsData
+    tiebreaker: NotRequired[datetime.datetime]
+
+    league: ScheduleLeagueData
+    knockout: KnockoutConfigData
+
+    static_knockout: NotRequired[StaticKnockoutData]
 
 
 AwardsData = NewType('AwardsData', dict[str, Union[TLA, list[TLA]]])

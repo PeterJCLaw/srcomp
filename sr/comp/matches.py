@@ -13,7 +13,12 @@ from league_ranker import RankedPosition
 
 from . import yaml_loader
 from .arenas import Arena
-from .knockout_scheduler import KnockoutScheduler, StaticScheduler
+from .knockout_scheduler import (
+    AutoKnockoutScheduleData,
+    KnockoutScheduler,
+    StaticKnockoutScheduleData,
+    StaticScheduler,
+)
 from .knockout_scheduler.base_scheduler import BaseKnockoutScheduler
 from .match_period import Delay, Match, MatchPeriod, MatchSlot, MatchType
 from .match_period_clock import MatchPeriodClock
@@ -25,9 +30,11 @@ from .types import (
     ExtraSpacingData,
     LeagueMatches,
     MatchNumber,
+    MatchSlotLengthsData,
+    ScheduleData,
     ShepherdName,
+    StagingTimingsData,
     TLA,
-    YAMLData,
 )
 
 TSchedule = TypeVar('TSchedule', bound='MatchSchedule')
@@ -124,18 +131,38 @@ class MatchSchedule:
         :param dict teams: A mapping of TLAs to :class:`.Team` instances.
         """
 
-        y = yaml_loader.load(config_fname)
+        y: ScheduleData = yaml_loader.load(config_fname)
 
         league: LeagueMatches = yaml_loader.load(league_fname)['matches']
 
         schedule = cls(y, league, teams, num_teams_per_arena)
 
+        k: BaseKnockoutScheduler[Any]
         if y['knockout'].get('static', False):
-            knockout_scheduler: type[BaseKnockoutScheduler] = StaticScheduler
+            k = StaticScheduler(
+                schedule,
+                scores,
+                arenas,
+                num_teams_per_arena,
+                teams,
+                config=StaticKnockoutScheduleData({
+                    'match_periods': y['match_periods'],
+                    'static_knockout': y['static_knockout'],
+                }),
+            )
         else:
-            knockout_scheduler = KnockoutScheduler
+            k = KnockoutScheduler(
+                schedule,
+                scores,
+                arenas,
+                num_teams_per_arena,
+                teams,
+                config=AutoKnockoutScheduleData({
+                    'match_periods': y['match_periods'],
+                    'knockout': y['knockout'],
+                }),
+            )
 
-        k = knockout_scheduler(schedule, scores, arenas, num_teams_per_arena, teams, y)
         k.add_knockouts()
 
         schedule.knockout_rounds = k.knockout_rounds
@@ -148,7 +175,7 @@ class MatchSchedule:
 
     def __init__(
         self,
-        y: YAMLData,
+        y: ScheduleData,
         league: LeagueMatches,
         teams: Mapping[TLA, Team],
         num_teams_per_arena: int,
@@ -208,9 +235,9 @@ class MatchSchedule:
 
         self.n_league_matches = self.n_matches()
 
-    def _load_match_slot_lengths(self, yamldata: YAMLData) -> None:
+    def _load_match_slot_lengths(self, yamldata: MatchSlotLengthsData) -> None:
         durations = {
-            key: datetime.timedelta(0, value)
+            key: datetime.timedelta(0, value)  # type: ignore[arg-type]
             for key, value in yamldata.items()
         }
         pre = durations['pre']
@@ -222,7 +249,7 @@ class MatchSchedule:
         self.match_slot_lengths = durations
         self.match_duration: datetime.timedelta = total
 
-    def _load_staging_times(self, yamldata: YAMLData) -> None:
+    def _load_staging_times(self, yamldata: StagingTimingsData) -> None:
         def to_timedeltas(item: Any) -> Any:
             if isinstance(item, dict):
                 return {

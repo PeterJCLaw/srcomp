@@ -14,8 +14,6 @@ from typing import Any
 import dateutil.parser
 import yaml
 
-from .types import YAMLData
-
 try:
     from yaml import CLoader as YAML_Loader
 except ImportError:
@@ -43,7 +41,7 @@ def add_time_constructor(loader: type[YAML_Loader]) -> None:
 add_time_constructor(YAML_Loader)
 
 
-def load(file_path: Path) -> YAMLData:
+def load(file_path: Path) -> Any:
     """
     Load a YAML fie and return the results.
 

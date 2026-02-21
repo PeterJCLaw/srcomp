@@ -13,92 +13,104 @@ from sr.comp.knockout_scheduler.static_scheduler import (
     InvalidReferenceError,
     InvalidSeedError,
     parse_team_ref,
+    StaticKnockoutScheduleData,
     WrongNumberOfTeamsError,
 )
 from sr.comp.match_period import Delay, Match, MatchSlot, MatchType
 from sr.comp.scores import LeaguePosition, LeaguePositions
 from sr.comp.teams import Team
-from sr.comp.types import ArenaName, GamePoints, MatchId, TLA, YAMLData
+from sr.comp.types import (
+    ArenaName,
+    GamePoints,
+    MatchId,
+    MatchPeriodData,
+    StaticKnockoutData,
+    TLA,
+)
 
 from .factories import build_match, FakeSchedule
 
 TLAs = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF', 'GGG', 'HHH', 'III', 'JJJ']
 
 
-def get_four_team_config():
+class TestData(StaticKnockoutData):
+    teams_per_arena: int
+
+
+def get_four_team_config() -> TestData:
     return {
         'teams_per_arena': 4,
         'matches': {
             0: {
                 0: {
-                    'arena': 'A',
+                    'arena': ArenaName('A'),
                     'display_name': "Qualifier 1",
                     'start_time': datetime(2014, 4, 27, 14, 30),
-                    'teams': ['S3', 'S5', 'S8', 'S10'],
+                    'teams': ['S3', 'S5', 'S8', 'S10'],  # type: ignore[list-item]
                 },
                 1: {
-                    'arena': 'A',
+                    'arena': ArenaName('A'),
                     'start_time': datetime(2014, 4, 27, 14, 35),
-                    'teams': ['S4', 'S6', 'S7', 'S9'],
+                    'teams': ['S4', 'S6', 'S7', 'S9'],  # type: ignore[list-item]
                 },
             },
             1: {
                 0: {
-                    'arena': 'A',
+                    'arena': ArenaName('A'),
                     'start_time': datetime(2014, 4, 27, 14, 45),
-                    'teams': ['S2', '000', '002', '011'],
+                    'teams': ['S2', '000', '002', '011'],  # type: ignore[list-item]
                 },
                 1: {
-                    'arena': 'A',
+                    'arena': ArenaName('A'),
                     'start_time': datetime(2014, 4, 27, 14, 50),
-                    'teams': ['S1', '001', '010', '012'],
+                    'teams': ['S1', '001', '010', '012'],  # type: ignore[list-item]
                 },
             },
             2: {
                 0: {
-                    'arena': 'A',
+                    'arena': ArenaName('A'),
                     'start_time': datetime(2014, 4, 27, 15, 0),
-                    'teams': ['100', '101', '110', '111'],
+                    'teams': ['100', '101', '110', '111'],  # type: ignore[list-item]
                 },
             },
         },
     }
 
 
-def get_two_team_config():
+def get_two_team_config() -> TestData:
     return {
         'teams_per_arena': 2,
         'matches': {
             0: {
                 0: {
-                    'arena': 'A',
+                    'arena': ArenaName('A'),
                     'display_name': "Qualifier 1",
                     'start_time': datetime(2014, 4, 27, 14, 30),
-                    'teams': ['S3', 'S5'],
+                    'teams': ['S3', 'S5'],  # type: ignore[list-item]
                 },
                 1: {
-                    'arena': 'A',
+                    'arena': ArenaName('A'),
                     'start_time': datetime(2014, 4, 27, 14, 35),
-                    'teams': ['S4', 'S6'],
+                    'teams': ['S4', 'S6'],  # type: ignore[list-item]
                 },
             },
             1: {
                 0: {
-                    'arena': 'A',
+                    'arena': ArenaName('A'),
                     'start_time': datetime(2014, 4, 27, 14, 45),
-                    'teams': ['S1', '000'],
+                    'teams': ['S1', '000'],  # type: ignore[list-item]
                 },
                 1: {
-                    'arena': 'A',
+                    'arena': ArenaName('A'),
                     'start_time': datetime(2014, 4, 27, 14, 50),
-                    'teams': ['S2', '010'],
+                    'teams': ['S2', '010'],  # type: ignore[list-item]
                 },
             },
             2: {
                 0: {
-                    'arena': 'A',
+                    'arena': ArenaName('A'),
                     'start_time': datetime(2014, 4, 27, 15, 0),
-                    'teams': ['100', '110'],
+                    'teams': ['100', '110'],  # type: ignore[list-item]
                 },
             },
         },
@@ -106,7 +118,7 @@ def get_two_team_config():
 
 
 def get_scheduler(
-    matches_config: YAMLData,
+    matches_config: TestData,
     matches: list[MatchSlot] | None = None,
     positions: LeaguePositions | None = None,
     knockout_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]] | None = None,
@@ -148,14 +160,14 @@ def get_scheduler(
     knockout_scores = mock.Mock(resolved_positions=knockout_positions)
     scores = mock.Mock(league=league_scores, knockout=knockout_scores)
 
-    num_teams_per_arena = matches_config.pop('teams_per_arena')
+    num_teams_per_arena = matches_config.pop('teams_per_arena')  # type: ignore[misc]
 
-    period_config = {
+    period_config: MatchPeriodData = {
         "description": "A description of the period",
         "start_time":   datetime(2014, 3, 27, 13),  # noqa:E241
         "end_time":     datetime(2014, 3, 27, 17, 30),  # noqa:E241
     }
-    config = {
+    config: StaticKnockoutScheduleData = {
         'match_periods': {'knockout': [period_config]},
         'static_knockout': matches_config,
     }

@@ -10,13 +10,17 @@ from ..match_period import Match, MatchSlot, MatchType
 from ..match_period_clock import MatchPeriodClock, OutOfTimeException
 from ..scores import Scores
 from ..teams import Team
-from ..types import ArenaName, MatchNumber, TLA, YAMLData
+from ..types import ArenaName, KnockoutConfigData, MatchNumber, TLA
 from . import seeding, stable_random
-from .base_scheduler import BaseKnockoutScheduler
+from .base_scheduler import BaseKnockoutScheduleData, BaseKnockoutScheduler
 from .types import ScheduleHost
 
 
-class KnockoutScheduler(BaseKnockoutScheduler):
+class AutoKnockoutScheduleData(BaseKnockoutScheduleData):
+    knockout: KnockoutConfigData
+
+
+class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
     """
     A class that can be used to generate a knockout schedule based on seeding.
 
@@ -44,7 +48,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
         arenas: Iterable[ArenaName],
         num_teams_per_arena: int,
         teams: Mapping[TLA, Team],
-        config: YAMLData,
+        config: AutoKnockoutScheduleData,
     ) -> None:
         if num_teams_per_arena != self.num_teams_per_arena:
             raise ValueError(
@@ -186,6 +190,7 @@ class KnockoutScheduler(BaseKnockoutScheduler):
             # Number of rounds remaining to be added
             rounds_remaining = self.get_rounds_remaining(self.knockout_rounds[-1])
 
+            arenas: Iterable[ArenaName]
             if rounds_remaining <= knockout_conf['single_arena']['rounds']:
                 arenas = knockout_conf['single_arena']['arenas']
             else:
