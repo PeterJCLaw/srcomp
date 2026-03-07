@@ -282,7 +282,17 @@ class BaseScores:
 
     @property
     def last_scored_match(self) -> MatchNumber | None:
-        """The most match with the highest id for which we have score data."""
+        """
+        The match with the highest id for which we have score data.
+
+        This is intended primarily for display purposes and should not be relied
+        upon as a measure of the completeness of scores up to the identified
+        match.
+
+        Warning: this does not account for there possibly being earlier matches
+        which are missing score data. For example if matches `0`, `1` and `3`
+        have scores while match `2` does not then this will return `3`.
+        """
         if len(self.ranked_points) == 0:
             return None
         matches = self.ranked_points.keys()
@@ -550,6 +560,14 @@ class Scores:
         self.last_scored_match = lsm
         """
         The match with the highest id for which we have score data.
+
+        This is intended primarily for display purposes and should not be relied
+        upon as a measure of the completeness of scores up to the identified
+        match.
+
+        Warning: this does not account for there possibly being earlier matches
+        which are missing score data. For example if matches `0`, `1` and `3`
+        have scores while match `2` does not then this will return `3`.
         """
 
     def get_scores(self, match: Match) -> MatchScore | None:
