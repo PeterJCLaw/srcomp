@@ -148,7 +148,9 @@ class MatchSchedule:
                 teams,
                 config=StaticKnockoutScheduleData({
                     'match_periods': y['match_periods'],
-                    'static_knockout': y['static_knockout'],
+                    'static_knockout': StaticScheduler.modernise_config_if_needed(
+                        y['static_knockout'],
+                    ),
                 }),
             )
         else:

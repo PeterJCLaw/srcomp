@@ -40,37 +40,43 @@ class TestData(StaticKnockoutData):
 def get_four_team_config() -> TestData:
     return {
         'teams_per_arena': 4,
-        'matches': {
+        'rounds': {
             0: {
-                0: {
-                    'arena': ArenaName('A'),
-                    'display_name': "Qualifier 1",
-                    'start_time': datetime(2014, 4, 27, 14, 30),
-                    'teams': ['S3', 'S5', 'S8', 'S10'],  # type: ignore[list-item]
-                },
-                1: {
-                    'arena': ArenaName('A'),
-                    'start_time': datetime(2014, 4, 27, 14, 35),
-                    'teams': ['S4', 'S6', 'S7', 'S9'],  # type: ignore[list-item]
+                'matches': {
+                    0: {
+                        'arena': ArenaName('A'),
+                        'display_name': "Qualifier 1",
+                        'start_time': datetime(2014, 4, 27, 14, 30),
+                        'teams': ['S3', 'S5', 'S8', 'S10'],  # type: ignore[list-item]
+                    },
+                    1: {
+                        'arena': ArenaName('A'),
+                        'start_time': datetime(2014, 4, 27, 14, 35),
+                        'teams': ['S4', 'S6', 'S7', 'S9'],  # type: ignore[list-item]
+                    },
                 },
             },
             1: {
-                0: {
-                    'arena': ArenaName('A'),
-                    'start_time': datetime(2014, 4, 27, 14, 45),
-                    'teams': ['S2', '000', '002', '011'],  # type: ignore[list-item]
-                },
-                1: {
-                    'arena': ArenaName('A'),
-                    'start_time': datetime(2014, 4, 27, 14, 50),
-                    'teams': ['S1', '001', '010', '012'],  # type: ignore[list-item]
+                'matches': {
+                    0: {
+                        'arena': ArenaName('A'),
+                        'start_time': datetime(2014, 4, 27, 14, 45),
+                        'teams': ['S2', '000', '002', '011'],  # type: ignore[list-item]
+                    },
+                    1: {
+                        'arena': ArenaName('A'),
+                        'start_time': datetime(2014, 4, 27, 14, 50),
+                        'teams': ['S1', '001', '010', '012'],  # type: ignore[list-item]
+                    },
                 },
             },
             2: {
-                0: {
-                    'arena': ArenaName('A'),
-                    'start_time': datetime(2014, 4, 27, 15, 0),
-                    'teams': ['100', '101', '110', '111'],  # type: ignore[list-item]
+                'matches': {
+                    0: {
+                        'arena': ArenaName('A'),
+                        'start_time': datetime(2014, 4, 27, 15, 0),
+                        'teams': ['100', '101', '110', '111'],  # type: ignore[list-item]
+                    },
                 },
             },
         },
@@ -80,37 +86,43 @@ def get_four_team_config() -> TestData:
 def get_two_team_config() -> TestData:
     return {
         'teams_per_arena': 2,
-        'matches': {
+        'rounds': {
             0: {
-                0: {
-                    'arena': ArenaName('A'),
-                    'display_name': "Qualifier 1",
-                    'start_time': datetime(2014, 4, 27, 14, 30),
-                    'teams': ['S3', 'S5'],  # type: ignore[list-item]
-                },
-                1: {
-                    'arena': ArenaName('A'),
-                    'start_time': datetime(2014, 4, 27, 14, 35),
-                    'teams': ['S4', 'S6'],  # type: ignore[list-item]
+                'matches': {
+                    0: {
+                        'arena': ArenaName('A'),
+                        'display_name': "Qualifier 1",
+                        'start_time': datetime(2014, 4, 27, 14, 30),
+                        'teams': ['S3', 'S5'],  # type: ignore[list-item]
+                    },
+                    1: {
+                        'arena': ArenaName('A'),
+                        'start_time': datetime(2014, 4, 27, 14, 35),
+                        'teams': ['S4', 'S6'],  # type: ignore[list-item]
+                    },
                 },
             },
             1: {
-                0: {
-                    'arena': ArenaName('A'),
-                    'start_time': datetime(2014, 4, 27, 14, 45),
-                    'teams': ['S1', '000'],  # type: ignore[list-item]
-                },
-                1: {
-                    'arena': ArenaName('A'),
-                    'start_time': datetime(2014, 4, 27, 14, 50),
-                    'teams': ['S2', '010'],  # type: ignore[list-item]
+                'matches': {
+                    0: {
+                        'arena': ArenaName('A'),
+                        'start_time': datetime(2014, 4, 27, 14, 45),
+                        'teams': ['S1', '000'],  # type: ignore[list-item]
+                    },
+                    1: {
+                        'arena': ArenaName('A'),
+                        'start_time': datetime(2014, 4, 27, 14, 50),
+                        'teams': ['S2', '010'],  # type: ignore[list-item]
+                    },
                 },
             },
             2: {
-                0: {
-                    'arena': ArenaName('A'),
-                    'start_time': datetime(2014, 4, 27, 15, 0),
-                    'teams': ['100', '110'],  # type: ignore[list-item]
+                'matches': {
+                    0: {
+                        'arena': ArenaName('A'),
+                        'start_time': datetime(2014, 4, 27, 15, 0),
+                        'teams': ['100', '110'],  # type: ignore[list-item]
+                    },
                 },
             },
         },
@@ -244,14 +256,14 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
     def assertInvalidReference(self, value, matches=()):
         config = get_four_team_config()
 
-        config['matches'][1][0]['teams'][0] = value
+        config['rounds'][1]['matches'][0]['teams'][0] = value
 
         self.assertInvalidSchedule(config, InvalidReferenceError, matches)
 
     def assertInvalidSeed(self, value, matches=()):
         config = get_four_team_config()
 
-        config['matches'][1][0]['teams'][0] = value
+        config['rounds'][1]['matches'][0]['teams'][0] = value
 
         self.assertInvalidSchedule(config, InvalidSeedError, matches)
 
@@ -305,7 +317,7 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
     def test_four_teams_start_only_progressing_winner_from_quarters(self):
         config = get_four_team_config()
 
-        semis = config['matches'][1]
+        semis = config['rounds'][1]['matches']
         semis[0]['teams'][-1] = None
         semis[1]['teams'][-1] = None
 
@@ -352,7 +364,7 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
         teams['BBB'] = Team('BBB', 'BBB', False, dropped_out_after=-1)
 
         config = get_four_team_config()
-        qualifier_teams = config['matches'][0][0]['teams']
+        qualifier_teams = config['rounds'][0]['matches'][0]['teams']
 
         self.assertEqual('S10', qualifier_teams[-1], "Setup self-check failed!")
         qualifier_teams[-1] = None
@@ -587,41 +599,41 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
     def test_too_few_teams_first_round(self):
         config = get_four_team_config()
 
-        config['matches'][0][0]['teams'].pop()
+        config['rounds'][0]['matches'][0]['teams'].pop()
 
         self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
 
     def test_too_few_teams_second_round(self):
         config = get_four_team_config()
 
-        config['matches'][1][0]['teams'].pop()
+        config['rounds'][1]['matches'][0]['teams'].pop()
 
         self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
 
     def test_too_few_teams_third_round(self):
         config = get_four_team_config()
 
-        config['matches'][2][0]['teams'].pop()
+        config['rounds'][2]['matches'][0]['teams'].pop()
 
         self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
 
     def test_too_many_teams_first_round(self):
         config = get_four_team_config()
 
-        config['matches'][0][0]['teams'].append('S1')
+        config['rounds'][0]['matches'][0]['teams'].append('S1')
 
         self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
 
     def test_too_many_teams_second_round(self):
         config = get_four_team_config()
 
-        config['matches'][1][0]['teams'].append('S1')
+        config['rounds'][1]['matches'][0]['teams'].append('S1')
 
         self.assertInvalidSchedule(config, WrongNumberOfTeamsError)
 
     def test_too_many_teams_third_round(self):
         config = get_four_team_config()
 
-        config['matches'][2][0]['teams'].append('S1')
+        config['rounds'][2]['matches'][0]['teams'].append('S1')
 
         self.assertInvalidSchedule(config, WrongNumberOfTeamsError)

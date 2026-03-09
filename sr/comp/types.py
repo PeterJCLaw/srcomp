@@ -283,7 +283,28 @@ class StaticMatchInfo(TypedDict):
     display_name: NotRequired[str]
 
 
+class StaticKnockoutRoundData(TypedDict):
+    display_name: NotRequired[str]
+    matches: Mapping[int, StaticMatchInfo]
+
+
 class StaticKnockoutData(TypedDict):
+    rounds: Mapping[int, StaticKnockoutRoundData]
+    """
+    A mapping describing the rounds & matches in the static knockout.
+
+    Keys should be 0-indexed numbers identifying the round or match
+    respectively. Match identifiers start from zero for each round.
+
+    On the inner mapping, that is the one describing the matches in a round, the
+    following string keys may also be present (the mix of known string keys and
+    unknown integer keys cannot be expressed in Python's type system yet):
+      - `display_name`: display name for the round, replacing the default
+        auto-generated name.
+    """
+
+
+class LegacyStaticKnockoutData(TypedDict):
     matches: Mapping[int, Mapping[int, StaticMatchInfo]]
 
 
@@ -299,7 +320,7 @@ class ScheduleData(TypedDict):
     league: ScheduleLeagueData
     knockout: KnockoutConfigData
 
-    static_knockout: NotRequired[StaticKnockoutData]
+    static_knockout: NotRequired[StaticKnockoutData | LegacyStaticKnockoutData]
 
 
 AwardsData = NewType('AwardsData', dict[str, Union[TLA, list[TLA]]])

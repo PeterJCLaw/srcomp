@@ -5,6 +5,7 @@ A static knockout schedule.
 from __future__ import annotations
 
 import re
+import typing
 from collections.abc import Iterable, Mapping
 
 from ..match_period import Match, MatchSlot, MatchType
@@ -12,8 +13,10 @@ from ..scores import Scores
 from ..teams import Team
 from ..types import (
     ArenaName,
+    LegacyStaticKnockoutData,
     MatchNumber,
     StaticKnockoutData,
+    StaticKnockoutRoundData,
     StaticMatchInfo,
     StaticMatchTeamReference,
     TLA,
@@ -78,6 +81,23 @@ class StaticScheduler(BaseKnockoutScheduler[StaticKnockoutScheduleData]):
       * dropping out a team such that there are no longer enough seeds requires
         manual changes to the schedule to remove the seeds which cannot be filled
     """
+
+    @staticmethod
+    def modernise_config_if_needed(
+        config: StaticKnockoutData | LegacyStaticKnockoutData,
+    ) -> StaticKnockoutData:
+        if 'rounds' in config:
+            return typing.cast(StaticKnockoutData, config)
+
+        if 'matches' in config:
+            return StaticKnockoutData(
+                rounds={
+                    idx: StaticKnockoutRoundData(matches=matches)
+                    for idx, matches in config['matches'].items()
+                },
+            )
+
+        raise ValueError("Unknown static knockout scheduler config structure")
 
     def __init__(
         self,
@@ -212,10 +232,13 @@ class StaticScheduler(BaseKnockoutScheduler[StaticKnockoutScheduleData]):
         self.period.matches.append(MatchSlot(new_matches))
 
     def add_knockouts(self) -> None:
-        knockout_conf = self.config['static_knockout']['matches']
+        rounds_info = self.config['static_knockout']['rounds']
 
-        for round_num, round_info in sorted(knockout_conf.items()):
-            rounds_remaining = len(knockout_conf) - round_num - 1
-            self._append_knockout_round(rounds_remaining)
-            for match_num, match_info in sorted(round_info.items()):
+        for round_num, round_info in sorted(rounds_info.items()):
+            rounds_remaining = len(rounds_info) - round_num - 1
+            self._append_knockout_round(
+                rounds_remaining,
+                name=round_info.get('display_name'),
+            )
+            for match_num, match_info in sorted(round_info['matches'].items()):
                 self._add_match(match_info, rounds_remaining, match_num)

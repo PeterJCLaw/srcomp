@@ -192,14 +192,20 @@ class BaseKnockoutScheduler(Generic[TConfig]):
 
         return teams
 
-    def _append_knockout_round(self, rounds_remaining: int) -> KnockoutRound:
-        knockout_round = KnockoutRound(
-            name=self.get_round_display_name(
+    def _append_knockout_round(
+        self,
+        rounds_remaining: int,
+        name: str | None = None,
+    ) -> KnockoutRound:
+        if name is None:
+            name = self.get_round_display_name(
                 round_number=len(self.knockout_rounds),
                 rounds_remaining=rounds_remaining,
-            ),
-        )
+            )
+
+        knockout_round = KnockoutRound(name=name)
         self.knockout_rounds.append(knockout_round)
+
         return knockout_round
 
     def add_knockouts(self) -> None:
