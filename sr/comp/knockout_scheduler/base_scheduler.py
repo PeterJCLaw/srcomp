@@ -99,27 +99,27 @@ class BaseKnockoutScheduler(Generic[TConfig]):
     @staticmethod
     def get_match_display_name(
         rounds_remaining: int,
-        round_num: int,
+        num_within_round: int,
         global_num: MatchNumber,
     ) -> str:
         """
         Get a human-readable match display name.
 
         :param rounds_remaining: The number of knockout rounds remaining.
-        :param knockout_num: The match number within the knockout round.
+        :param num_within_round: The match number within the knockout round.
         :param global_num: The global match number.
         """
 
         if rounds_remaining == 0:
             display_name = "Final (#{global_num})"
         elif rounds_remaining == 1:
-            display_name = "Semi {round_num} (#{global_num})"
+            display_name = "Semi {num_within_round} (#{global_num})"
         elif rounds_remaining == 2:
-            display_name = "Quarter {round_num} (#{global_num})"
+            display_name = "Quarter {num_within_round} (#{global_num})"
         else:
             display_name = "Match {global_num}"
         return display_name.format(
-            round_num=round_num + 1,
+            num_within_round=num_within_round + 1,
             global_num=global_num,
         )
 
