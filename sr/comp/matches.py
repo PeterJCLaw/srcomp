@@ -15,6 +15,7 @@ from . import yaml_loader
 from .arenas import Arena
 from .knockout_scheduler import (
     AutoKnockoutScheduleData,
+    KnockoutRound,
     KnockoutScheduler,
     StaticKnockoutScheduleData,
     StaticScheduler,
@@ -191,7 +192,7 @@ class MatchSchedule:
         for the competition.
         """
 
-        self.knockout_rounds: list[list[Match]] = []
+        self.knockout_rounds: Sequence[KnockoutRound] = []
         """
         A list of the knockout matches by round. Each entry in the list
         represents a round of knockout matches, such that `knockout_rounds[-1]`

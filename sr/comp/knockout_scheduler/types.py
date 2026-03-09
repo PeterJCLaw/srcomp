@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import datetime
-from collections.abc import Collection
+from collections.abc import Collection, Iterable
 from typing import Protocol, TypedDict
 
-from sr.comp.match_period import Delay, MatchSlot
+from sr.comp.match_period import Delay, Match, MatchSlot
 from sr.comp.types import MatchPeriodData
 
 
@@ -28,3 +28,17 @@ class ScheduleHost(Protocol):
 
 class KnockoutPeriodData(TypedDict):
     knockout: list[MatchPeriodData]
+
+
+class KnockoutRound(list[Match]):
+    """
+    A round of matches within the knockout stages.
+
+    Note: for convenience this currently inherits from ``list``. However this is
+    liable to change and most of the methods from ``list`` are not considered
+    part of the public interface. Consumers should treat this as a ``Sequence``.
+    """
+
+    def __init__(self, name: str, matches: Iterable[Match] = ()):
+        super().__init__(matches)
+        self.name = name

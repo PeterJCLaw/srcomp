@@ -5,6 +5,7 @@ from unittest import mock
 
 from league_ranker import calc_positions, calc_ranked_points
 
+from sr.comp.knockout_scheduler import KnockoutRound
 from sr.comp.match_period import Match, MatchPeriod, MatchType
 from sr.comp.matches import MatchSchedule
 from sr.comp.teams import Team
@@ -45,7 +46,7 @@ def make_schedule():
         type=MatchType.knockout,
         use_resolved_ranking=False,
     )
-    schedule.knockout_rounds = [[finals]]
+    schedule.knockout_rounds = [KnockoutRound("Finals", [finals])]
     schedule.matches.append({'A': finals})
 
     return schedule

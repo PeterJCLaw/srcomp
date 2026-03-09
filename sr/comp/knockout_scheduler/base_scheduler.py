@@ -9,7 +9,7 @@ from ..match_period import Match, MatchPeriod, MatchType
 from ..scores import Scores
 from ..teams import Team
 from ..types import ArenaName, MatchId, MatchNumber, TLA
-from .types import KnockoutPeriodData, ScheduleHost
+from .types import KnockoutPeriodData, KnockoutRound, ScheduleHost
 
 # Use '???' as the "we don't know yet" marker
 UNKNOWABLE_TEAM = TLA('???')
@@ -65,7 +65,7 @@ class BaseKnockoutScheduler(Generic[TConfig]):
         # in this list is important (e.g. self.knockout_rounds[0][0] is
         # will involve the top seed, whilst self.knockout_rounds[0][-1] will
         # involve the second seed).
-        self.knockout_rounds: list[list[Match]] = []
+        self.knockout_rounds: list[KnockoutRound] = []
 
         period_config = self.config['match_periods']['knockout'][0]
         self.period = MatchPeriod(
@@ -123,6 +123,27 @@ class BaseKnockoutScheduler(Generic[TConfig]):
             global_num=global_num,
         )
 
+    @staticmethod
+    def get_round_display_name(
+        round_number: int,
+        rounds_remaining: int,
+    ) -> str:
+        """
+        Get a human-readable knockout round display name.
+
+        :param round_number: The round number within the knockouts.
+            This should be a 0-indexed number.
+        :param rounds_remaining: The number of knockout rounds remaining.
+        """
+
+        if rounds_remaining == 0:
+            return "Finals"
+        elif rounds_remaining == 1:
+            return "Semi Finals"
+        elif rounds_remaining == 2:
+            return "Quarter Finals"
+        return f"Round {round_number}"
+
     def get_ranking(self, game: Match) -> list[TLA]:
         """
         Get a ranking of the given match's teams.
@@ -170,6 +191,16 @@ class BaseKnockoutScheduler(Generic[TConfig]):
             teams = [UNKNOWABLE_TEAM] * len(teams)
 
         return teams
+
+    def _append_knockout_round(self, rounds_remaining: int) -> KnockoutRound:
+        knockout_round = KnockoutRound(
+            name=self.get_round_display_name(
+                round_number=len(self.knockout_rounds),
+                rounds_remaining=rounds_remaining,
+            ),
+        )
+        self.knockout_rounds.append(knockout_round)
+        return knockout_round
 
     def add_knockouts(self) -> None:
         """

@@ -77,7 +77,7 @@ class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
         :param list matches: A list of lists of teams for each match.
         """
 
-        self.knockout_rounds += [[]]
+        knockout_round = self._append_knockout_round(rounds_remaining)
 
         round_num = 0
         while len(matches):
@@ -116,7 +116,7 @@ class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
                     use_resolved_ranking=rounds_remaining != 0,
                 )
 
-                self.knockout_rounds[-1].append(match)
+                knockout_round.append(match)
                 new_matches[arena] = match
 
                 if len(matches) == 0:
