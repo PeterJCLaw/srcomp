@@ -281,6 +281,7 @@ class StaticMatchInfo(TypedDict):
     start_time: datetime.datetime
     teams: list[StaticMatchTeamReference]
     display_name: NotRequired[str]
+    bracket: NotRequired[str]
 
 
 class StaticKnockoutRoundData(TypedDict):

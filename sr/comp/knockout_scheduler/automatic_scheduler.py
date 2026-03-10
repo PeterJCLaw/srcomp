@@ -6,7 +6,7 @@ import datetime
 import math
 from collections.abc import Iterable, Mapping, Sized
 
-from ..match_period import Match, MatchSlot, MatchType
+from ..match_period import KnockoutMatch, Match, MatchSlot, MatchType
 from ..match_period_clock import MatchPeriodClock, OutOfTimeException
 from ..scores import Scores
 from ..teams import Team
@@ -104,7 +104,7 @@ class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
                     num,
                 )
 
-                match = Match(
+                match = KnockoutMatch(
                     num,
                     display_name,
                     arena,
@@ -112,6 +112,7 @@ class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
                     start_time,
                     end_time,
                     MatchType.knockout,
+                    knockout_bracket='default',
                     # Just the finals don't use the resolved ranking
                     use_resolved_ranking=rounds_remaining != 0,
                 )

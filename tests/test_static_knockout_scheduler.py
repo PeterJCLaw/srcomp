@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import unittest
 from collections import OrderedDict
 from collections.abc import Collection, Mapping
@@ -16,7 +17,13 @@ from sr.comp.knockout_scheduler.static_scheduler import (
     StaticKnockoutScheduleData,
     WrongNumberOfTeamsError,
 )
-from sr.comp.match_period import Delay, Match, MatchSlot, MatchType
+from sr.comp.match_period import (
+    Delay,
+    KnockoutMatch,
+    Match,
+    MatchSlot,
+    MatchType,
+)
 from sr.comp.scores import LeaguePosition, LeaguePositions
 from sr.comp.teams import Team
 from sr.comp.types import (
@@ -216,7 +223,17 @@ def build_5_matches(places, *, first_match_number=0):
     ]
 
     matches = [
-        Match(idx, name.format(idx), 'A', teams, start, end, MatchType.knockout, True)
+        KnockoutMatch(
+            idx,
+            name.format(idx),
+            'A',
+            teams,
+            start,
+            end,
+            MatchType.knockout,
+            use_resolved_ranking=True,
+            knockout_bracket='default',
+        )
         for (idx, name), (start, end), teams in zip(
             enumerate(names, start=first_match_number),
             times,
@@ -225,7 +242,7 @@ def build_5_matches(places, *, first_match_number=0):
     ]
 
     # Final has different resolution expectations
-    matches[-1] = matches[-1]._replace(use_resolved_ranking=False)
+    matches[-1] = dataclasses.replace(matches[-1], use_resolved_ranking=False)
 
     return [{'A': match} for match in matches]
 

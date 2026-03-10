@@ -5,7 +5,13 @@ import random
 from collections.abc import Collection, Iterable, Mapping, Sequence
 from typing import TypeVar
 
-from sr.comp.match_period import Delay, Match, MatchSlot, MatchType
+from sr.comp.match_period import (
+    Delay,
+    KnockoutMatch,
+    Match,
+    MatchSlot,
+    MatchType,
+)
 from sr.comp.types import (
     ArenaName,
     GamePoints,
@@ -28,7 +34,23 @@ def build_match(
     end_time: datetime.datetime = datetime.datetime(2020, 1, 25, 11, 5, tzinfo=UTC),
     type_: MatchType = MatchType.league,
     use_resolved_ranking: bool = False,
+    knockout_bracket: str | None = None,
 ) -> Match:
+    if type_ == MatchType.knockout:
+        return KnockoutMatch(
+            MatchNumber(num),
+            f"Match {num}",
+            ArenaName(arena),
+            list(teams),
+            start_time,
+            end_time,
+            type_,
+            use_resolved_ranking,
+            knockout_bracket or 'default',
+        )
+    elif knockout_bracket is not None:
+        raise TypeError("Should not provide 'knockout_bracket' for non-knockout match")
+
     return Match(
         MatchNumber(num),
         f"Match {num}",
