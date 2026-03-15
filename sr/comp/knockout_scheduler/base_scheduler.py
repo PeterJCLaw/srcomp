@@ -21,6 +21,8 @@ class BaseKnockoutScheduleData(TypedDict):
 
 TConfig = TypeVar('TConfig', bound=BaseKnockoutScheduleData)
 
+DEFAULT_KNOCKOUT_BRACKET_NAME = 'default'
+
 
 class BaseKnockoutScheduler(Generic[TConfig]):
     """

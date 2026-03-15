@@ -5,6 +5,9 @@ import random
 from collections.abc import Collection, Iterable, Mapping, Sequence
 from typing import TypeVar
 
+from sr.comp.knockout_scheduler.base_scheduler import (
+    DEFAULT_KNOCKOUT_BRACKET_NAME,
+)
 from sr.comp.match_period import (
     Delay,
     KnockoutMatch,
@@ -46,7 +49,7 @@ def build_match(
             end_time,
             type_,
             use_resolved_ranking,
-            knockout_bracket or 'default',
+            knockout_bracket or DEFAULT_KNOCKOUT_BRACKET_NAME,
         )
     elif knockout_bracket is not None:
         raise TypeError("Should not provide 'knockout_bracket' for non-knockout match")

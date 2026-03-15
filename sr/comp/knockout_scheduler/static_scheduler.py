@@ -21,7 +21,11 @@ from ..types import (
     StaticMatchTeamReference,
     TLA,
 )
-from .base_scheduler import BaseKnockoutScheduleData, BaseKnockoutScheduler
+from .base_scheduler import (
+    BaseKnockoutScheduleData,
+    BaseKnockoutScheduler,
+    DEFAULT_KNOCKOUT_BRACKET_NAME,
+)
 from .types import ScheduleHost
 
 
@@ -223,7 +227,7 @@ class StaticScheduler(BaseKnockoutScheduler[StaticKnockoutScheduleData]):
             end_time,
             MatchType.knockout,
             use_resolved_ranking=not is_final,
-            knockout_bracket=match_info.get('bracket', 'default'),
+            knockout_bracket=match_info.get('bracket', DEFAULT_KNOCKOUT_BRACKET_NAME),
         )
         self.knockout_rounds[-1].append(match)
 

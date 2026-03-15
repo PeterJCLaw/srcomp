@@ -10,6 +10,9 @@ from unittest import mock
 from league_ranker import RankedPosition
 
 from sr.comp.knockout_scheduler import StaticScheduler, UNKNOWABLE_TEAM
+from sr.comp.knockout_scheduler.base_scheduler import (
+    DEFAULT_KNOCKOUT_BRACKET_NAME,
+)
 from sr.comp.knockout_scheduler.static_scheduler import (
     InvalidReferenceError,
     InvalidSeedError,
@@ -232,7 +235,7 @@ def build_5_matches(places, *, first_match_number=0):
             end,
             MatchType.knockout,
             use_resolved_ranking=True,
-            knockout_bracket='default',
+            knockout_bracket=DEFAULT_KNOCKOUT_BRACKET_NAME,
         )
         for (idx, name), (start, end), teams in zip(
             enumerate(names, start=first_match_number),
