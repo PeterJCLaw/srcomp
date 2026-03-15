@@ -286,26 +286,42 @@ class StaticMatchInfo(TypedDict):
 class StaticKnockoutRoundData(TypedDict):
     display_name: NotRequired[str]
     matches: Mapping[int, StaticMatchInfo]
+    """
+    A mapping describing the matches in the round.
+
+    Keys should be 0-indexed numbers identifying the match within the round.
+    Match identifiers start from zero for each round.
+    """
 
 
 class StaticKnockoutData(TypedDict):
     rounds: Mapping[int, StaticKnockoutRoundData]
     """
-    A mapping describing the rounds & matches in the static knockout.
+    A mapping describing the rounds in the knockout.
 
-    Keys should be 0-indexed numbers identifying the round or match
-    respectively. Match identifiers start from zero for each round.
-
-    On the inner mapping, that is the one describing the matches in a round, the
-    following string keys may also be present (the mix of known string keys and
-    unknown integer keys cannot be expressed in Python's type system yet):
-      - `display_name`: display name for the round, replacing the default
-        auto-generated name.
+    Keys should be 0-indexed numbers identifying the round.
     """
 
 
 class LegacyStaticKnockoutData(TypedDict):
+    """
+    Legacy format for statically specifying a knockout.
+
+    This format is deprecated in favour of ``StaticKnockoutData``, though does
+    not have a timeline for removal. Internally knockouts in this format are
+    converted to the newer format for ingestion.
+
+    Users may wish to use ``srcomp modernise-static-knockout`` provided by the
+    ``sr.comp.cli`` package to upgrade their configurations.
+    """
+
     matches: Mapping[int, Mapping[int, StaticMatchInfo]]
+    """
+    A mapping describing the rounds & matches in the static knockout.
+
+    Keys should be 0-indexed numbers identifying the round or match
+    respectively. Match identifiers start from zero for each round.
+    """
 
 
 class ScheduleData(TypedDict):
