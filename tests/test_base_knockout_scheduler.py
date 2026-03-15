@@ -64,6 +64,7 @@ def get_scheduler(
     }
     config: BaseKnockoutScheduleData = {
         'match_periods': {'knockout': [period_config]},
+        'brackets': (),
     }
     arenas = [ArenaName('A')]
 

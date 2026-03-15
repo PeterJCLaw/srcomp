@@ -246,6 +246,14 @@ class KnockoutSingleArenaData(TypedDict):
     arenas: list[ArenaName]
 
 
+class KnockoutBracketData(TypedDict):
+    name: str
+    """The internal identifier of a knockout bracket"""
+
+    display_name: str
+    """The internal identifier of a knockout bracket"""
+
+
 class KnockoutConfigData(TypedDict):
     round_spacing: int
     """Time delay between rounds (in seconds)"""
@@ -254,6 +262,15 @@ class KnockoutConfigData(TypedDict):
     arity: NotRequired[int]
     """Number of teams taking part"""
     single_arena: KnockoutSingleArenaData
+
+    brackets: NotRequired[list[KnockoutBracketData]]
+    """
+    Brackets which make up the knockout.
+
+    When omitted a single bracket named 'default' with display name "Knockouts" is used.
+
+    This currently has no bearing on the actual matches and is purely a display consideration.
+    """
 
     static: NotRequired[bool]
     """Whether or not to use the static knockout scheduler (rather than the automatic one)"""

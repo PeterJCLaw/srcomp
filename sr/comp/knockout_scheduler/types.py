@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import datetime
 from collections.abc import Collection, Iterable
 from typing import Protocol, TypedDict
@@ -24,6 +25,12 @@ class ScheduleHost(Protocol):
     @property
     def n_league_matches(self) -> int:
         ...
+
+
+@dataclasses.dataclass
+class KnockoutBracket:
+    name: str
+    display_name: str
 
 
 class KnockoutPeriodData(TypedDict):
