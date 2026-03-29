@@ -12,9 +12,12 @@ from league_ranker import RankedPosition
 from sr.comp.knockout_scheduler.base_scheduler import (
     BaseKnockoutScheduleData,
     BaseKnockoutScheduler,
+    DEFAULT_KNOCKOUT_BRACKET_NAME,
+    InvalidKnockoutBracketsError,
     UNKNOWABLE_TEAM,
 )
-from sr.comp.match_period import Delay, MatchSlot
+from sr.comp.knockout_scheduler.types import KnockoutRound
+from sr.comp.match_period import Delay, MatchSlot, MatchType
 from sr.comp.scores import LeaguePosition, LeaguePositions
 from sr.comp.teams import Team
 from sr.comp.types import ArenaName, GamePoints, MatchId, MatchPeriodData, TLA
@@ -185,4 +188,80 @@ class BaseKnockoutSchedulerTests(unittest.TestCase):
         self.assertEqual(
             ['ABC', 'DEF'],
             scheduler._get_seeds(),
+        )
+
+    def test_validate_brackets_ok(self) -> None:
+        scheduler = get_scheduler()
+        scheduler.knockout_rounds = [
+            KnockoutRound(
+                "Knockouts",
+                [
+                    build_match(type_=MatchType.knockout),  # type: ignore[list-item]
+                ],
+            ),
+        ]
+        scheduler.validate_brackets()
+
+    def test_validate_brackets_extra(self) -> None:
+        scheduler = get_scheduler()
+        scheduler.knockout_rounds = []
+
+        with self.assertRaises(InvalidKnockoutBracketsError) as cm:
+            scheduler.validate_brackets()
+
+        self.assertEqual(
+            (
+                {},
+                set([DEFAULT_KNOCKOUT_BRACKET_NAME]),
+                set([DEFAULT_KNOCKOUT_BRACKET_NAME]),
+            ),
+            (
+                cm.exception.missing_brackets,
+                cm.exception.extra_brackets,
+                cm.exception.known_brackets,
+            ),
+            "Wrong error data",
+        )
+
+        self.assertIn(
+            "Invalid",
+            str(cm.exception),
+            "Bad error message",
+        )
+
+    def test_validate_brackets_mismatch(self) -> None:
+        match = build_match(
+            type_=MatchType.knockout,
+            knockout_bracket='mismatch',
+        )
+
+        scheduler = get_scheduler()
+        scheduler.knockout_rounds = [
+            KnockoutRound(
+                "Knockouts",
+                [match],  # type: ignore[list-item]
+            ),
+        ]
+
+        with self.assertRaises(InvalidKnockoutBracketsError) as cm:
+            scheduler.validate_brackets()
+
+        self.assertEqual(
+            (
+                {'mismatch': [match]},
+                set([DEFAULT_KNOCKOUT_BRACKET_NAME]),
+                set([DEFAULT_KNOCKOUT_BRACKET_NAME]),
+            ),
+            (
+                cm.exception.missing_brackets,
+                cm.exception.extra_brackets,
+                cm.exception.known_brackets,
+            ),
+            "Wrong error data",
+        )
+
+        self.assertIn(
+            "Invalid",
+            str(cm.exception),
+            "Bad error message",
         )

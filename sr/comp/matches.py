@@ -170,6 +170,7 @@ class MatchSchedule:
             )
 
         k.add_knockouts()
+        k.validate_brackets()
 
         schedule.knockout_brackets = k.knockout_brackets
         schedule.knockout_rounds = k.knockout_rounds

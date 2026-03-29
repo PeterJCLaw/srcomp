@@ -5,7 +5,7 @@ import datetime
 from collections.abc import Collection, Iterable
 from typing import Protocol, TypedDict
 
-from sr.comp.match_period import Delay, Match, MatchSlot
+from sr.comp.match_period import Delay, KnockoutMatch, MatchSlot
 from sr.comp.types import MatchPeriodData
 
 
@@ -37,7 +37,7 @@ class KnockoutPeriodData(TypedDict):
     knockout: list[MatchPeriodData]
 
 
-class KnockoutRound(list[Match]):
+class KnockoutRound(list[KnockoutMatch]):
     """
     A round of matches within the knockout stages.
 
@@ -46,6 +46,6 @@ class KnockoutRound(list[Match]):
     part of the public interface. Consumers should treat this as a ``Sequence``.
     """
 
-    def __init__(self, name: str, matches: Iterable[Match] = ()):
+    def __init__(self, name: str, matches: Iterable[KnockoutMatch] = ()):
         super().__init__(matches)
         self.name = name

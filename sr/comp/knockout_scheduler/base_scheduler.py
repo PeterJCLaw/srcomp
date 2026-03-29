@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping, Sequence
-from typing import Generic, TypedDict, TypeVar
+import collections
+import difflib
+from collections.abc import Collection, Iterable, Mapping, Sequence
+from typing import final, Generic, TypedDict, TypeVar
 
-from ..match_period import Match, MatchPeriod, MatchType
+from .. import text_utils
+from ..match_period import KnockoutMatch, Match, MatchPeriod, MatchType
 from ..scores import Scores
 from ..teams import Team
 from ..types import ArenaName, KnockoutBracketData, MatchId, MatchNumber, TLA
@@ -28,6 +31,40 @@ class BaseKnockoutScheduleData(TypedDict):
 TConfig = TypeVar('TConfig', bound=BaseKnockoutScheduleData)
 
 DEFAULT_KNOCKOUT_BRACKET_NAME = 'default'
+
+
+class InvalidKnockoutBracketsError(Exception):
+    def __init__(
+        self,
+        missing_brackets: Mapping[str, Collection[KnockoutMatch]],
+        extra_brackets: Collection[str],
+        known_brackets: Collection[str],
+    ) -> None:
+        super().__init__(missing_brackets, extra_brackets, known_brackets)
+        self.missing_brackets = missing_brackets
+        self.extra_brackets = extra_brackets
+        self.known_brackets = known_brackets
+
+    def __str__(self) -> str:
+        messages = ["Invalid knockout brackets configuration."]
+
+        if self.missing_brackets:
+            missing_str = ", ".join(
+                f"{bracket!r} (in {text_utils.join_and(x.display_name for x in matches)}; "
+                f"close matches: {difflib.get_close_matches(bracket, self.known_brackets)})"
+                for bracket, matches in self.missing_brackets.items()
+            )
+            messages.append(
+                f"The following brackets are referenced but not defined: {missing_str}.",
+            )
+
+        if self.extra_brackets:
+            extra_str = text_utils.join_and(repr(x) for x in self.extra_brackets)
+            messages.append(
+                f"The following brackets are defined but not used: {extra_str}.",
+            )
+
+        return " ".join(messages)
 
 
 class BaseKnockoutScheduler(Generic[TConfig]):
@@ -235,6 +272,29 @@ class BaseKnockoutScheduler(Generic[TConfig]):
         self.knockout_rounds.append(knockout_round)
 
         return knockout_round
+
+    @final
+    def validate_brackets(self) -> None:
+        valid_bracket_ids = set(x.name for x in self.knockout_brackets)
+
+        matches_by_bracket: collections.defaultdict[str, list[KnockoutMatch]]
+        matches_by_bracket = collections.defaultdict(list)
+        for knockout_round in self.knockout_rounds:
+            for match in knockout_round:
+                matches_by_bracket[match.knockout_bracket].append(match)
+
+        missing_brackets = {
+            x: y
+            for x, y in matches_by_bracket.items()
+            if x not in valid_bracket_ids
+        }
+        extra_brackets = valid_bracket_ids - matches_by_bracket.keys()
+        if missing_brackets or extra_brackets:
+            raise InvalidKnockoutBracketsError(
+                missing_brackets,
+                extra_brackets,
+                valid_bracket_ids,
+            )
 
     def add_knockouts(self) -> None:
         """
