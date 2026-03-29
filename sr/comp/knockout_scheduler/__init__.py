@@ -3,10 +3,11 @@
 from .automatic_scheduler import AutoKnockoutScheduleData, KnockoutScheduler
 from .base_scheduler import UNKNOWABLE_TEAM
 from .static_scheduler import StaticKnockoutScheduleData, StaticScheduler
-from .types import KnockoutRound
+from .types import KnockoutBracket, KnockoutRound
 
 __all__ = (
     'AutoKnockoutScheduleData',
+    'KnockoutBracket',
     'KnockoutRound',
     'KnockoutScheduler',
     'StaticKnockoutScheduleData',

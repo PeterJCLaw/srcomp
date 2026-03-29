@@ -83,6 +83,7 @@ def get_scheduler(
     }
     config: AutoKnockoutScheduleData = {
         'match_periods': {'knockout': [period_config]},
+        'brackets': (),
         'knockout': knockout_config,
     }
     arenas = [ArenaName('A')]

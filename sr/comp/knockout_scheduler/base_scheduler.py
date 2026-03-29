@@ -2,14 +2,19 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Generic, TypedDict, TypeVar
 
 from ..match_period import Match, MatchPeriod, MatchType
 from ..scores import Scores
 from ..teams import Team
-from ..types import ArenaName, MatchId, MatchNumber, TLA
-from .types import KnockoutPeriodData, KnockoutRound, ScheduleHost
+from ..types import ArenaName, KnockoutBracketData, MatchId, MatchNumber, TLA
+from .types import (
+    KnockoutBracket,
+    KnockoutPeriodData,
+    KnockoutRound,
+    ScheduleHost,
+)
 
 # Use '???' as the "we don't know yet" marker
 UNKNOWABLE_TEAM = TLA('???')
@@ -17,9 +22,12 @@ UNKNOWABLE_TEAM = TLA('???')
 
 class BaseKnockoutScheduleData(TypedDict):
     match_periods: KnockoutPeriodData
+    brackets: Sequence[KnockoutBracketData]
 
 
 TConfig = TypeVar('TConfig', bound=BaseKnockoutScheduleData)
+
+DEFAULT_KNOCKOUT_BRACKET_NAME = 'default'
 
 
 class BaseKnockoutScheduler(Generic[TConfig]):
@@ -32,6 +40,18 @@ class BaseKnockoutScheduler(Generic[TConfig]):
     :param dict teams: The teams.
     :param config: Custom configuration for the knockout scheduler.
     """
+
+    @staticmethod
+    def _build_brackets(brackets: Sequence[KnockoutBracketData]) -> list[KnockoutBracket]:
+        if not brackets:
+            return [
+                KnockoutBracket(
+                    DEFAULT_KNOCKOUT_BRACKET_NAME,
+                    display_name="Knockouts",
+                ),
+            ]
+
+        return [KnockoutBracket(**x) for x in brackets]
 
     def __init__(
         self,
@@ -55,6 +75,14 @@ class BaseKnockoutScheduler(Generic[TConfig]):
         This is used in building matches where we don't yet know which teams will
         actually be playing, and for filling in when there aren't enough teams to
         fill the arena.
+        """
+
+        self.knockout_brackets = self._build_brackets(self.config['brackets'])
+        """
+        Brackets which make up the knockout.
+
+        This currently has no bearing on the actual matches and is purely a
+        display consideration.
         """
 
         # The knockout matches appear in the normal matches list

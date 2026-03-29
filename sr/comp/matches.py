@@ -15,6 +15,7 @@ from . import yaml_loader
 from .arenas import Arena
 from .knockout_scheduler import (
     AutoKnockoutScheduleData,
+    KnockoutBracket,
     KnockoutRound,
     KnockoutScheduler,
     StaticKnockoutScheduleData,
@@ -148,6 +149,7 @@ class MatchSchedule:
                 teams,
                 config=StaticKnockoutScheduleData({
                     'match_periods': y['match_periods'],
+                    'brackets': y['knockout'].get('brackets', ()),
                     'static_knockout': StaticScheduler.modernise_config_if_needed(
                         y['static_knockout'],
                     ),
@@ -162,12 +164,14 @@ class MatchSchedule:
                 teams,
                 config=AutoKnockoutScheduleData({
                     'match_periods': y['match_periods'],
+                    'brackets': y['knockout'].get('brackets', ()),
                     'knockout': y['knockout'],
                 }),
             )
 
         k.add_knockouts()
 
+        schedule.knockout_brackets = k.knockout_brackets
         schedule.knockout_rounds = k.knockout_rounds
         schedule.match_periods.append(k.period)
 
@@ -192,6 +196,14 @@ class MatchSchedule:
         r"""
         A list of the :class:`.MatchPeriod`\s which contain the matches
         for the competition.
+        """
+
+        self.knockout_brackets: Sequence[KnockoutBracket]
+        """
+        A list of brackets which make up the knockout.
+
+        This currently has no bearing on the actual matches and is purely a
+        display consideration.
         """
 
         self.knockout_rounds: Sequence[KnockoutRound] = []

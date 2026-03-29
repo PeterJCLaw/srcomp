@@ -8,7 +8,7 @@ import re
 import typing
 from collections.abc import Iterable, Mapping
 
-from ..match_period import Match, MatchSlot, MatchType
+from ..match_period import KnockoutMatch, MatchSlot, MatchType
 from ..scores import Scores
 from ..teams import Team
 from ..types import (
@@ -21,7 +21,11 @@ from ..types import (
     StaticMatchTeamReference,
     TLA,
 )
-from .base_scheduler import BaseKnockoutScheduleData, BaseKnockoutScheduler
+from .base_scheduler import (
+    BaseKnockoutScheduleData,
+    BaseKnockoutScheduler,
+    DEFAULT_KNOCKOUT_BRACKET_NAME,
+)
 from .types import ScheduleHost
 
 
@@ -214,7 +218,7 @@ class StaticScheduler(BaseKnockoutScheduler[StaticKnockoutScheduleData]):
             display_name = f"{override_name} (#{num})"
 
         is_final = rounds_remaining == 0
-        match = Match(
+        match = KnockoutMatch(
             num,
             display_name,
             arena,
@@ -223,6 +227,7 @@ class StaticScheduler(BaseKnockoutScheduler[StaticKnockoutScheduleData]):
             end_time,
             MatchType.knockout,
             use_resolved_ranking=not is_final,
+            knockout_bracket=match_info.get('bracket', DEFAULT_KNOCKOUT_BRACKET_NAME),
         )
         self.knockout_rounds[-1].append(match)
 
