@@ -16,6 +16,7 @@ from .knockout_scheduler import UNKNOWABLE_TEAM
 from .match_period import Match, MatchSlot, MatchType
 from .matches import MatchSchedule
 from .scores import BaseScores
+from .text_utils import join_and
 from .types import ArenaName, MatchId, MatchNumber, TLA
 
 ErrorType = NewType('ErrorType', str)
@@ -54,19 +55,6 @@ def with_source(
 ) -> Iterator[ValidationError]:
     for error in naive_errors:
         yield error.with_source(*source)
-
-
-def join_and(items: Iterable[object]) -> str:
-    strings = [str(x) for x in items]
-    if not strings:
-        return ""
-
-    if len(strings) == 1:
-        return strings[0]
-
-    *rest, last = strings
-
-    return " and ".join((", ".join(rest), last))
 
 
 def report_errors(error_type: ErrorType, id_: object, errors: list[str]) -> None:
