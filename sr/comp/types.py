@@ -357,6 +357,80 @@ class ScheduleData(TypedDict):
     static_knockout: NotRequired[StaticKnockoutData | LegacyStaticKnockoutData]
 
 
+class StructuredSeedReference(TypedDict):
+    """
+    A reference to a seeded team for pulling into a knockout match.
+
+    Seeds are strictly positive integers in ``range(1, N_TEAMS + 1)``.
+    """
+    seed: int
+
+
+class StructuredMatchTeamPositionReference(TypedDict):
+    """
+    A reference to a team based on their position in the results of a knockout
+    match.
+    """
+
+    round: int  # noqa: A003
+    """
+    The round containing the match to reference.
+
+    0-based index matching the original structure definition.
+    """
+
+    match: int
+    """
+    The match containing the team to reference.
+
+    0-based index matching the original structure definition.
+    """
+
+    position: int
+    """
+    The position within the results of the referred match to pull into the current match.
+
+    0-based index, the winners of the referred match have position ``0``.
+    """
+
+
+StructuredMatchTeamReference = Union[
+    StructuredSeedReference,
+    StructuredMatchTeamPositionReference,
+]
+
+
+class StructuredMatchInfo(TypedDict):
+    arena: ArenaName
+    teams: list[StructuredMatchTeamReference]
+    display_name: NotRequired[str]
+    bracket: NotRequired[str]
+
+
+class StructuredKnockoutRoundData(TypedDict):
+    display_name: NotRequired[str]
+    matches: Mapping[int, StructuredMatchInfo]
+    """
+    A mapping describing the matches in the round.
+
+    Keys should be 0-indexed numbers identifying the match within the round.
+    Match identifiers start from zero for each round.
+    """
+
+
+class StructuredKnockoutData(TypedDict):
+    rounds: Mapping[int, StructuredKnockoutRoundData]
+    """
+    A mapping describing the rounds in the knockout.
+
+    Keys should be 0-indexed numbers identifying the round.
+    """
+
+
+class KnockoutData(TypedDict):
+    structured_knockout: StructuredKnockoutData
+
+
 AwardsData = NewType('AwardsData', dict[str, Union[TLA, list[TLA]]])
 
 
