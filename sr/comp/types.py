@@ -254,7 +254,7 @@ class KnockoutBracketData(TypedDict):
     """The internal identifier of a knockout bracket"""
 
 
-class KnockoutConfigData(TypedDict):
+class ScheduleKnockoutData(TypedDict):
     round_spacing: int
     """Time delay between rounds (in seconds)"""
     final_delay: int
@@ -352,7 +352,7 @@ class ScheduleData(TypedDict):
     tiebreaker: NotRequired[datetime.datetime]
 
     league: ScheduleLeagueData
-    knockout: KnockoutConfigData
+    knockout: ScheduleKnockoutData
 
     static_knockout: NotRequired[StaticKnockoutData | LegacyStaticKnockoutData]
 

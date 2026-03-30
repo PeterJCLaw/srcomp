@@ -18,9 +18,9 @@ from sr.comp.teams import Team
 from sr.comp.types import (
     ArenaName,
     GamePoints,
-    KnockoutConfigData,
     MatchId,
     MatchPeriodData,
+    ScheduleKnockoutData,
     TLA,
 )
 
@@ -73,7 +73,7 @@ def get_scheduler(
         'start_time': datetime(2014, 3, 27, 13),
         'end_time':   datetime(2014, 3, 27, 17, 30),  # noqa:E241
     }
-    knockout_config: KnockoutConfigData = {
+    knockout_config: ScheduleKnockoutData = {
         'round_spacing': 30,
         'final_delay': 12,
         'single_arena': {

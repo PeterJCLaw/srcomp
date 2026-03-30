@@ -10,7 +10,7 @@ from ..match_period import KnockoutMatch, Match, MatchSlot, MatchType
 from ..match_period_clock import MatchPeriodClock, OutOfTimeException
 from ..scores import Scores
 from ..teams import Team
-from ..types import ArenaName, KnockoutConfigData, MatchNumber, TLA
+from ..types import ArenaName, MatchNumber, ScheduleKnockoutData, TLA
 from . import seeding, stable_random
 from .base_scheduler import (
     BaseKnockoutScheduleData,
@@ -21,7 +21,7 @@ from .types import ScheduleHost
 
 
 class AutoKnockoutScheduleData(BaseKnockoutScheduleData):
-    knockout: KnockoutConfigData
+    knockout: ScheduleKnockoutData
 
 
 class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
