@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import unittest
 from collections import OrderedDict
-from collections.abc import Collection, Mapping
+from collections.abc import Mapping
 from datetime import datetime, timedelta
 from unittest import mock
 
@@ -145,7 +145,7 @@ def get_scheduler(
     positions: LeaguePositions | None = None,
     knockout_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]] | None = None,
     league_game_points: dict[MatchId, Mapping[TLA, GamePoints]] | None = None,
-    delays: Collection[Delay] | None = None,
+    delays: list[Delay] | None = None,
     teams: dict[TLA, Team] | None = None,
 ) -> StaticScheduler:
     matches = matches or []

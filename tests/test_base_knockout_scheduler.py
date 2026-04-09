@@ -4,7 +4,7 @@ import datetime
 import random
 import unittest
 from collections import OrderedDict
-from collections.abc import Collection, Mapping
+from collections.abc import Mapping
 from unittest import mock
 
 from league_ranker import RankedPosition
@@ -30,7 +30,7 @@ def get_scheduler(
     positions: LeaguePositions | None = None,
     knockout_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]] | None = None,
     league_game_points: dict[MatchId, Mapping[TLA, GamePoints]] | None = None,
-    delays: Collection[Delay] | None = None,
+    delays: list[Delay] | None = None,
     teams: dict[TLA, Team] | None = None,
     num_teams_per_arena: int = 4,
 ) -> BaseKnockoutScheduler[BaseKnockoutScheduleData]:

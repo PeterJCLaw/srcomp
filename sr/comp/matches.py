@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import bisect
 import datetime
 from collections.abc import Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
@@ -335,6 +336,9 @@ class MatchSchedule:
 
         delays.sort(key=lambda x: x.time)
         self.delays = delays
+
+    def _recover_time(self, recovered_time: Delay) -> None:
+        bisect.insort(self.delays, recovered_time, key=lambda x: x.time)
 
     def remove_drop_outs(
         self,
