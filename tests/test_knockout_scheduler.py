@@ -8,7 +8,11 @@ from unittest import mock
 
 from league_ranker import RankedPosition
 
-from sr.comp.knockout_scheduler import KnockoutScheduler, UNKNOWABLE_TEAM
+from sr.comp.knockout_scheduler import (
+    KnockoutScheduler,
+    modernise_automatic_knockout_config,
+    UNKNOWABLE_TEAM,
+)
 from sr.comp.knockout_scheduler.automatic_scheduler import (
     AutoKnockoutScheduleData,
 )
@@ -20,7 +24,8 @@ from sr.comp.types import (
     GamePoints,
     MatchId,
     MatchPeriodData,
-    ScheduleKnockoutData,
+    ScheduleAutomaticKnockoutData,
+    ScheduleKnockoutRoundSpacingData,
     TLA,
 )
 
@@ -36,8 +41,10 @@ def mock_first_round_seeding(side_effect):
 
 def get_scheduler(
     matches: list[MatchSlot] | None = None,
+    *,
     positions: LeaguePositions | None = None,
     knockout_positions: Mapping[MatchId, Mapping[TLA, RankedPosition]] | None = None,
+    round_spacing: ScheduleKnockoutRoundSpacingData | None = None,
     league_game_points: dict[MatchId, Mapping[TLA, GamePoints]] | None = None,
     delays: list[Delay] | None = None,
     teams: dict[TLA, Team] | None = None,
@@ -73,14 +80,17 @@ def get_scheduler(
         'start_time': datetime(2014, 3, 27, 13),
         'end_time':   datetime(2014, 3, 27, 17, 30),  # noqa:E241
     }
-    knockout_config: ScheduleKnockoutData = {
+    knockout_config: ScheduleAutomaticKnockoutData
+    knockout_config = modernise_automatic_knockout_config({
         'round_spacing': 30,
         'final_delay': 12,
         'single_arena': {
             'rounds': 3,
             'arenas': [ArenaName('A')],
         },
-    }
+    })
+    if round_spacing:
+        knockout_config['round_spacing'] = round_spacing
     config: AutoKnockoutScheduleData = {
         'match_periods': {'knockout': [period_config]},
         'brackets': (),
@@ -514,3 +524,97 @@ class KnockoutSchedulerTests(unittest.TestCase):
         ]
 
         self.assertEqual(expected_times, start_times, "Wrong start times")
+
+    def test_timings_with_delays_later_absorbed(self):
+        positions = OrderedDict()
+        for i in range(16):
+            positions[f'team-{i}'] = i
+
+        delays = [
+            Delay(
+                time=datetime(2014, 3, 27, 13, 2),
+                delay=timedelta(minutes=2),
+            ),
+            Delay(
+                time=datetime(2014, 3, 27, 13, 12),
+                delay=timedelta(minutes=2),
+            ),
+        ]
+
+        scheduler = get_scheduler(
+            positions=positions,
+            delays=delays,
+            round_spacing={
+                'default': {
+                    'delay_flex': 150,
+                    'minimum': 150,
+                    'nominal': 300,
+                },
+                'overrides': {
+                    -1: {
+                        'delay_flex': 240,
+                        'minimum': 102,
+                        'nominal': 342,
+                    },
+                },
+            },
+        )
+        scheduler.add_knockouts()
+
+        knockout_rounds = scheduler.knockout_rounds
+        num_rounds = len(knockout_rounds)
+
+        self.assertEqual(3, num_rounds, "Should be quarters, semis and finals")
+
+        start_times = [m['A'].start_time for m in scheduler.period.matches]
+
+        expected_times = [
+            # Quarter finals
+            datetime(2014, 3, 27, 13, 0),
+            datetime(2014, 3, 27, 13, 7),   # affected by first delay only
+            datetime(2014, 3, 27, 13, 14),  # affected by both delays
+            datetime(2014, 3, 27, 13, 19),
+
+            # 5 minute gap, with 2:30 of flex -- all the flex is used up
+
+            # Semi finals
+            datetime(2014, 3, 27, 13, 26, 30),
+            datetime(2014, 3, 27, 13, 31, 30),
+
+            # 5:42 gap, with 4 minutes of flex -- some of the flex is used
+            # we're back on track
+
+            # Final
+            datetime(2014, 3, 27, 13, 40, 42),
+        ]
+
+        self.assertEqual(expected_times, start_times, "Wrong start times")
+
+        self.assertEqual(
+            [
+                Delay(
+                    time=datetime(2014, 3, 27, 13, 2),
+                    delay=timedelta(minutes=2),
+                ),
+                Delay(
+                    time=datetime(2014, 3, 27, 13, 12),
+                    delay=timedelta(minutes=2),
+                ),
+                Delay(
+                    time=datetime(2014, 3, 27, 13, 24),
+                    delay=timedelta(minutes=-2.5),
+                ),
+                Delay(
+                    time=datetime(2014, 3, 27, 13, 36, 30),
+                    delay=timedelta(minutes=-1.5),
+                ),
+            ],
+            scheduler.schedule.delays,
+            "Should have updated the schedule with recovered time",
+        )
+
+        self.assertEqual(
+            timedelta(0),
+            sum((x.delay for x in scheduler.schedule.delays), start=timedelta(0)),
+            "Final delay should be zero",
+        )

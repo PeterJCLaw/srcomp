@@ -4,6 +4,7 @@ import datetime
 from collections.abc import Mapping
 from typing import (
     Collection,
+    Literal,
     NewType,
     Protocol,
     runtime_checkable,
@@ -254,15 +255,7 @@ class KnockoutBracketData(TypedDict):
     """The internal identifier of a knockout bracket"""
 
 
-class ScheduleKnockoutData(TypedDict):
-    round_spacing: int
-    """Time delay between rounds (in seconds)"""
-    final_delay: int
-    """Extra delay before the final (for build-up and rotating, in seconds)"""
-    arity: NotRequired[int]
-    """Number of teams taking part"""
-    single_arena: KnockoutSingleArenaData
-
+class _BracketsMixin(TypedDict):
     brackets: NotRequired[list[KnockoutBracketData]]
     """
     Brackets which make up the knockout.
@@ -272,8 +265,61 @@ class ScheduleKnockoutData(TypedDict):
     This currently has no bearing on the actual matches and is purely a display consideration.
     """
 
+
+class LegacyScheduleKnockoutData(TypedDict, _BracketsMixin):
+    round_spacing: int
+    """Time delay between rounds (in seconds)"""
+    final_delay: int
+    """Extra delay before the final (for build-up and rotating, in seconds)"""
+    arity: NotRequired[int]
+    """Number of teams taking part"""
+    single_arena: KnockoutSingleArenaData
+
     static: NotRequired[bool]
     """Whether or not to use the static knockout scheduler (rather than the automatic one)"""
+
+
+class KnockoutRoundSpacingData(TypedDict):
+    """
+    The spacing between knockout rounds, all in seconds.
+
+    nominal == delay_flex + minimum
+    """
+
+    delay_flex: int
+    """How much delay time to absorb (in seconds)"""
+
+    minimum: int
+    """Minimum delay between rounds (in seconds)"""
+
+    nominal: int
+    """Default time delay between rounds (in seconds)"""
+
+
+class ScheduleKnockoutRoundSpacingData(TypedDict):
+    default: KnockoutRoundSpacingData
+    overrides: NotRequired[dict[int, KnockoutRoundSpacingData]]
+
+
+class ScheduleAutomaticKnockoutData(TypedDict, _BracketsMixin):
+    scheduler: Literal['automatic']
+
+    round_spacing: ScheduleKnockoutRoundSpacingData
+
+    arity: NotRequired[int]
+    """Number of teams taking part"""
+
+    single_arena: KnockoutSingleArenaData
+
+
+class ScheduleStaticKnockoutData(TypedDict, _BracketsMixin):
+    scheduler: Literal['static']
+
+
+ScheduleKnockoutData = Union[
+    ScheduleAutomaticKnockoutData,
+    ScheduleStaticKnockoutData,
+]
 
 
 StaticMatchTeamReference = NewType('StaticMatchTeamReference', str)
@@ -352,7 +398,7 @@ class ScheduleData(TypedDict):
     tiebreaker: NotRequired[datetime.datetime]
 
     league: ScheduleLeagueData
-    knockout: ScheduleKnockoutData
+    knockout: ScheduleKnockoutData | LegacyScheduleKnockoutData
 
     static_knockout: NotRequired[StaticKnockoutData | LegacyStaticKnockoutData]
 
