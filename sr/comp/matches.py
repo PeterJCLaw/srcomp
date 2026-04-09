@@ -338,6 +338,29 @@ class MatchSchedule:
         self.delays = delays
 
     def _recover_time(self, recovered_time: Delay) -> None:
+        """
+        Callback to record that previously delayed time has been recovered.
+
+        This is expected to be passed to `MatchPeriodClock.apply_spacing` as
+        part of either the knockouts or league scheduling. There it is called as
+        to indicate that a flexible gap in the schedule has been shrunk,
+        recovering time previously lost to delays.
+
+        This is necessary to ensure that the central list of delays (held on
+        this instance) is in sync with the actual timings, so that calls to
+        `delay_at` return values which correspond correctly.
+
+        The passed delay value should:
+         - be at the `time` of the earlier end of the time window which was
+           shortened
+         - have a *negative* `delay` value, with magnitude of the amount of time
+           recovered
+        """
+        if recovered_time.delay >= datetime.timedelta(0):
+            raise ValueError(
+                f"Recovered duration should be negative. (Got {recovered_time!r})",
+            )
+
         bisect.insort(self.delays, recovered_time, key=lambda x: x.time)
 
     def remove_drop_outs(
