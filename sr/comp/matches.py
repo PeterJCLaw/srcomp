@@ -22,6 +22,8 @@ from .knockout_scheduler import (
     modernise_knockout_config_if_needed,
     StaticKnockoutScheduleData,
     StaticScheduler,
+    StructuredKnockoutScheduleData,
+    StructuredScheduler,
 )
 from .knockout_scheduler.base_scheduler import BaseKnockoutScheduler
 from .match_period import Delay, Match, MatchPeriod, MatchSlot, MatchType
@@ -32,6 +34,7 @@ from .types import (
     ArenaName,
     DelayData,
     ExtraSpacingData,
+    KnockoutData,
     LeagueMatches,
     MatchNumber,
     MatchSlotLengthsData,
@@ -119,6 +122,7 @@ class MatchSchedule:
         cls: type[TSchedule],
         config_fname: Path,
         league_fname: Path,
+        knockout_fname: Path,
         scores: Scores,
         arenas: Mapping[ArenaName, Arena],
         num_teams_per_arena: int,
@@ -157,6 +161,21 @@ class MatchSchedule:
                     'static_knockout': StaticScheduler.modernise_config_if_needed(
                         y['static_knockout'],
                     ),
+                }),
+            )
+        elif knockout_config['scheduler'] == 'structured':
+            structured_knockout: KnockoutData = yaml_loader.load(knockout_fname)
+            k = StructuredScheduler(
+                schedule,
+                scores,
+                arenas,
+                num_teams_per_arena,
+                teams,
+                config=StructuredKnockoutScheduleData({
+                    'match_periods': y['match_periods'],
+                    'brackets': knockout_config.get('brackets', ()),
+                    'schedule': knockout_config,
+                    'structure': structured_knockout['structured_knockout'],
                 }),
             )
         elif knockout_config['scheduler'] == 'automatic':

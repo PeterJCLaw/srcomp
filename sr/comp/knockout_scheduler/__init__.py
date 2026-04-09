@@ -7,6 +7,10 @@ from .converters import (
     modernise_knockout_config_if_needed,
 )
 from .static_scheduler import StaticKnockoutScheduleData, StaticScheduler
+from .structured_scheduler import (
+    StructuredKnockoutScheduleData,
+    StructuredScheduler,
+)
 from .types import KnockoutBracket, KnockoutRound
 
 __all__ = (
@@ -18,5 +22,7 @@ __all__ = (
     'modernise_knockout_config_if_needed',
     'StaticKnockoutScheduleData',
     'StaticScheduler',
+    'StructuredKnockoutScheduleData',
+    'StructuredScheduler',
     'UNKNOWABLE_TEAM',
 )
