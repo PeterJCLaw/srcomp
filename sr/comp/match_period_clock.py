@@ -2,10 +2,46 @@
 
 from __future__ import annotations
 
+import dataclasses
 import datetime
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
+from typing_extensions import Self
 
 from .match_period import Delay, MatchPeriod
+
+
+@dataclasses.dataclass(frozen=True, slots=True)
+class Spacing:
+    """
+    Spacing which can be applied to a ``MatchPeriodClock``.
+
+    nominal == delay_flex + minimum.
+    """
+
+    delay_flex: datetime.timedelta
+    """The maximum amount of delay time to absorb."""
+
+    minimum: datetime.timedelta
+    """The minimum amount of time to advance."""
+
+    nominal: datetime.timedelta
+    """The initial amount of time to advance, assuming there are no delays."""
+
+    @classmethod
+    def fixed(cls, nominal: datetime.timedelta) -> Self:
+        return cls(
+            delay_flex=datetime.timedelta(0),
+            minimum=nominal,
+            nominal=nominal,
+        )
+
+    def __post_init__(self) -> None:
+        zero = datetime.timedelta(0)
+        if self.delay_flex < zero or self.minimum < zero or self.nominal < zero:
+            raise ValueError("Spacing values cannot be negative.")
+
+        if self.delay_flex + self.minimum != self.nominal:
+            raise ValueError("Spacing durations are inconsistent.")
 
 
 class OutOfTimeException(Exception):
@@ -118,6 +154,30 @@ class MatchPeriodClock:
 
         self._current_time += duration
         self._apply_delays()
+
+    def apply_spacing(self, spacing: Spacing, recover_time: Callable[[Delay], None]) -> None:
+        """
+        Apply a given spacing to make some time pass. This is expected to be
+        called when inserting a variable length gap between matches.
+
+        The ``recover_time`` parameter should be a callable which updates the
+        central view of delays in the system and will be called with a negative
+        delay when time is recovered.
+        """
+
+        if self._total_delay is not None:
+            delay_to_absorb = min(self._total_delay, spacing.delay_flex)
+
+            if delay_to_absorb:
+                recovered_time = Delay(
+                    # A negative delay recovers time.
+                    delay=-delay_to_absorb,
+                    time=self._current_time,
+                )
+                self._delays.insert(0, recovered_time)
+                recover_time(recovered_time)
+
+        self.advance_time(spacing.nominal)
 
     def _apply_delays(self) -> None:
         delays = self._delays

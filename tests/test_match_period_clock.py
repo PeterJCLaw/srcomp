@@ -4,7 +4,11 @@ import datetime
 import unittest
 
 from sr.comp.match_period import MatchPeriod, MatchSlot, MatchType
-from sr.comp.match_period_clock import MatchPeriodClock, OutOfTimeException
+from sr.comp.match_period_clock import (
+    MatchPeriodClock,
+    OutOfTimeException,
+    Spacing,
+)
 from sr.comp.matches import Delay
 
 
@@ -234,6 +238,343 @@ class AdvanceTimeTests(MatchPeriodClockTestsBase):
             curr_time,
             "Time should advance by the given amount (2) plus the size of the "
             "intervening delays (1+1)",
+        )
+
+
+class ApplySpacingTests(MatchPeriodClockTestsBase):
+    REF = datetime.datetime(2000, 1, 1)
+
+    maxDiff = None
+
+    @classmethod
+    def build_delay(cls, *, time: int, delay: int) -> Delay:
+        return Delay(
+            time=cls.REF.replace(second=time),
+            delay=datetime.timedelta(seconds=delay),
+        )
+
+    def build_match_period(  # type: ignore[override]
+        self,
+        start: int,
+        end: int,
+    ) -> MatchPeriod:
+        return super().build_match_period(
+            start=self.REF.replace(second=start),
+            end=self.REF.replace(second=end),
+        )
+
+    def assertApplySpacing(
+        self,
+        clock: MatchPeriodClock,
+        nominal: int,
+        flex: int = 0,
+        expected_recovery: int | None = None,
+    ) -> None:
+        recovered = None
+
+        def recovery(delay: Delay) -> None:
+            nonlocal recovered
+            self.assertIsNone(recovered, "Should only recover time once")
+            recovered = -delay.delay.total_seconds()
+
+        clock.apply_spacing(
+            Spacing(
+                delay_flex=datetime.timedelta(seconds=flex),
+                minimum=datetime.timedelta(seconds=nominal - flex),
+                nominal=datetime.timedelta(seconds=nominal),
+            ),
+            recover_time=recovery,
+        )
+
+        self.assertEqual(expected_recovery, recovered, "Wrong amount of recovered time")
+
+    def assertCurrentTime(self, clock: MatchPeriodClock, seconds: int, message: str) -> None:
+        self.assertEqual(
+            seconds,
+            clock.current_time.second,
+            message,
+        )
+
+    # No flex -- should behave just like `advance_time`
+
+    def test_no_delays(self) -> None:
+        period = self.build_match_period(0, 10)
+        clock = MatchPeriodClock(period, [])
+        self.assertCurrentTime(clock, 0, "Should start at the start of the period")
+
+        self.assertApplySpacing(clock, 1)
+
+        self.assertCurrentTime(clock, 1, "Time should advance by the given amount (1)")
+
+        self.assertApplySpacing(clock, 2)
+
+        self.assertCurrentTime(clock, 3, "Time should advance by the given amount (2)")
+
+    def test_with_delays(self) -> None:
+        period = self.build_match_period(0, 50)
+        delays = [
+            self.build_delay(time=1, delay=1),
+            self.build_delay(time=5, delay=2),
+        ]
+        clock = MatchPeriodClock(period, delays)
+        self.assertCurrentTime(clock, 0, "Should start at the start of the period")
+
+        self.assertApplySpacing(clock, 1)  # plus a delay of 1 at time=1
+
+        self.assertCurrentTime(
+            clock,
+            2,
+            "Time should advance by the given amount (1) plus the size of the "
+            "delay it meets",
+        )
+
+        self.assertApplySpacing(clock, 2)
+
+        self.assertCurrentTime(
+            clock,
+            4,
+            "Time should advance by the given amount (2) only; there are no "
+            "intervening delays",
+        )
+
+        self.assertApplySpacing(clock, 2)  # takes us to 6, plus a delay of 2 at time=5
+
+        self.assertCurrentTime(
+            clock,
+            8,
+            "Time should advance by the given amount (2) plus the size of the "
+            "intervening delay (2)",
+        )
+
+        self.assertApplySpacing(clock, 2)
+
+        self.assertCurrentTime(
+            clock,
+            10,
+            "Time should advance by the given amount (2) only; there are no "
+            "intervening delays",
+        )
+
+    def test_overlapping_delays(self) -> None:
+        period = self.build_match_period(0, 10)
+        delays = [
+            self.build_delay(time=1, delay=2),  # from 1 -> 3
+            self.build_delay(time=2, delay=1),  # extra at 2, so 1 -> 4
+        ]
+        clock = MatchPeriodClock(period, delays)
+        self.assertCurrentTime(clock, 0, "Should start at the start of the period")
+
+        self.assertApplySpacing(clock, 2)  # plus a total delay of 3
+
+        self.assertCurrentTime(
+            clock,
+            5,
+            "Time should advance by the given amount (2) plus the size of the "
+            "intervening delays (1+2)",
+        )
+
+    def test_touching_delays(self) -> None:
+        period = self.build_match_period(0, 10)
+        delays = [
+            self.build_delay(time=1, delay=1),  # from 1 -> 2
+            self.build_delay(time=2, delay=1),  # from 2 -> 3
+        ]
+        clock = MatchPeriodClock(period, delays)
+        self.assertCurrentTime(clock, 0, "Should start at the start of the period")
+
+        self.assertApplySpacing(clock, 2)  # plus a total delay of 2
+
+        self.assertCurrentTime(
+            clock,
+            4,
+            "Time should advance by the given amount (2) plus the size of the "
+            "intervening delays (1+1)",
+        )
+
+    # Flex greater than the delays -- should fully absorb the delays
+
+    def test_flex_no_delays(self) -> None:
+        period = self.build_match_period(0, 10)
+        clock = MatchPeriodClock(period, [])
+        self.assertCurrentTime(clock, 0, "Should start at the start of the period")
+
+        self.assertApplySpacing(clock, 2, flex=1)
+
+        self.assertCurrentTime(clock, 2, "Time should advance by the given amount (2)")
+
+        self.assertApplySpacing(clock, 2, flex=1)
+
+        self.assertCurrentTime(clock, 4, "Time should advance by the given amount (2)")
+
+    def test_flex_ignores_future_delays(self) -> None:
+        period = self.build_match_period(0, 50)
+        delays = [
+            self.build_delay(time=1, delay=1),  # at 1 -> 2
+            self.build_delay(time=3, delay=2),  # at 3 -> 5
+        ]
+        clock = MatchPeriodClock(period, delays)
+        self.assertCurrentTime(clock, 0, "Should start at the start of the period")
+
+        # Flex ignore delays which happen after the start of the spacing we're adding.
+        self.assertApplySpacing(clock, 3, flex=2)
+
+        self.assertCurrentTime(
+            clock,
+            6,
+            "Time should advance by the given amount (3) plus the size of the "
+            "(future) delays it meets",
+        )
+
+    def test_flex_gt_delays_with_delays(self) -> None:
+        period = self.build_match_period(0, 50)
+        delays = [
+            self.build_delay(time=0, delay=1),  # seen, absorbed
+            self.build_delay(time=1, delay=1),   # seen, absorbed
+            self.build_delay(time=9, delay=2),   # future, ignored initially
+        ]
+        clock = MatchPeriodClock(period, delays)
+        clock.advance_time(datetime.timedelta(seconds=3))   # plus delays (2)
+        self.assertCurrentTime(clock, 5, "Should be after the initial delays")
+
+        # Absorbs both delays which were already "expended", but not the one
+        # which is in the future.
+        self.assertApplySpacing(clock, 5, flex=3, expected_recovery=2)
+
+        self.assertCurrentTime(
+            clock,
+            8,
+            "Time should advance by the given amount (5) minus the historic delays (2)",
+        )
+
+        # Doesn't absorb any of the delay which happens "during" this spacing
+        self.assertApplySpacing(clock, 2, flex=1, expected_recovery=None)
+
+        self.assertCurrentTime(
+            clock,
+            12,
+            "Time should advance by the given amount (2) plus the size of the "
+            "delay it meets (2)",
+        )
+
+        # Recovers from the previous delay (2), with some space left over
+        self.assertApplySpacing(clock, 4, flex=3, expected_recovery=2)
+
+        self.assertCurrentTime(
+            clock,
+            14,
+            "Time should advance by the given amount (4) minus the historic delays (2)",
+        )
+
+        # no flex needed, we're on track
+        self.assertApplySpacing(clock, 2, flex=1, expected_recovery=None)
+
+        self.assertCurrentTime(
+            clock,
+            16,
+            "Time should advance by the given amount (2) only; there are no "
+            "remaining delays",
+        )
+
+    def test_flex_delays_overlapping_delays(self) -> None:
+        period = self.build_match_period(0, 10)
+        delays = [
+            self.build_delay(time=1, delay=2),  # from 1 -> 3
+            self.build_delay(time=2, delay=1),  # extra at 2, so 1 -> 4
+        ]
+        clock = MatchPeriodClock(period, delays)
+        self.assertCurrentTime(clock, 0, "Should start at the start of the period")
+
+        # No flexing, delays are after the spacing starts
+        self.assertApplySpacing(clock, 4, flex=3, expected_recovery=None)
+
+        self.assertCurrentTime(
+            clock,
+            7,
+            "Time should advance by the given amount (4) absorbing the "
+            "intervening delays (1+2)",
+        )
+
+    def test_flex_delays_touching_delays(self) -> None:
+        period = self.build_match_period(0, 10)
+        delays = [
+            self.build_delay(time=1, delay=1),  # from 1 -> 2
+            self.build_delay(time=2, delay=1),  # from 2 -> 3
+        ]
+        clock = MatchPeriodClock(period, delays)
+        self.assertCurrentTime(clock, 0, "Should start at the start of the period")
+
+        # No flexing, delays are after the spacing starts
+        self.assertApplySpacing(clock, 4, flex=3, expected_recovery=None)
+
+        self.assertCurrentTime(
+            clock,
+            6,
+            "Time should advance by the given amount (3) plus the size of the "
+            "(future) delays it meets",
+        )
+
+    # Flex less than the delays -- should partially absorb the delays
+
+    def test_flex_lt_delays_with_delays(self) -> None:
+        period = self.build_match_period(0, 50)
+        delays = [
+            self.build_delay(time=0, delay=2),  # seen, absorbed
+            self.build_delay(time=1, delay=2),  # seen, absorbed
+            self.build_delay(time=9, delay=2),  # future, ignored initially
+        ]
+        clock = MatchPeriodClock(period, delays)
+        clock.advance_time(datetime.timedelta(seconds=1))   # plus delays (4)
+        self.assertCurrentTime(clock, 5, "Should be after the initial delays")
+
+        # Absorbs some of the delays which were already "expended", but not the
+        # one which is in the future.
+        self.assertApplySpacing(clock, 4, flex=1, expected_recovery=1)
+
+        self.assertCurrentTime(
+            clock,
+            8,
+            "Time should advance by the given amount (4) minus a portion of the "
+            "historic delays (1)",
+        )
+
+        # Doesn't absorb any of the delay which happens "during" this spacing,
+        # but should absorb some of the previous delay
+        self.assertApplySpacing(clock, 3, flex=1, expected_recovery=1)
+
+        self.assertCurrentTime(
+            clock,
+            12,
+            "Time should advance by the given amount (3) minus a portion of the "
+            "historic delays (1) plus the size of the delay it meets (2)",
+        )
+
+        # Absorbs a portion of the historic delays
+        self.assertApplySpacing(clock, 2, flex=1, expected_recovery=1)
+
+        self.assertCurrentTime(
+            clock,
+            13,
+            "Time should advance by the given amount (3) minus a portion of the "
+            "historic delays (1)",
+        )
+
+        # Recovers from the previous delays (1+2), with some space left over
+        self.assertApplySpacing(clock, 5, flex=4, expected_recovery=3)
+
+        self.assertCurrentTime(
+            clock,
+            15,
+            "Time should advance by the given amount (5) minus the historic delays (3)",
+        )
+
+        # no flex needed, we're on track
+        self.assertApplySpacing(clock, 2, flex=1, expected_recovery=None)
+
+        self.assertCurrentTime(
+            clock,
+            17,
+            "Time should advance by the given amount (2) only; there are no "
+            "remaining delays",
         )
 
 
