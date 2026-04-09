@@ -1,13 +1,16 @@
 import unittest
 from collections import defaultdict
+from collections.abc import Mapping
 from datetime import datetime, timedelta
+from typing import Any
 
 from sr.comp.match_period import Match
 from sr.comp.matches import MatchSchedule, parse_ranges
 from sr.comp.teams import Team
+from sr.comp.types import MatchNumber, TLA
 
 
-def get_basic_data():
+def get_basic_data() -> dict[str, Any]:
     the_data = {
         'match_slot_lengths': {
             'pre': 90,
@@ -56,12 +59,14 @@ def get_basic_data():
     return the_data
 
 
-def load_data(the_data):
-    teams = defaultdict(lambda: Team(None, None, False, None))
-    teams['WYC'] = Team(None, None, False, 1)  # dropped out after match 1
+def load_data(the_data: dict[str, Any]) -> MatchSchedule:
+    teams: Mapping[TLA, Team]
+    teams = defaultdict(lambda: Team(None, None, False, None))  # type: ignore[arg-type]
+    # Team which drops out after match 1
+    teams[TLA('WYC')] = Team(TLA('WYC'), "Team WYC", False, MatchNumber(1))
 
     matches = MatchSchedule(
-        the_data,
+        the_data,  # type: ignore[arg-type]
         the_data['matches'],
         teams,
         num_teams_per_arena=4,
@@ -69,7 +74,7 @@ def load_data(the_data):
     return matches
 
 
-def load_basic_data():
+def load_basic_data() -> MatchSchedule:
     matches = load_data(get_basic_data())
     if len(matches.match_periods) != 1:
         raise ValueError("Unexpected number of match periods")
