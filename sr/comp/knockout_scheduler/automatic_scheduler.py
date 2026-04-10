@@ -2,15 +2,24 @@
 
 from __future__ import annotations
 
+import dataclasses
 import datetime
 import math
 from collections.abc import Iterable, Mapping, Sized
+from typing_extensions import Self
 
 from ..match_period import KnockoutMatch, Match, MatchSlot, MatchType
 from ..match_period_clock import MatchPeriodClock, OutOfTimeException, Spacing
 from ..scores import Scores
 from ..teams import Team
-from ..types import ArenaName, MatchNumber, ScheduleKnockoutData, TLA
+from ..types import (
+    ArenaName,
+    KnockoutRoundSpacingData,
+    MatchNumber,
+    ScheduleAutomaticKnockoutData,
+    ScheduleKnockoutRoundSpacingData,
+    TLA,
+)
 from . import seeding, stable_random
 from .base_scheduler import (
     BaseKnockoutScheduleData,
@@ -20,8 +29,50 @@ from .base_scheduler import (
 from .types import ScheduleHost
 
 
+@dataclasses.dataclass(frozen=True, slots=True)
+class RoundsSpacing:
+    default: Spacing
+    overrides: Mapping[int, Spacing]
+
+    @classmethod
+    def parse(cls, spacing_data: ScheduleKnockoutRoundSpacingData) -> Self:
+        def build(spacing_entry: KnockoutRoundSpacingData) -> Spacing:
+            return Spacing(
+                delay_flex=datetime.timedelta(seconds=spacing_entry['delay_flex']),
+                minimum=datetime.timedelta(seconds=spacing_entry['minimum']),
+                nominal=datetime.timedelta(seconds=spacing_entry['nominal']),
+            )
+
+        default = build(spacing_data['default'])
+
+        overrides = {
+            num: build(entry)
+            for num, entry in spacing_data.get('overrides', {}).items()
+        }
+
+        return cls(default, overrides)
+
+    def __post_init__(self) -> None:
+        if not (
+            all(x < 0 for x in self.overrides.keys()) or
+            all(x > 0 for x in self.overrides.keys())
+        ):
+            raise ValueError(
+                "Invalid overrides configuration -- "
+                "all entries must be positive or all must be negative. "
+                f"Got {set(self.overrides.keys())}.",
+            )
+
+    def get(self, *, round_num: int, rounds_remaining: int) -> Spacing:
+        if (spacing := self.overrides.get(round_num)) is not None:
+            return spacing
+        if (spacing := self.overrides.get(-rounds_remaining)) is not None:
+            return spacing
+        return self.default
+
+
 class AutoKnockoutScheduleData(BaseKnockoutScheduleData):
-    knockout: ScheduleKnockoutData
+    knockout: ScheduleAutomaticKnockoutData
 
 
 class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
@@ -181,10 +232,6 @@ class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
     def get_rounds_remaining(prev_matches: Sized) -> int:
         return int(math.log(len(prev_matches), 2))
 
-    @staticmethod
-    def parse_spacing(seconds: int) -> Spacing:
-        return Spacing.fixed(datetime.timedelta(seconds=seconds))
-
     def _apply_spacing(self, spacing: Spacing) -> None:
         self.clock.apply_spacing(
             spacing=spacing,
@@ -193,28 +240,26 @@ class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
 
     def _add_knockouts(self) -> None:
         knockout_conf = self.config['knockout']
-        round_spacing = self.parse_spacing(knockout_conf['round_spacing'])
+        rounds_spacing = RoundsSpacing.parse(knockout_conf['round_spacing'])
 
         self._add_first_round(conf_arity=knockout_conf.get('arity'))
 
         while len(self.knockout_rounds[-1]) > 1:
 
-            # Add the delay between rounds
-            self._apply_spacing(spacing=round_spacing)
-
             # Number of rounds remaining to be added
             rounds_remaining = self.get_rounds_remaining(self.knockout_rounds[-1])
+
+            # Add the delay between rounds
+            self._apply_spacing(rounds_spacing.get(
+                round_num=len(self.knockout_rounds),
+                rounds_remaining=rounds_remaining,
+            ))
 
             arenas: Iterable[ArenaName]
             if rounds_remaining <= knockout_conf['single_arena']['rounds']:
                 arenas = knockout_conf['single_arena']['arenas']
             else:
                 arenas = self.arenas
-
-            if len(self.knockout_rounds[-1]) == 2:
-                # Extra delay before the final match
-                final_delay = self.parse_spacing(knockout_conf['final_delay'])
-                self._apply_spacing(spacing=final_delay)
 
             self._add_round(arenas, rounds_remaining - 1)
 

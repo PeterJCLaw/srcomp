@@ -4,6 +4,7 @@ import datetime
 from collections.abc import Mapping
 from typing import (
     Collection,
+    Literal,
     NewType,
     Protocol,
     runtime_checkable,
@@ -254,15 +255,7 @@ class KnockoutBracketData(TypedDict):
     """The internal identifier of a knockout bracket"""
 
 
-class ScheduleKnockoutData(TypedDict):
-    round_spacing: int
-    """Time delay between rounds (in seconds)"""
-    final_delay: int
-    """Extra delay before the final (for build-up and rotating, in seconds)"""
-    arity: NotRequired[int]
-    """Number of teams taking part"""
-    single_arena: KnockoutSingleArenaData
-
+class _BracketsMixin(TypedDict):
     brackets: NotRequired[list[KnockoutBracketData]]
     """
     Brackets which make up the knockout.
@@ -272,8 +265,68 @@ class ScheduleKnockoutData(TypedDict):
     This currently has no bearing on the actual matches and is purely a display consideration.
     """
 
+
+class LegacyScheduleKnockoutData(TypedDict, _BracketsMixin):
+    round_spacing: int
+    """Time delay between rounds (in seconds)"""
+    final_delay: int
+    """Extra delay before the final (for build-up and rotating, in seconds)"""
+    arity: NotRequired[int]
+    """Number of teams taking part"""
+    single_arena: KnockoutSingleArenaData
+
     static: NotRequired[bool]
     """Whether or not to use the static knockout scheduler (rather than the automatic one)"""
+
+
+class KnockoutRoundSpacingData(TypedDict):
+    """
+    The spacing between knockout rounds, all in seconds.
+
+    nominal == delay_flex + minimum
+    """
+
+    delay_flex: int
+    """How much delay time to absorb (in seconds)"""
+
+    minimum: int
+    """Minimum delay between rounds (in seconds)"""
+
+    nominal: int
+    """Default time delay between rounds (in seconds)"""
+
+
+class ScheduleKnockoutRoundSpacingData(TypedDict):
+    default: KnockoutRoundSpacingData
+    overrides: NotRequired[dict[int, KnockoutRoundSpacingData]]
+
+
+class ScheduleAutomaticKnockoutData(TypedDict, _BracketsMixin):
+    scheduler: Literal['automatic']
+
+    round_spacing: ScheduleKnockoutRoundSpacingData
+
+    arity: NotRequired[int]
+    """Number of teams taking part"""
+
+    single_arena: KnockoutSingleArenaData
+
+
+class ScheduleStaticKnockoutData(TypedDict, _BracketsMixin):
+    scheduler: Literal['static']
+
+
+class ScheduleStructuredKnockoutData(TypedDict, _BracketsMixin):
+    scheduler: Literal['structured']
+
+    round_spacing: ScheduleKnockoutRoundSpacingData
+
+
+ScheduleKnockoutData = Union[
+    ScheduleAutomaticKnockoutData,
+    ScheduleStaticKnockoutData,
+    ScheduleStructuredKnockoutData,
+]
 
 
 StaticMatchTeamReference = NewType('StaticMatchTeamReference', str)
@@ -352,9 +405,88 @@ class ScheduleData(TypedDict):
     tiebreaker: NotRequired[datetime.datetime]
 
     league: ScheduleLeagueData
-    knockout: ScheduleKnockoutData
+    knockout: ScheduleKnockoutData | LegacyScheduleKnockoutData
 
     static_knockout: NotRequired[StaticKnockoutData | LegacyStaticKnockoutData]
+
+
+class StructuredSeedReference(TypedDict):
+    """
+    A reference to a seeded team for pulling into a knockout match.
+
+    Seeds are strictly positive integers in ``range(1, N_TEAMS + 1)``.
+    """
+    seed: int
+
+
+class StructuredMatchTeamPositionReference(TypedDict):
+    """
+    A reference to a team based on their position in the results of a knockout
+    match.
+    """
+
+    round: int  # noqa: A003
+    """
+    The round containing the match to reference.
+
+    0-based index matching the original structure definition.
+    """
+
+    slot: int
+    """
+    The slot number within the structure containing the team to reference.
+
+    0-based index matching the original structure definition.
+    """
+
+    arena: ArenaName
+    """
+    The arena of the match containing the team to reference.
+    """
+
+    position: int
+    """
+    The position within the results of the referred match to pull into the current match.
+
+    0-based index, the winners of the referred match have position ``0``.
+    """
+
+
+StructuredMatchTeamReference = Union[
+    StructuredSeedReference,
+    StructuredMatchTeamPositionReference,
+]
+
+
+class StructuredMatchInfo(TypedDict):
+    teams: list[StructuredMatchTeamReference | None]
+    display_name: NotRequired[str]
+    bracket: NotRequired[str]
+
+
+class StructuredKnockoutRoundData(TypedDict):
+    display_name: NotRequired[str]
+    match_slots: Mapping[int, Mapping[ArenaName, StructuredMatchInfo]]
+    """
+    A mapping describing the match slots in the round.
+
+    First level keys should be 0-indexed numbers identifying the match slot
+    within the round. Second level keys are arena names. Slot numbers start from
+    zero for each round.
+    """
+
+
+class StructuredKnockoutData(TypedDict):
+    rounds: Mapping[int, StructuredKnockoutRoundData]
+    """
+    A mapping describing the rounds in the knockout.
+
+    Keys should be 0-indexed numbers identifying the round.
+    """
+
+
+class KnockoutData(TypedDict):
+    structured_knockout: StructuredKnockoutData
 
 
 AwardsData = NewType('AwardsData', dict[str, Union[TLA, list[TLA]]])

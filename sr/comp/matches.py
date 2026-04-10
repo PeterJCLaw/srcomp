@@ -19,8 +19,11 @@ from .knockout_scheduler import (
     KnockoutBracket,
     KnockoutRound,
     KnockoutScheduler,
+    modernise_knockout_config_if_needed,
     StaticKnockoutScheduleData,
     StaticScheduler,
+    StructuredKnockoutScheduleData,
+    StructuredScheduler,
 )
 from .knockout_scheduler.base_scheduler import BaseKnockoutScheduler
 from .match_period import Delay, Match, MatchPeriod, MatchSlot, MatchType
@@ -31,6 +34,7 @@ from .types import (
     ArenaName,
     DelayData,
     ExtraSpacingData,
+    KnockoutData,
     LeagueMatches,
     MatchNumber,
     MatchSlotLengthsData,
@@ -118,6 +122,7 @@ class MatchSchedule:
         cls: type[TSchedule],
         config_fname: Path,
         league_fname: Path,
+        knockout_fname: Path,
         scores: Scores,
         arenas: Mapping[ArenaName, Arena],
         num_teams_per_arena: int,
@@ -140,8 +145,10 @@ class MatchSchedule:
 
         schedule = cls(y, league, teams, num_teams_per_arena)
 
+        knockout_config = modernise_knockout_config_if_needed(y['knockout'])
+
         k: BaseKnockoutScheduler[Any]
-        if y['knockout'].get('static', False):
+        if knockout_config['scheduler'] == 'static':
             k = StaticScheduler(
                 schedule,
                 scores,
@@ -150,13 +157,28 @@ class MatchSchedule:
                 teams,
                 config=StaticKnockoutScheduleData({
                     'match_periods': y['match_periods'],
-                    'brackets': y['knockout'].get('brackets', ()),
+                    'brackets': knockout_config.get('brackets', ()),
                     'static_knockout': StaticScheduler.modernise_config_if_needed(
                         y['static_knockout'],
                     ),
                 }),
             )
-        else:
+        elif knockout_config['scheduler'] == 'structured':
+            structured_knockout: KnockoutData = yaml_loader.load(knockout_fname)
+            k = StructuredScheduler(
+                schedule,
+                scores,
+                arenas,
+                num_teams_per_arena,
+                teams,
+                config=StructuredKnockoutScheduleData({
+                    'match_periods': y['match_periods'],
+                    'brackets': knockout_config.get('brackets', ()),
+                    'round_spacing': knockout_config['round_spacing'],
+                    'structure': structured_knockout['structured_knockout'],
+                }),
+            )
+        elif knockout_config['scheduler'] == 'automatic':
             k = KnockoutScheduler(
                 schedule,
                 scores,
@@ -165,9 +187,13 @@ class MatchSchedule:
                 teams,
                 config=AutoKnockoutScheduleData({
                     'match_periods': y['match_periods'],
-                    'brackets': y['knockout'].get('brackets', ()),
-                    'knockout': y['knockout'],
+                    'brackets': knockout_config.get('brackets', ()),
+                    'knockout': knockout_config,
                 }),
+            )
+        else:
+            raise ValueError(
+                f"Unsupported knockout scheduler type {knockout_config['scheduler']!r}",
             )
 
         k.add_knockouts()

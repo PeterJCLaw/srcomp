@@ -121,6 +121,7 @@ class SRComp:
         self.schedule = matches.MatchSchedule.create(
             self.root / 'schedule.yaml',
             self.root / 'league.yaml',
+            self.root / 'knockout.yaml',
             self.scores,
             self.arenas,
             self.num_teams_per_arena,
