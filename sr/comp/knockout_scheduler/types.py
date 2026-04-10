@@ -14,6 +14,9 @@ class ScheduleHost(Protocol):
     def delays(self) -> Collection[Delay]:
         ...
 
+    def _recover_time(self, recovered_time: Delay) -> None:
+        ...
+
     @property
     def matches(self) -> list[MatchSlot]:
         ...

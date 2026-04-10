@@ -7,7 +7,7 @@ import math
 from collections.abc import Iterable, Mapping, Sized
 
 from ..match_period import KnockoutMatch, Match, MatchSlot, MatchType
-from ..match_period_clock import MatchPeriodClock, OutOfTimeException
+from ..match_period_clock import MatchPeriodClock, OutOfTimeException, Spacing
 from ..scores import Scores
 from ..teams import Team
 from ..types import ArenaName, MatchNumber, ScheduleKnockoutData, TLA
@@ -181,16 +181,26 @@ class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
     def get_rounds_remaining(prev_matches: Sized) -> int:
         return int(math.log(len(prev_matches), 2))
 
+    @staticmethod
+    def parse_spacing(seconds: int) -> Spacing:
+        return Spacing.fixed(datetime.timedelta(seconds=seconds))
+
+    def _apply_spacing(self, spacing: Spacing) -> None:
+        self.clock.apply_spacing(
+            spacing=spacing,
+            recover_time=self.schedule._recover_time,
+        )
+
     def _add_knockouts(self) -> None:
         knockout_conf = self.config['knockout']
-        round_spacing = datetime.timedelta(seconds=knockout_conf['round_spacing'])
+        round_spacing = self.parse_spacing(knockout_conf['round_spacing'])
 
         self._add_first_round(conf_arity=knockout_conf.get('arity'))
 
         while len(self.knockout_rounds[-1]) > 1:
 
             # Add the delay between rounds
-            self.clock.advance_time(round_spacing)
+            self._apply_spacing(spacing=round_spacing)
 
             # Number of rounds remaining to be added
             rounds_remaining = self.get_rounds_remaining(self.knockout_rounds[-1])
@@ -203,8 +213,8 @@ class KnockoutScheduler(BaseKnockoutScheduler[AutoKnockoutScheduleData]):
 
             if len(self.knockout_rounds[-1]) == 2:
                 # Extra delay before the final match
-                final_delay = datetime.timedelta(seconds=knockout_conf['final_delay'])
-                self.clock.advance_time(final_delay)
+                final_delay = self.parse_spacing(knockout_conf['final_delay'])
+                self._apply_spacing(spacing=final_delay)
 
             self._add_round(arenas, rounds_remaining - 1)
 

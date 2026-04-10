@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import bisect
 import datetime
 import random
-from collections.abc import Collection, Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import TypeVar
 
 from sr.comp.knockout_scheduler.base_scheduler import (
@@ -127,11 +128,15 @@ class FakeSchedule:
     def __init__(
         self,
         *,
-        delays: Collection[Delay],
+        delays: list[Delay],
         matches: list[MatchSlot],
         match_duration: datetime.timedelta,
     ):
         self.delays = delays
+        self.delays.sort(key=lambda x: x.time)
         self.matches = matches
         self.match_duration = match_duration
         self.n_league_matches = len(matches)
+
+    def _recover_time(self, recovered_time: Delay) -> None:
+        bisect.insort(self.delays, recovered_time, key=lambda x: x.time)

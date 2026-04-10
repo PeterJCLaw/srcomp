@@ -4,7 +4,7 @@ from collections.abc import Mapping
 from datetime import datetime, timedelta
 from typing import Any
 
-from sr.comp.match_period import Match
+from sr.comp.match_period import Delay, Match
 from sr.comp.matches import MatchSchedule, parse_ranges
 from sr.comp.teams import Team
 from sr.comp.types import MatchNumber, TLA
@@ -427,6 +427,19 @@ class MatchesTests(unittest.TestCase):
         delay = match_sched.delay_at(when)
 
         self.assertEqual(timedelta(seconds=15), delay)
+
+    def test_delay_after_recovered_time(self) -> None:
+        match_sched = load_basic_data()
+
+        match_sched._recover_time(Delay(
+            time=match_sched.delays[0].time,
+            delay=timedelta(seconds=-10),
+        ))
+
+        when = datetime(2014, 3, 26, 13, 2)
+        delay = match_sched.delay_at(when)
+
+        self.assertEqual(timedelta(seconds=5), delay)
 
     def test_basic_delay(self):
         matches = load_basic_data()
