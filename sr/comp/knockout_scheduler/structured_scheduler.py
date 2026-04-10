@@ -23,7 +23,7 @@ from .base_scheduler import (
     BaseKnockoutScheduler,
     DEFAULT_KNOCKOUT_BRACKET_NAME,
 )
-from .static_scheduler import (
+from .exceptions import (
     InvalidReferenceError,
     InvalidSeedError,
     WrongNumberOfTeamsError,

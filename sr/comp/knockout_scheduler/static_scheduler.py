@@ -26,23 +26,16 @@ from .base_scheduler import (
     BaseKnockoutScheduler,
     DEFAULT_KNOCKOUT_BRACKET_NAME,
 )
+from .exceptions import (
+    InvalidReferenceError,
+    InvalidSeedError,
+    WrongNumberOfTeamsError,
+)
 from .types import ScheduleHost
 
 
 class StaticKnockoutScheduleData(BaseKnockoutScheduleData):
     static_knockout: StaticKnockoutData
-
-
-class InvalidSeedError(ValueError):
-    pass
-
-
-class InvalidReferenceError(ValueError):
-    pass
-
-
-class WrongNumberOfTeamsError(ValueError):
-    pass
 
 
 def parse_team_ref(team_ref: str) -> tuple[int, int, int]:
