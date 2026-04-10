@@ -158,7 +158,7 @@ class Region(TypedDict):
     shepherds: ShepherdingArea
 
 
-LeagueMatches = NewType('LeagueMatches', dict[int, dict[ArenaName, list[TLA]]])
+LeagueMatches = NewType('LeagueMatches', dict[int, dict[ArenaName, list[TLA | None]]])
 
 
 class LeagueData(TypedDict):
