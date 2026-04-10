@@ -774,3 +774,100 @@ class StaticKnockoutSchedulerTests(unittest.TestCase):
         config['rounds'][2]['match_slots'][0][ARENA_A]['teams'].append({'seed': 1})
 
         self.assertInvalidSchedule(n_teams, config, WrongNumberOfTeamsError)
+
+    def test_timings_no_delays(self) -> None:
+        scheduler = get_scheduler(get_four_team_structure())
+        scheduler.add_knockouts()
+
+        knockout_rounds = scheduler.knockout_rounds
+        num_rounds = len(knockout_rounds)
+
+        self.assertEqual(3, num_rounds, "Should be quarters, semis and finals")
+
+        start_times = [m[ARENA_A].start_time for m in scheduler.period.matches]
+
+        expected_times = [
+            # Quarter finals
+            datetime(2014, 4, 27, 14, 30),
+
+            # 5 minute gap
+
+            # Semis
+            datetime(2014, 4, 27, 14, 40),
+            datetime(2014, 4, 27, 14, 45),
+
+            # 10 minute gap
+
+            # Final
+            datetime(2014, 4, 27, 15, 0),
+        ]
+
+        self.assertEqual(expected_times, start_times, "Wrong start times")
+
+    def test_timings_with_delays_later_absorbed(self) -> None:
+        delays = [
+            Delay(
+                time=datetime(2014, 4, 27, 14, 32),
+                delay=timedelta(minutes=2),
+            ),
+            Delay(
+                time=datetime(2014, 4, 27, 14, 43),
+                delay=timedelta(minutes=2),
+            ),
+        ]
+
+        scheduler = get_scheduler(
+            get_four_team_structure(),
+            delays=delays,
+        )
+        scheduler.add_knockouts()
+
+        knockout_rounds = scheduler.knockout_rounds
+        num_rounds = len(knockout_rounds)
+
+        self.assertEqual(3, num_rounds, "Should be quarters, semis and finals")
+
+        start_times = [m[ARENA_A].start_time for m in scheduler.period.matches]
+
+        expected_times = [
+            # Quarter finals
+            datetime(2014, 4, 27, 14, 30),
+
+            # 5 minute gap, no flex, delay carries
+
+            # Semis
+            datetime(2014, 4, 27, 14, 42),  # affected by first delay
+            datetime(2014, 4, 27, 14, 49),  # affected by both delays
+
+            # 10 minute gap, 5 minutes flex, all time recovered
+
+            # Final
+            datetime(2014, 4, 27, 15, 0),
+        ]
+
+        self.assertEqual(expected_times, start_times, "Wrong start times")
+
+        self.assertEqual(
+            [
+                Delay(
+                    time=datetime(2014, 4, 27, 14, 32),
+                    delay=timedelta(minutes=2),
+                ),
+                Delay(
+                    time=datetime(2014, 4, 27, 14, 43),
+                    delay=timedelta(minutes=2),
+                ),
+                Delay(
+                    time=datetime(2014, 4, 27, 14, 54),
+                    delay=timedelta(minutes=-4),
+                ),
+            ],
+            scheduler.schedule.delays,
+            "Should have updated the schedule with recovered time",
+        )
+
+        self.assertEqual(
+            timedelta(0),
+            sum((x.delay for x in scheduler.schedule.delays), start=timedelta(0)),
+            "Final delay should be zero",
+        )
