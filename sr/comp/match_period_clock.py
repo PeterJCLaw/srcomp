@@ -41,7 +41,10 @@ class Spacing:
             raise ValueError("Spacing values cannot be negative.")
 
         if self.delay_flex + self.minimum != self.nominal:
-            raise ValueError("Spacing durations are inconsistent.")
+            raise ValueError(
+                "Spacing durations are inconsistent. "
+                f"({self.delay_flex} + {self.minimum} != {self.nominal})",
+            )
 
 
 class OutOfTimeException(Exception):
