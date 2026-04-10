@@ -459,7 +459,7 @@ StructuredMatchTeamReference = Union[
 
 
 class StructuredMatchInfo(TypedDict):
-    teams: list[StructuredMatchTeamReference]
+    teams: list[StructuredMatchTeamReference | None]
     display_name: NotRequired[str]
     bracket: NotRequired[str]
 
