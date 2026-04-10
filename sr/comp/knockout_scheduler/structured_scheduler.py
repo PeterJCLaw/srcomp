@@ -11,7 +11,7 @@ from ..teams import Team
 from ..types import (
     ArenaName,
     MatchNumber,
-    ScheduleStructuredKnockoutData,
+    ScheduleKnockoutRoundSpacingData,
     StructuredKnockoutData,
     StructuredMatchInfo,
     StructuredMatchTeamReference,
@@ -32,7 +32,7 @@ from .types import ScheduleHost
 
 
 class StructuredKnockoutScheduleData(BaseKnockoutScheduleData):
-    schedule: ScheduleStructuredKnockoutData
+    round_spacing: ScheduleKnockoutRoundSpacingData
     structure: StructuredKnockoutData
 
 
@@ -213,9 +213,7 @@ class StructuredScheduler(BaseKnockoutScheduler[StructuredKnockoutScheduleData])
 
     def add_knockouts(self) -> None:
         rounds_info = self.config['structure']['rounds']
-        rounds_spacing = RoundsSpacing.parse(
-            self.config['schedule']['round_spacing'],
-        )
+        rounds_spacing = RoundsSpacing.parse(self.config['round_spacing'])
 
         for round_num, round_info in sorted(rounds_info.items()):
             rounds_remaining = len(rounds_info) - round_num - 1

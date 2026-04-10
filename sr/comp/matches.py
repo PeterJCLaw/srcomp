@@ -174,7 +174,7 @@ class MatchSchedule:
                 config=StructuredKnockoutScheduleData({
                     'match_periods': y['match_periods'],
                     'brackets': knockout_config.get('brackets', ()),
-                    'schedule': knockout_config,
+                    'round_spacing': knockout_config['round_spacing'],
                     'structure': structured_knockout['structured_knockout'],
                 }),
             )
