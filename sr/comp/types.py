@@ -296,7 +296,7 @@ This supports the following formats:
 class StaticMatchInfo(TypedDict):
     arena: ArenaName
     start_time: datetime.datetime
-    teams: list[StaticMatchTeamReference]
+    teams: list[StaticMatchTeamReference | None]
     display_name: NotRequired[str]
     bracket: NotRequired[str]
 
