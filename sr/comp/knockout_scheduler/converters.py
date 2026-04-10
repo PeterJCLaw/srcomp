@@ -51,7 +51,10 @@ def modernise_knockout_config_if_needed(
         return cast(ScheduleKnockoutData, config)
 
     if config.get('static'):
-        return ScheduleStaticKnockoutData(scheduler='static')
+        static_config = ScheduleStaticKnockoutData(scheduler='static')
+        if (brackets := config.get('brackets')) is not None:
+            static_config['brackets'] = brackets
+        return static_config
 
     if 'single_arena' in config:
         return modernise_automatic_knockout_config(
