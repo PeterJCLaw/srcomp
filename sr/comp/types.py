@@ -139,6 +139,7 @@ class ArenasData(TypedDict):
 
 
 class DeploymentsData(TypedDict):
+    """Data expected in the 'deployments.yaml' compstate file."""
     deployments: list[str]
 
 
@@ -149,6 +150,7 @@ class ShepherdData(TypedDict):
 
 
 class ShepherdingData(TypedDict):
+    """Data expected in the 'shepherding.yaml' compstate file."""
     shepherds: list[ShepherdData]
 
 
@@ -165,6 +167,7 @@ class RegionData(TypedDict):
 
 
 class LayoutData(TypedDict):
+    """Data expected in the 'layout.yaml' compstate file."""
     teams: list[RegionData]
 
 
@@ -180,6 +183,7 @@ LeagueMatches = NewType('LeagueMatches', dict[int, dict[ArenaName, list[TLA | No
 
 
 class LeagueData(TypedDict):
+    """Data expected in the 'league.yaml' compstate file."""
     matches: LeagueMatches
 
 
@@ -413,6 +417,8 @@ class LegacyStaticKnockoutData(TypedDict):
 
 
 class ScheduleData(TypedDict):
+    """Data expected in the 'schedule.yaml' compstate file."""
+
     match_slot_lengths: MatchSlotLengthsData
     staging: StagingTimingsData
     timezone: str
@@ -503,10 +509,12 @@ class StructuredKnockoutData(TypedDict):
 
 
 class KnockoutData(TypedDict):
+    """Data expected in the 'knockout.yaml' compstate file."""
     structured_knockout: StructuredKnockoutData
 
 
 AwardsData = NewType('AwardsData', dict[str, Union[TLA, list[TLA]]])
+AwardsData.__doc__ = """Data expected in the 'awards.yaml' compstate file."""
 
 
 class TeamData(TypedDict):
@@ -516,4 +524,5 @@ class TeamData(TypedDict):
 
 
 class TeamsData(TypedDict):
+    """Data expected in the 'teams.yaml' compstate file."""
     teams: Mapping[TLA, TeamData]
