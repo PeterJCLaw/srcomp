@@ -10,7 +10,7 @@ from sr.comp.arenas import ArenaName
 from sr.comp.match_period import Match, MatchType
 from sr.comp.scores import TeamScore
 from sr.comp.teams import Team
-from sr.comp.types import MatchNumber, TLA
+from sr.comp.types import AwardsData, MatchNumber, TLA
 from sr.comp.winners import Award, compute_awards
 
 UTC = datetime.timezone.utc
@@ -181,7 +181,7 @@ class WinnersTests(unittest.TestCase):
                 ['DDD'],
                 compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('.')).get(Award.third),
             )
-            yaml_load.assert_called_with(Path('.'))
+            yaml_load.assert_called_with(Path('.'), AwardsData)
 
     def test_manual(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -190,7 +190,7 @@ class WinnersTests(unittest.TestCase):
                 ['BBB'],
                 compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('.')).get(Award.web),
             )
-            yaml_load.assert_called_with(Path('.'))
+            yaml_load.assert_called_with(Path('.'), AwardsData)
 
     def test_manual_no_award(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -199,7 +199,7 @@ class WinnersTests(unittest.TestCase):
                 [],
                 compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('.')).get(Award.web),
             )
-            yaml_load.assert_called_with(Path('.'))
+            yaml_load.assert_called_with(Path('.'), AwardsData)
 
     def test_manual_tie(self):
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
@@ -208,7 +208,7 @@ class WinnersTests(unittest.TestCase):
                 ['BBB', 'CCC'],
                 compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('.')).get(Award.web),
             )
-            yaml_load.assert_called_with(Path('.'))
+            yaml_load.assert_called_with(Path('.'), AwardsData)
 
     def test_no_overrides_file(self):
         awards = compute_awards(MockScores(), FINAL_INFO, TEAMS, Path('missing.yaml'))

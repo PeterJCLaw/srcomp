@@ -176,12 +176,12 @@ def degroup(grouped_positions: Mapping[T, Iterable[TLA]]) -> OrderedDict[TLA, T]
 def load_scores_data(result_dir: Path) -> Iterator[ScoreData]:
     # Find the scores for each match
     for result_file in results_finder(result_dir):
-        yield yaml_loader.load(result_file)
+        yield yaml_loader.load(result_file, ScoreData)
 
 
 def load_external_scores_data(result_dir: Path) -> Iterator[ExternalScoreEntry]:
     for result_file in result_dir.glob('*.yaml'):
-        raw: ExternalScoreData = yaml_loader.load(result_file)
+        raw: ExternalScoreData = yaml_loader.load(result_file, ExternalScoreData)
         yield from raw['scores']
 
 

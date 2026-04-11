@@ -37,7 +37,7 @@ def load_teams(filename: Path) -> dict[TLA, Team]:
     :return: A dictionary mapping TLAs to :class:`Team` objects.
     """
 
-    data: TeamsData = yaml_loader.load(filename)
+    data: TeamsData = yaml_loader.load(filename, TeamsData)
 
     teams = {}
     for tla, info in data['teams'].items():

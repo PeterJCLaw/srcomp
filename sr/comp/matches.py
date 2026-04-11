@@ -35,6 +35,7 @@ from .types import (
     DelayData,
     ExtraSpacingData,
     KnockoutData,
+    LeagueData,
     LeagueMatches,
     MatchNumber,
     MatchSlotLengthsData,
@@ -139,9 +140,9 @@ class MatchSchedule:
         :param dict teams: A mapping of TLAs to :class:`.Team` instances.
         """
 
-        y: ScheduleData = yaml_loader.load(config_fname)
+        y: ScheduleData = yaml_loader.load(config_fname, ScheduleData)
 
-        league: LeagueMatches = yaml_loader.load(league_fname)['matches']
+        league: LeagueMatches = yaml_loader.load(league_fname, LeagueData)['matches']
 
         schedule = cls(y, league, teams, num_teams_per_arena)
 
@@ -164,7 +165,7 @@ class MatchSchedule:
                 }),
             )
         elif knockout_config['scheduler'] == 'structured':
-            structured_knockout: KnockoutData = yaml_loader.load(knockout_fname)
+            structured_knockout: KnockoutData = yaml_loader.load(knockout_fname, KnockoutData)
             k = StructuredScheduler(
                 schedule,
                 scores,

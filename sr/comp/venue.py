@@ -213,11 +213,11 @@ class Venue:
         shepherding_file: Path,
     ):
 
-        layout_data: LayoutData = yaml_loader.load(layout_file)
+        layout_data: LayoutData = yaml_loader.load(layout_file, LayoutData)
         teams_layout = layout_data['teams']
         self.check_teams(teams, teams_layout)
 
-        shepherding_data: ShepherdingData = yaml_loader.load(shepherding_file)
+        shepherding_data: ShepherdingData = yaml_loader.load(shepherding_file, ShepherdingData)
         shepherds = shepherding_data['shepherds']
 
         self._shepherding_areas = [a['name'] for a in shepherds]

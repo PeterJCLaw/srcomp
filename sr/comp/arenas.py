@@ -36,7 +36,7 @@ def load_arenas(filename: Path) -> dict[ArenaName, Arena]:
         A mapping of arena names to :class:`Arena` objects.
     """
 
-    y: ArenasData = yaml_loader.load(filename)
+    y: ArenasData = yaml_loader.load(filename, ArenasData)
 
     arenas_data = y['arenas']
 
@@ -63,7 +63,7 @@ def load_corners(filename: Path) -> dict[CornerNumber, Corner]:
         A mapping of corner numbers to :class:`Corner` objects.
     """
 
-    y: ArenasData = yaml_loader.load(filename)
+    y: ArenasData = yaml_loader.load(filename, ArenasData)
 
     corners = OrderedDict()
     for number, corner in y['corners'].items():

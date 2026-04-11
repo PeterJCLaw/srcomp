@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar
 
 import dateutil.parser
 import yaml
@@ -26,6 +26,8 @@ except ImportError:
         "Installing libyaml is highly recommended.",
     )
 
+T = TypeVar('T')
+
 
 def time_constructor(_: Any, node: yaml.Node) -> datetime.datetime:
     return dateutil.parser.parse(node.value)
@@ -41,12 +43,15 @@ def add_time_constructor(loader: type[YAML_Loader]) -> None:
 add_time_constructor(YAML_Loader)
 
 
-def load(file_path: Path) -> Any:
+def load(file_path: Path, type_: type[T]) -> T:
     """
     Load a YAML fie and return the results.
 
     :param Path file_path: The path to the YAML file.
+    :param type_: The type to ``cast`` the loaded data. No validation is
+        performed.
     :return: The parsed contents.
     """
     with file_path.open(mode='r') as f:
-        return yaml.load(f, Loader=YAML_Loader)
+        data: T = yaml.load(f, Loader=YAML_Loader)
+        return data

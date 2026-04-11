@@ -74,17 +74,18 @@ def mock_shepherding_loader() -> ShepherdingData:
 
 
 @overload
-def mock_loader(name: Literal['LYT']) -> LayoutData:
+def mock_loader(name: Literal['LYT'], type_: type[LayoutData]) -> LayoutData:
     ...
 
 
 @overload
-def mock_loader(name: Literal['SHPD']) -> ShepherdingData:
+def mock_loader(name: Literal['SHPD'], type_: type[ShepherdingData]) -> ShepherdingData:
     ...
 
 
 def mock_loader(
     name: Literal['LYT', 'SHPD'],
+    type_: type[LayoutData] | type[ShepherdingData],
 ) -> LayoutData | ShepherdingData:
     if name == 'LYT':
         return mock_layout_loader()
@@ -101,12 +102,15 @@ class VenueTests(unittest.TestCase):
         return Venue(teams, cast(Path, 'LYT'), cast(Path, 'SHPD'))
 
     def test_invalid_region(self) -> None:
-        def my_mock_loader(name: Literal['LYT', 'SHPD']) -> LayoutData | ShepherdingData:
+        def my_mock_loader(
+            name: Literal['LYT', 'SHPD'],
+            type_: type[LayoutData] | type[ShepherdingData],
+        ) -> LayoutData | ShepherdingData:
             if name == 'SHPD':
-                res = mock_loader(name)
+                res = mock_loader(name, ShepherdingData)
                 res['shepherds'][0]['regions'].append(RegionName('invalid-region'))
                 return res
-            return mock_loader(name)
+            return mock_loader(name, LayoutData)
 
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = my_mock_loader
@@ -137,12 +141,15 @@ class VenueTests(unittest.TestCase):
             self.assertEqual(set(), lte.missing)
 
     def test_duplicate_teams(self) -> None:
-        def my_mock_loader(name: Literal['LYT', 'SHPD']) -> LayoutData | ShepherdingData:
+        def my_mock_loader(
+            name: Literal['LYT', 'SHPD'],
+            type_: type[LayoutData] | type[ShepherdingData],
+        ) -> LayoutData | ShepherdingData:
             if name == 'LYT':
-                res = mock_loader(name)
+                res = mock_loader(name, LayoutData)
                 res['teams'][1]['teams'].append(TLA('ABC'))
                 return res
-            return mock_loader(name)
+            return mock_loader(name, ShepherdingData)
 
         with mock.patch('sr.comp.yaml_loader.load') as yaml_load:
             yaml_load.side_effect = my_mock_loader

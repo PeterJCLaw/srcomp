@@ -105,7 +105,7 @@ def _compute_explicit_awards(path: Path, teams: Mapping[TLA, Team]) -> Winners:
     if not path.exists():
         return {}
 
-    explicit_awards: AwardsData = yaml_loader.load(path)
+    explicit_awards: AwardsData = yaml_loader.load(path, AwardsData)
     assert explicit_awards, "Awards file should not be present if empty."
 
     awards = {
