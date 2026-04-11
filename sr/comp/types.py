@@ -21,6 +21,7 @@ TLA = NewType('TLA', str)
 Colour = NewType('Colour', str)
 
 ArenaName = NewType('ArenaName', str)
+CornerNumber = NewType('CornerNumber', int)
 
 MatchNumber = NewType('MatchNumber', int)
 MatchId = tuple[ArenaName, MatchNumber]
@@ -120,6 +121,22 @@ ShepherdName = NewType('ShepherdName', str)
 
 # TypeDicts with names ending `Data` represent the raw structure expected in
 # files of that name.
+
+
+class ArenaData(TypedDict):
+    display_name: str
+    colour: NotRequired[Colour]
+
+
+class CornerData(TypedDict):
+    colour: Colour
+
+
+class ArenasData(TypedDict):
+    """Data expected in the 'arenas.yaml' compstate file."""
+    arenas: Mapping[ArenaName, ArenaData]
+    corners: Mapping[CornerNumber, CornerData]
+
 
 class DeploymentsData(TypedDict):
     deployments: list[str]

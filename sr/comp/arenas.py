@@ -4,18 +4,16 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from pathlib import Path
-from typing import NamedTuple, NewType
+from typing import NamedTuple
 
 from . import yaml_loader
-from .types import ArenaName, Colour
-
-CornerNumber = NewType('CornerNumber', int)
+from .types import ArenaName, ArenasData, Colour, CornerNumber
 
 
 class Arena(NamedTuple):
     name: ArenaName
     display_name: str
-    colour: Colour
+    colour: Colour | None
 
 
 class Corner(NamedTuple):
@@ -38,7 +36,7 @@ def load_arenas(filename: Path) -> dict[ArenaName, Arena]:
         A mapping of arena names to :class:`Arena` objects.
     """
 
-    y = yaml_loader.load(filename)
+    y: ArenasData = yaml_loader.load(filename)
 
     arenas_data = y['arenas']
 
@@ -65,7 +63,7 @@ def load_corners(filename: Path) -> dict[CornerNumber, Corner]:
         A mapping of corner numbers to :class:`Corner` objects.
     """
 
-    y = yaml_loader.load(filename)
+    y: ArenasData = yaml_loader.load(filename)
 
     corners = OrderedDict()
     for number, corner in y['corners'].items():
