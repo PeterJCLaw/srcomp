@@ -16,6 +16,7 @@ from . import yaml_loader
 from .match_period import Match, MatchType
 from .types import (
     ExternalScoreData,
+    ExternalScoreEntry,
     GamePoints,
     MatchId,
     MatchNumber,
@@ -178,9 +179,9 @@ def load_scores_data(result_dir: Path) -> Iterator[ScoreData]:
         yield yaml_loader.load(result_file)
 
 
-def load_external_scores_data(result_dir: Path) -> Iterator[ExternalScoreData]:
+def load_external_scores_data(result_dir: Path) -> Iterator[ExternalScoreEntry]:
     for result_file in result_dir.glob('*.yaml'):
-        raw = yaml_loader.load(result_file)
+        raw: ExternalScoreData = yaml_loader.load(result_file)
         yield from raw['scores']
 
 
@@ -455,7 +456,7 @@ class TiebreakerScores(KnockoutScores):
 
 
 def load_external_scores(
-    scores_data: Iterable[ExternalScoreData],
+    scores_data: Iterable[ExternalScoreEntry],
     teams: Iterable[TLA],
 ) -> Mapping[TLA, TeamScore]:
     """
@@ -467,7 +468,7 @@ def load_external_scores(
     scores = {x: TeamScore() for x in teams}
 
     for entry in scores_data:
-        tla = TLA(entry['team'])
+        tla = entry['team']
         try:
             team_score = scores[tla]
         except KeyError:
@@ -475,9 +476,9 @@ def load_external_scores(
 
         game_points = entry.get('game_points')
         if game_points:
-            team_score.add_game_points(GamePoints(game_points))
+            team_score.add_game_points(game_points)
 
-        team_score.add_league_points(LeaguePoints(entry['league_points']))
+        team_score.add_league_points(entry['league_points'])
 
     return scores
 

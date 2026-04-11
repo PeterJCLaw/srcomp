@@ -43,6 +43,8 @@ class ScoreTeamData(TypedDict):
 
 
 class ScoreData(TypedDict):
+    """Data expected in the league/knockout match score files."""
+
     arena_id: ArenaName
     match_number: MatchNumber
     teams: Mapping[TLA, ScoreTeamData]
@@ -74,15 +76,17 @@ Scorer = Union[ValidatingScorer, SimpleScorer]
 ScorerType = type[Union[ValidatingScorer, SimpleScorer]]
 
 
-class ExternalScoreData(TypedDict):
-    """
-    The expected YAML data format in "external" scores files is a single root
-    key 'scores' whose value is a list of mappings compatible with this type.
-    """
+class ExternalScoreEntry(TypedDict):
+    """Entries in the "external" score files."""
 
-    team: str
-    game_points: NotRequired[int]
-    league_points: int
+    team: TLA
+    game_points: NotRequired[GamePoints]
+    league_points: LeaguePoints
+
+
+class ExternalScoreData(TypedDict):
+    """Data expected in the "external" score files."""
+    scores: list[ExternalScoreEntry]
 
 
 class Ranker(Protocol):
